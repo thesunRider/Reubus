@@ -1,3 +1,5 @@
+#Region Initializing
+
 #include <IE.au3>
 #include <ColorConstants.au3>
 #include <Process.au3>
@@ -28,6 +30,10 @@ _SetTheme("DarkTeal")
 Local $regValue = "0x2AF8"
 RegWrite("HKEY_CURRENT_USER\Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_BROWSER_EMULATION", _ProcessGetName(@AutoItPID), "REG_DWORD", $regValue)
 RegWrite("HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Internet Explorer\MAIN\FeatureControl\FEATURE_BROWSER_EMULATION", _ProcessGetName(@AutoItPID), "REG_DWORD", $regValue)
+
+#EndRegion
+
+#Region Welcome screen
 
 ;welcome-screen
 
@@ -70,22 +76,10 @@ While 1
 	EndSwitch
 WEnd
 
-Func _CheckHover($inpgui,$cntrl)
-    Local $Info = GUIGetCursorInfo($inpgui)
-    If Not IsArray($Info) Then Return
-    If $Info[4] == $cntrl Then
-		ConsoleWrite("overlayed")
-		GUICtrlSetColor ($cntrl,0x025669 )
-	Else
-		GUICtrlSetColor ($cntrl,$COLOR_WHITE)
-    EndIf
-EndFunc   ;==>_CheckHover
+#EndRegion
 
-Func _rfrsh()
-_IEAction($grph_hndl, "refresh")
-EndFunc
 
-;main-screen
+#Region main-screen
 
 ;Sleep(2000) ;Loading........
 
@@ -127,3 +121,24 @@ While 1
 
 	EndSwitch
 WEnd
+
+#EndRegion
+
+#Region Functions
+
+Func _CheckHover($inpgui,$cntrl)
+    Local $Info = GUIGetCursorInfo($inpgui)
+    If Not IsArray($Info) Then Return
+    If $Info[4] == $cntrl Then
+		ConsoleWrite("overlayed")
+		GUICtrlSetColor ($cntrl,0x025669 )
+	Else
+		GUICtrlSetColor ($cntrl,$COLOR_WHITE)
+    EndIf
+EndFunc   ;==>_CheckHover
+
+Func _rfrsh()
+_IEAction($grph_hndl, "refresh")
+EndFunc
+
+#EndRegion
