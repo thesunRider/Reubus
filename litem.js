@@ -538,7 +538,7 @@
          * @param {String} type an string to know how to fetch it: "text","arraybuffer","json","blob"
          * @param {Function} on_complete callback(data)
          * @param {Function} on_error in case of an error
-         * @return {FileReader|Promise} returns the object used to 
+         * @return {FileReader|Promise} returns the object used to
          */
 		fetchFile: function( url, type, on_complete, on_error ) {
 			var that = this;
@@ -833,7 +833,7 @@
      * Run N steps (cycles) of the graph
      * @method runStep
      * @param {number} num number of steps to run, default is 1
-     * @param {Boolean} do_not_catch_errors [optional] if you want to try/catch errors 
+     * @param {Boolean} do_not_catch_errors [optional] if you want to try/catch errors
      * @param {number} limit max number of nodes to execute (used to execute from start to a node)
      */
 
@@ -2136,7 +2136,7 @@
 		+ resizable: if set to false it wont be resizable with the mouse
 		+ horizontal: slots are distributed horizontally
 		+ widgets_start_y: widgets start at y distance from the top of the node
-	
+
 	flags object:
 		+ collapsed: if it is collapsed
 
@@ -3292,7 +3292,7 @@
      * @param {String} name the text to show on the widget
      * @param {String} value the default value
      * @param {Function|String} callback function to call when it changes (optionally, it can be the name of the property to modify)
-     * @param {Object} options the object that contains special properties of this widget 
+     * @param {Object} options the object that contains special properties of this widget
      * @return {Object} the created widget object
      */
     LGraphNode.prototype.addWidget = function( type, name, value, callback, options )
@@ -5270,7 +5270,7 @@ LGraphNode.prototype.executeAction = function(action)
             } //clicked outside of nodes
             else {
                 //search for link connector
-				if(!this.read_only) 
+				if(!this.read_only)
 					for (var i = 0; i < this.visible_links.length; ++i) {
 						var link = this.visible_links[i];
 						var center = link._pos;
@@ -6354,7 +6354,7 @@ LGraphNode.prototype.executeAction = function(action)
         for (var i in this.selected_nodes) {
             var node = this.selected_nodes[i];
 			//autoconnect when possible (very basic, only takes into account first input-output)
-			if(node.inputs && node.inputs.length && node.outputs && node.outputs.length && LiteGraph.isValidConnection( node.inputs[0].type, node.outputs[0].type ) && node.inputs[0].link && node.outputs[0].links && node.outputs[0].links.length ) 
+			if(node.inputs && node.inputs.length && node.outputs && node.outputs.length && LiteGraph.isValidConnection( node.inputs[0].type, node.outputs[0].type ) && node.inputs[0].link && node.outputs[0].links && node.outputs[0].links.length )
 			{
 				var input_link = node.graph.links[ node.inputs[0].link ];
 				var output_link = node.graph.links[ node.outputs[0].links[0] ];
@@ -8498,7 +8498,7 @@ LGraphNode.prototype.executeAction = function(action)
                                 values = w.options.values(w, node);
                             }
 							var values_list = null;
-							
+
 							if( w.type != "number")
 								values_list = values.constructor === Array ? values : Object.keys(values);
 
@@ -8511,7 +8511,7 @@ LGraphNode.prototype.executeAction = function(action)
                                 if ( w.options.max != null && w.value > w.options.max ) {
                                     w.value = w.options.max;
                                 }
-                            } else if (delta) { //clicked in arrow, used for combos 
+                            } else if (delta) { //clicked in arrow, used for combos
 								var index = -1;
 								if(values.constructor === Object)
 									index = values_list.indexOf( String( w.value ) ) + delta;
@@ -8527,7 +8527,7 @@ LGraphNode.prototype.executeAction = function(action)
 	                                w.value = values[index];
 								else
 	                                w.value = index;
-                            } else { //combo clicked 
+                            } else { //combo clicked
 								var text_values = values != values_list ? Object.values(values) : values;
                                 var menu = new LiteGraph.ContextMenu(text_values, {
                                         scale: Math.max(1, this.ds.scale),
@@ -9410,7 +9410,7 @@ LGraphNode.prototype.executeAction = function(action)
         dialog.style.top = top + "px";
 
 		//To avoid out of screen problems
-		if(event.layerY > (rect.height - 200)) 
+		if(event.layerY > (rect.height - 200))
             helper.style.maxHeight = (rect.height - event.layerY - 20) + "px";
 
 		/*
@@ -10529,6 +10529,8 @@ LGraphNode.prototype.executeAction = function(action)
         //compute best position
         var left = options.left || 0;
         var top = options.top || 0;
+				console.log(left);
+		console.log(top);
         if (options.event) {
             left = options.event.clientX - 10;
             top = options.event.clientY - 10;
@@ -11290,7 +11292,7 @@ if (typeof exports != "undefined") {
 			name: "",
 			type: "number",
 			value: 0
-		}; 
+		};
 
         var that = this;
 
@@ -15060,7 +15062,7 @@ if (typeof exports != "undefined") {
 			mat4.scale( M, M, S );
 		}
 
-		this.setOutputData(0, M);		
+		this.setOutputData(0, M);
 	}
 
     LiteGraph.registerNodeType("math3d/mat4", Math3DMat4);
@@ -17708,10 +17710,10 @@ void main() {\n\
 			precision: LGraphTexture.DEFAULT
 		};
 
-		this._uniforms = { 
-			u_texture: 0, 
-			u_textureB: 1, 
-			u_factor: 1, 
+		this._uniforms = {
+			u_texture: 0,
+			u_textureB: 1,
+			u_factor: 1,
 			u_scale: vec2.create(),
 			u_offset: vec2.create()
 		};
@@ -18220,7 +18222,7 @@ void main() {\n\
 		this.addOutput("avg", "vec4");
 		this.addOutput("lum", "number");
 		this.properties = {
-			use_previous_frame: true, //to avoid stalls 
+			use_previous_frame: true, //to avoid stalls
 			high_quality: false //to use as much pixels as possible
 		};
 
@@ -18378,7 +18380,7 @@ void main() {\n\
 		this.addOutput("max", "vec4");
 		this.properties = {
 			mode: "max",
-			use_previous_frame: true //to avoid stalls 
+			use_previous_frame: true //to avoid stalls
 		};
 
 		this._uniforms = {
@@ -18458,7 +18460,7 @@ void main() {\n\
 		{
 			var tex = this._textures_chain[i];
 
-			prev = tex;				
+			prev = tex;
 		}
 
 		var shader = LGraphTextureMinMax._shader;
@@ -21562,7 +21564,7 @@ void main(void){\n\
 		if (name == "code" )
 			this.compileCode( value );
 	}
-	
+
 	LGraphTextureCanvas2D.prototype.compileCode = function( code ) {
 		this._func = null;
 		if( !LiteGraph.allow_scripts )
@@ -21806,7 +21808,7 @@ void main(void){\n\
 		u_view: view_matrix,
 		u_projection: projection_matrix,
 		u_viewprojection: viewprojection_matrix,
-		u_model: model_matrix 
+		u_model: model_matrix
 	};
 
 	LiteGraph.LGraphRender = {
@@ -22097,7 +22099,7 @@ void main(void){\n\
 			points[i] = x * radius;
 			points[i+1] = y * radius;
 			points[i+2] = z * radius;
-		}			
+		}
 	}
 
 	LGraphPoints3D.generateHemisphere = function (points, size, radius)
@@ -22146,7 +22148,7 @@ void main(void){\n\
 			points[i] = r * sinPhi * cosTheta;
 			points[i+1] = r * sinPhi * sinTheta;
 			points[i+2] = r * cosPhi;
-		}	
+		}
 	}
 
 	function findRandomTriangle( areas, f )
@@ -22166,15 +22168,15 @@ void main(void){\n\
 			imid = ((imax + imin)*0.5)|0;
 			var t = areas[ imid ];
 			if( t == f )
-				return imid; 
+				return imid;
 			if( imin == (imax - 1) )
 				return imin;
 			if (t < f)
 				imin = imid;
-			else         
+			else
 				imax = imid;
 		}
-		return imid;		
+		return imid;
 	}
 
 	LGraphPoints3D.generateFromObject = function( points, normals, size, obj, evenly )
@@ -22225,7 +22227,7 @@ void main(void){\n\
 				var s = (aL + bL+ cL) / 2;
 				total_area += Math.sqrt(s * (s - aL) * (s - bL) * (s - cL));
 				areas[i] = total_area;
-			}			
+			}
 			for(var i = 0; i < num_triangles; ++i) //normalize
 				areas[i] /= total_area;
 		}
@@ -22387,7 +22389,7 @@ void main(void){\n\
 
 			switch(this.properties.mode)
 			{
-				case LGraphPointsToInstances.NORMAL: 
+				case LGraphPointsToInstances.NORMAL:
 					mat4.setTranslation( m, point );
 					if(normals)
 					{
@@ -22404,10 +22406,10 @@ void main(void){\n\
 						mat4.setTranslation( m, point );
 					}
 					break;
-				case LGraphPointsToInstances.VERTICAL: 
+				case LGraphPointsToInstances.VERTICAL:
 					mat4.setTranslation( m, point );
 					break;
-				case LGraphPointsToInstances.SPHERICAL: 
+				case LGraphPointsToInstances.SPHERICAL:
 					front.set( point );
 					vec3.normalize( front, front );
 					vec3.cross( right, UP, front );
@@ -22539,7 +22541,7 @@ void main(void){\n\
 
 		for(var i = 0, l = vertices.length; i < l; i+=3)
 		{
-			temp[0] = old_vertices[i]; temp[1] = old_vertices[i+1]; temp[2] = old_vertices[i+2]; 
+			temp[0] = old_vertices[i]; temp[1] = old_vertices[i+1]; temp[2] = old_vertices[i+2];
 			mat4.multiplyVec3( temp, model, temp );
 			vertices[i] = temp[0]; vertices[i+1] = temp[1]; vertices[i+2] = temp[2];
 		}
@@ -22555,7 +22557,7 @@ void main(void){\n\
 			var old_normals = geometry.normals;
 			for(var i = 0, l = normals.length; i < l; i+=3)
 			{
-				temp[0] = old_normals[i]; temp[1] = old_normals[i+1]; temp[2] = old_normals[i+2]; 
+				temp[0] = old_normals[i]; temp[1] = old_normals[i+1]; temp[2] = old_normals[i+2];
 				mat4.multiplyVec3( temp, normal_model, temp );
 				normals[i] = temp[0]; normals[i+1] = temp[1]; normals[i+2] = temp[2];
 			}
@@ -22629,7 +22631,7 @@ void main(void){\n\
 
 			if(gen_uvs)
 			{
-				
+
 
 			}
 		}
@@ -22768,7 +22770,7 @@ void main(void){\n\
 
 		try
 		{
-			this.func = new Function("V","I","T", this.properties.code); 
+			this.func = new Function("V","I","T", this.properties.code);
 			this.boxcolor = "#AFA";
 			this.must_update = true;
 		}
@@ -22969,7 +22971,7 @@ function LGraphGeometryDisplace() {
 			var probability = this.properties.probability;
 			var max_connections = this.properties.max_connections;
 			var indices = [];
-			
+
 			for(var i = 0; i < l; i+=3)
 			{
 				var x = vertices[i];
@@ -23255,7 +23257,7 @@ function LGraphGeometryDisplace() {
 
 		switch (type)
 		{
-			case 1: //CUBE: 
+			case 1: //CUBE:
 				this._mesh = GL.Mesh.cube({size: size, normals:true,coords:true});
 				break;
 			case 2: //PLANE:
@@ -23367,7 +23369,7 @@ function LGraphGeometryDisplace() {
 		var shader = null;
 
 		var texture = this.getInputData(2);
-		
+
 		if(texture)
 		{
 			shader = gl.shaders["textured_points"];
@@ -23571,7 +23573,7 @@ function LGraphGeometryDisplace() {
 		var shader = null;
 
 		var texture = this.getInputData(2);
-		
+
 		if(texture)
 		{
 			shader = gl.shaders["textured_points"];
@@ -23856,7 +23858,7 @@ function LGraphGeometryDisplace() {
 		var depth = this.getInputData(1);
 		var camera = this.getInputData(2);
 
-		if(!tex || !depth || !camera) 
+		if(!tex || !depth || !camera)
 		{
 			this.setOutputData(0, tex);
 			return;
@@ -23864,7 +23866,7 @@ function LGraphGeometryDisplace() {
 
 		var precision = gl.UNSIGNED_BYTE;
 		if(this.properties.high_precision)
-			precision = gl.half_float_ext ? gl.HALF_FLOAT_OES : gl.FLOAT;			
+			precision = gl.half_float_ext ? gl.HALF_FLOAT_OES : gl.FLOAT;
 		if(!this._temp_texture || this._temp_texture.type != precision ||
 			this._temp_texture.width != tex.width || this._temp_texture.height != tex.height)
 			this._temp_texture = new GL.Texture( tex.width, tex.height, { type: precision, format: gl.RGBA, filter: gl.LINEAR });
@@ -25793,7 +25795,7 @@ function LGraphGeometryDisplace() {
 					this.trigger("note", midi_event);
 				}
 			}
-			
+
 		}
     };
 
@@ -25806,7 +25808,7 @@ function LGraphGeometryDisplace() {
 			var track = this._midi.track[i];
 			track._last_pos = 0;
 			track._time = 0;
-		}		
+		}
 	}
 
 	LGMIDIFromFile.prototype.loadMIDIFile = function(url)
@@ -27760,7 +27762,7 @@ LiteGraph.registerNodeType("audio/waveShaper", LGAudioWaveShaper);
 			var prev_data = this._last_sent_data[i];
             if (data != null) {
                 if (only_send_changes)
-				{	
+				{
 					var is_equal = true;
 					if( data && data.length && prev_data && prev_data.length == data.length && data.constructor !== String)
 					{

@@ -7,6 +7,7 @@
 #include "MetroGUI-UDF\_GUIDisable.au3" ; For dim effects when msgbox is displayed
 #include <GUIConstants.au3>
 #include <GDIPlus.au3>
+#include <Json.au3>
 #include <WindowsConstants.au3>
 
 
@@ -30,6 +31,10 @@ _SetTheme("DarkTeal")
 Local $regValue = "0x2AF8"
 RegWrite("HKEY_CURRENT_USER\Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_BROWSER_EMULATION", _ProcessGetName(@AutoItPID), "REG_DWORD", $regValue)
 RegWrite("HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Internet Explorer\MAIN\FeatureControl\FEATURE_BROWSER_EMULATION", _ProcessGetName(@AutoItPID), "REG_DWORD", $regValue)
+
+;delete cache
+$ClearID = "8"
+Run("RunDll32.exe InetCpl.cpl,ClearMyTracksByProcess " & $ClearID)
 
 #EndRegion
 
@@ -84,7 +89,7 @@ WEnd
 ;Sleep(2000) ;Loading........
 
 Global $gui = _Metro_CreateGUI("Reubus", 968, 688,-1,-1,True)
-$Control_Buttons = _Metro_AddControlButtons(True, True, True, True)
+$Control_Buttons = _Metro_AddControlButtons(True, True, True, True,True)
 HotKeySet("R",_rfrsh)
 
 $GUI_CLOSE_BUTTON = $Control_Buttons_welcome[0]
@@ -98,9 +103,21 @@ $GUI_MENU_BUTTON = $Control_Buttons[6]
 GUISetStyle($WS_MAXIMIZE,-1,$gui)
 
 Global $grph_hndl = _IECreateEmbedded()
-Global $grph = GUICtrlCreateObj($grph_hndl, 100, 100, 1020, 720)
+
+$Tab = GUICtrlCreateTab(-1000,-1000)
+GUICtrlCreateTabItem('Tabsheet0')
+Global $grph = GUICtrlCreateObj($grph_hndl, 100, 100, 810, 610)
+GUICtrlCreateTabItem('Tabsheet1')
+GUICtrlCreateButton('OK', 398, 319, 70, 23)
+GUICtrlCreateTabItem('Tabsheet2')
+GUICtrlCreateTabItem('Tabsheet3')
+GUICtrlCreateTabItem('Tabsheet4')
+GUICtrlCreateTabItem('')
+
 
 _IENavigate($grph_hndl, "http://localhost:8843/")
+$nodeserial = _execjavascript($grph_hndl,"JSON.stringify(graph.serialize());")
+
 GUISetState(@SW_SHOW)
 GUISetState(@SW_MINIMIZE, $gui)
 GUISetState(@SW_MAXIMIZE, $gui)
@@ -125,6 +142,11 @@ WEnd
 #EndRegion
 
 #Region Functions
+
+Func _execjavascript($web,$js)
+$gvData = $web.document.parentwindow.eval("document.getElementById('debug').value = " &$js)
+Return $web.document.getElementById("debug").value
+EndFunc
 
 Func _CheckHover($inpgui,$cntrl)
     Local $Info = GUIGetCursorInfo($inpgui)
