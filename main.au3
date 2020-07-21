@@ -88,9 +88,8 @@ WEnd
 
 ;Sleep(2000) ;Loading........
 
-Global $gui = _Metro_CreateGUI("Reubus", 968, 688,-1,-1,True)
-$Control_Buttons = _Metro_AddControlButtons(True, True, True, True,True)
-HotKeySet("R",_rfrsh)
+Global $gui = _Metro_CreateGUI("Reubus", 1024 , 768, -1, -1,True)
+$Control_Buttons = _Metro_AddControlButtons(True, False, True, False, False)
 
 $GUI_CLOSE_BUTTON = $Control_Buttons_welcome[0]
 $GUI_MAXIMIZE_BUTTON = $Control_Buttons[1]
@@ -100,23 +99,26 @@ $GUI_FULLSCREEN_BUTTON = $Control_Buttons[4]
 $GUI_FSRestore_BUTTON = $Control_Buttons[5]
 $GUI_MENU_BUTTON = $Control_Buttons[6]
 
-GUISetStyle($WS_MAXIMIZE,-1,$gui)
 
-Global $grph_hndl = _IECreateEmbedded()
+;Global $grph_hndl = _IECreateEmbedded()
+GUICtrlCreatePic(@ScriptDir &"\gui_components\low_layout.jpg",0,@DesktopHeight-304,1920,304)
+GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
+GUICtrlCreatePic(@ScriptDir &"\gui_components\low_status_layout.jpg",0,@DesktopHeight-42,1920,42)
+GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
+GUICtrlCreatePic(@ScriptDir &"\gui_components\Layer 2_layout.jpg",0,39,1920,39)
+GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
+GUICtrlCreatePic(@ScriptDir &"\gui_components\seperator1_layout.jpg",200,560,5,259)
+GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
+;GUICtrlCreatePic(@ScriptDir &"\gui_components\low_status_layout.jpg",0,@DesktopHeight-42,1920,42)
+;GUICtrlCreatePic(@ScriptDir &"\gui_components\low_status_layout.jpg",0,@DesktopHeight-42,1920,42)
+;Global $grph = GUICtrlCreateObj($grph_hndl, 100, 100, 810, 610)
 
-$Tab = GUICtrlCreateTab(-1000,-1000)
-GUICtrlCreateTabItem('Tabsheet0')
-Global $grph = GUICtrlCreateObj($grph_hndl, 100, 100, 810, 610)
-GUICtrlCreateTabItem('Tabsheet1')
-GUICtrlCreateButton('OK', 398, 319, 70, 23)
-GUICtrlCreateTabItem('Tabsheet2')
-GUICtrlCreateTabItem('Tabsheet3')
-GUICtrlCreateTabItem('Tabsheet4')
-GUICtrlCreateTabItem('')
 
 
-_IENavigate($grph_hndl, "http://localhost:8843/")
-$nodeserial = _execjavascript($grph_hndl,"JSON.stringify(graph.serialize());")
+
+
+;_IENavigate($grph_hndl, "http://localhost:8843/")
+;$nodeserial = _execjavascript($grph_hndl,"JSON.stringify(graph.serialize());")
 
 GUISetState(@SW_SHOW)
 GUISetState(@SW_MINIMIZE, $gui)
@@ -127,14 +129,8 @@ While 1
 		Case $GUI_EVENT_CLOSE, $GUI_CLOSE_BUTTON
 			_Metro_GUIDelete($gui) ;Delete GUI/release resources, make sure you use this when working with multiple GUIs!
 			Exit
-		Case $GUI_MAXIMIZE_BUTTON
-			GUISetState(@SW_MAXIMIZE, $gui)
 		Case $GUI_MINIMIZE_BUTTON
 			GUISetState(@SW_MINIMIZE, $gui)
-		Case $GUI_RESTORE_BUTTON
-			GUISetState(@SW_RESTORE, $gui)
-		Case $GUI_FULLSCREEN_BUTTON, $GUI_FSRestore_BUTTON
-			ConsoleWrite("Fullscreen toggled" & @CRLF)
 
 	EndSwitch
 WEnd
@@ -158,9 +154,5 @@ Func _CheckHover($inpgui,$cntrl)
 		GUICtrlSetColor ($cntrl,$COLOR_WHITE)
     EndIf
 EndFunc   ;==>_CheckHover
-
-Func _rfrsh()
-_IEAction($grph_hndl, "refresh")
-EndFunc
 
 #EndRegion
