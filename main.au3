@@ -42,7 +42,7 @@ Run("RunDll32.exe InetCpl.cpl,ClearMyTracksByProcess " & $ClearID)
 
 ;welcome-screen
 
-Global $welcomegui = _Metro_CreateGUI("Welcome Screen", 600, 500,-1,-1,True)
+Global $welcomegui = _Metro_CreateGUI("Welcome Screen", 600, 500,-1,-1)
 $Control_Buttons_welcome = _Metro_AddControlButtons(True, False, True, False, False)
 
 $welabl = GUICtrlCreateLabel("Welcome",230,300,170,40)
@@ -51,6 +51,7 @@ GUICtrlSetColor (-1,$COLOR_WHITE)
 
 GUICtrlCreatePic("logo.jpg",80,130,440,150)
 $start_home = _Metro_CreateButtonEx2("Start", 225, 395, 185, 30)
+
 
 $GUI_CLOSE_BUTTON = $Control_Buttons_welcome[0]
 $GUI_MAXIMIZE_BUTTON = $Control_Buttons_welcome[1]
@@ -121,8 +122,7 @@ GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
 ;$nodeserial = _execjavascript($grph_hndl,"JSON.stringify(graph.serialize());")
 
 GUISetState(@SW_SHOW)
-GUISetState(@SW_MINIMIZE, $gui)
-GUISetState(@SW_MAXIMIZE, $gui)
+
 While 1
 	$nMsg = GUIGetMsg()
 	Switch $nMsg
