@@ -101,10 +101,11 @@ $GUI_FSRestore_BUTTON = $Control_Buttons[5]
 $GUI_MENU_BUTTON = $Control_Buttons[6]
 
 
-;$maintab = GUICtrlCreateTab(100,100)
+$maintab = GUICtrlCreateTab(400,400)
 
 Global $grph_hndl = _IECreateEmbedded()
-;GUICtrlCreateTabItem("tab1")
+
+GUICtrlCreateTabItem("tab1")
 
 GUICtrlCreatePic(@ScriptDir &"\gui_components\low_layout.jpg",0,@DesktopHeight-304,1920,304)
 GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
@@ -119,7 +120,9 @@ GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
 GUICtrlCreatePic("",600,680,148,38)
 GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
 _loadpic(-1,@ScriptDir &"\gui_components\png\scene_out_focus_layout.png")
-
+GUICtrlCreatePic("",600,580,148,38)
+GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
+_loadpic(-1,@ScriptDir &"\gui_components\png\Train model set_layout.png")
 
 ;GUICtrlCreatePic(@ScriptDir &"\gui_components\low_status_layout.jpg",0,@DesktopHeight-42,1920,42)
 ;GUICtrlCreatePic(@ScriptDir &"\gui_components\low_status_layout.jpg",0,@DesktopHeight-42,1920,42)
@@ -129,7 +132,7 @@ GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
 
 _IENavigate($grph_hndl, "http://localhost:8843/")
 
-;GUICtrlCreateTabItem("tab2")
+GUICtrlCreateTabItem("tab2")
 
 
 ;$nodeserial = _execjavascript($grph_hndl,"JSON.stringify(graph.serialize());")
@@ -153,8 +156,8 @@ WEnd
 #Region Functions
 
 Func _loadpic($iPic,$picture)
-Global Const $hImage = _GDIPlus_ImageLoadFromFile($picture)
-Global Const $hHBitmap = _GDIPlus_BitmapCreateHBITMAPFromBitmap($hImage)
+Global $hImage = _GDIPlus_ImageLoadFromFile($picture)
+Global $hHBitmap = _GDIPlus_BitmapCreateHBITMAPFromBitmap($hImage)
 _WinAPI_DeleteObject(GUICtrlSendMsg($iPic, $STM_SETIMAGE, $IMAGE_BITMAP, $hHBitmap))
 EndFunc
 
