@@ -169,13 +169,6 @@ GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
 GUICtrlSetColor(-1, 0xFFFFFF)
 GUICtrlSetFont($LabelScene3,10,20,0,"Times New Roman")
 
-
-
-
-
-
-
-
 ;GUICtrlCreatePic(@ScriptDir &"\gui_components\low_status_layout.jpg",0,@DesktopHeight-42,1920,42)
 ;GUICtrlCreatePic(@ScriptDir &"\gui_components\low_status_layout.jpg",0,@DesktopHeight-42,1920,42)
 

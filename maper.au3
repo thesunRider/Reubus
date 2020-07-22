@@ -11,6 +11,9 @@
 
 $mapurl = "https://www.mapdevelopers.com/draw-circle-tool.php?circles="
 $latlongurl = "https://www.latlong.net/"
+$latlurl = "https://www.findlatitudeandlongitude.com/"
+
+;$latln = _IECreate($latlurl,0,0,1)
 $opnurl = FileOpen("map_latlong.html",2)
 
 Local $latlong
@@ -45,10 +48,14 @@ GUIDelete()
 
 Exit
 
+Func _getlatln($address)
+
+EndFunc
+
 Func _zoomtoaddress($map,$address)
 $inp = _URIEncode('[[16093.4,8.8892501,76.5927044,"#AAAAAA","#000000",0.4]]')
 FileWrite($opnurl,_srcode($inp))
-_IENavigate($map, "http://localhost:8843/map_latlong.html")
+_IENavigate($map, "http://localhost:8843/map_latln.html")
 ConsoleWrite("munji")
 EndFunc
 
