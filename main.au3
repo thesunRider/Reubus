@@ -116,10 +116,11 @@ GUICtrlCreatePic(@ScriptDir &"\gui_components\seperator1_layout.jpg",200,560,3,2
 GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
 GUICtrlCreatePic(@ScriptDir &"\gui_components\seperator1_layout.jpg",600,78,3,483)
 GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
-
 GUICtrlCreatePic("",600,680,148,38)
 GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
 _loadpic(-1,@ScriptDir &"\gui_components\png\scene_out_focus_layout.png")
+
+
 ;GUICtrlCreatePic(@ScriptDir &"\gui_components\low_status_layout.jpg",0,@DesktopHeight-42,1920,42)
 ;GUICtrlCreatePic(@ScriptDir &"\gui_components\low_status_layout.jpg",0,@DesktopHeight-42,1920,42)
 
