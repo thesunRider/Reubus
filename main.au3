@@ -101,24 +101,35 @@ $GUI_FSRestore_BUTTON = $Control_Buttons[5]
 $GUI_MENU_BUTTON = $Control_Buttons[6]
 
 
-;Global $grph_hndl = _IECreateEmbedded()
+;$maintab = GUICtrlCreateTab(100,100)
+
+Global $grph_hndl = _IECreateEmbedded()
+;GUICtrlCreateTabItem("tab1")
+
 GUICtrlCreatePic(@ScriptDir &"\gui_components\low_layout.jpg",0,@DesktopHeight-304,1920,304)
 GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
 GUICtrlCreatePic(@ScriptDir &"\gui_components\low_status_layout.jpg",0,@DesktopHeight-42,1920,42)
 GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
 GUICtrlCreatePic(@ScriptDir &"\gui_components\Layer 2_layout.jpg",0,39,1920,39)
 GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
-GUICtrlCreatePic(@ScriptDir &"\gui_components\seperator1_layout.jpg",200,560,5,259)
+GUICtrlCreatePic(@ScriptDir &"\gui_components\seperator1_layout.jpg",200,560,3,259)
+GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
+GUICtrlCreatePic(@ScriptDir &"\gui_components\seperator1_layout.jpg",600,78,3,483)
 GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
 ;GUICtrlCreatePic(@ScriptDir &"\gui_components\low_status_layout.jpg",0,@DesktopHeight-42,1920,42)
 ;GUICtrlCreatePic(@ScriptDir &"\gui_components\low_status_layout.jpg",0,@DesktopHeight-42,1920,42)
-;Global $grph = GUICtrlCreateObj($grph_hndl, 100, 100, 810, 610)
+
+Global $grph = GUICtrlCreateObj($grph_hndl, 0, 79, 600, 481)
+GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
+
+_IENavigate($grph_hndl, "http://localhost:8843/")
+
+;GUICtrlCreateTabItem("tab2")
 
 
 
 
 
-;_IENavigate($grph_hndl, "http://localhost:8843/")
 ;$nodeserial = _execjavascript($grph_hndl,"JSON.stringify(graph.serialize());")
 
 GUISetState(@SW_SHOW)

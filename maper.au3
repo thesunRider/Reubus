@@ -48,7 +48,6 @@ Exit
 Func _zoomtoaddress($map,$address)
 $inp = _URIEncode('[[16093.4,8.8892501,76.5927044,"#AAAAAA","#000000",0.4]]')
 FileWrite($opnurl,_srcode($inp))
-Sleep(1000)
 _IENavigate($map, "http://localhost:8843/map_latlong.html")
 ConsoleWrite("munji")
 EndFunc
@@ -59,7 +58,7 @@ $html = '<html>' &@CRLF & _
 		'<div style="position: absolute; overflow: hidden; left: 0px; top: 0px; width:594px; height:400px;">'&@CRLF & _
 		'<div style="overflow: hidden; margin-top: -90px; margin-left: -25px;">'&@CRLF & _
 		'</div>'&@CRLF & _
-		'<iframe src="https://www.mapdevelopers.com/draw-circle-tool.php?circles='&$data &'" scrolling="no" style="height: 640px; border: 0px none; width: 619px; margin-top: -150px; margin-left: -15px; ">'&@CRLF & _
+		'<iframe id="ifra" src="https://www.mapdevelopers.com/draw-circle-tool.php?circles='&$data &'" scrolling="no" style="height: 640px; border: 0px none; width: 619px; margin-top: -150px; margin-left: -15px; ">'&@CRLF & _
 		'</iframe>'&@CRLF & _
 		'</div>'&@CRLF & _
 		'</div>'&@CRLF & _
