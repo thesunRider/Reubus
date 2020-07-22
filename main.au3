@@ -116,6 +116,10 @@ GUICtrlCreatePic(@ScriptDir &"\gui_components\seperator1_layout.jpg",200,560,3,2
 GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
 GUICtrlCreatePic(@ScriptDir &"\gui_components\seperator1_layout.jpg",600,78,3,483)
 GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
+
+GUICtrlCreatePic("",600,680,148,38)
+GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
+_loadpic(-1,@ScriptDir &"\gui_components\png\scene_out_focus_layout.png")
 ;GUICtrlCreatePic(@ScriptDir &"\gui_components\low_status_layout.jpg",0,@DesktopHeight-42,1920,42)
 ;GUICtrlCreatePic(@ScriptDir &"\gui_components\low_status_layout.jpg",0,@DesktopHeight-42,1920,42)
 
@@ -125,9 +129,6 @@ GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
 _IENavigate($grph_hndl, "http://localhost:8843/")
 
 ;GUICtrlCreateTabItem("tab2")
-
-
-
 
 
 ;$nodeserial = _execjavascript($grph_hndl,"JSON.stringify(graph.serialize());")
@@ -149,6 +150,12 @@ WEnd
 #EndRegion
 
 #Region Functions
+
+Func _loadpic($iPic,$picture)
+Global Const $hImage = _GDIPlus_ImageLoadFromFile($picture)
+Global Const $hHBitmap = _GDIPlus_BitmapCreateHBITMAPFromBitmap($hImage)
+_WinAPI_DeleteObject(GUICtrlSendMsg($iPic, $STM_SETIMAGE, $IMAGE_BITMAP, $hHBitmap))
+EndFunc
 
 Func _execjavascript($web,$js)
 $gvData = $web.document.parentwindow.eval("document.getElementById('debug').value = " &$js)
