@@ -1,18 +1,49 @@
-
-#include <MsgBoxConstants.au3>
+#include <GUIConstantsEx.au3>
 
 Example()
 
 Func Example()
-    ; Read the file without downloading to a folder. The option of 'get the file from the local cache' has been selected.
-    Local $dData = InetRead("https://maps.googleapis.com/maps/api/geocode/json?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA&key=AIzaSyABHR_7bob7XdyXAQoQwHAbV1KstEKyM6I")
+    GUICreate("My GUI Tab") ; will create a dialog box that when displayed is centered
 
-    ; The number of bytes read is returned using the @extended macro.
-    Local $iBytesRead = @extended
+    GUISetBkColor(0x00E0FFFF)
+    GUISetFont(9, 300)
 
-    ; Convert the ANSI compatible binary string back into a string.
-    Local $sData = BinaryToString($dData)
+    GUICtrlCreateTab(10, 10, 200, 100)
 
-    ; Display the results.
-    MsgBox($MB_SYSTEMMODAL, "", "The number of bytes read: " & $iBytesRead & @CRLF & @CRLF & $sData)
+    GUICtrlCreateTabItem("tab0")
+    GUICtrlCreateLabel("label0", 30, 80, 50, 20)
+    $ok = GUICtrlCreateButton("OK0", 20, 50, 50, 20)
+    GUICtrlCreateInput("default", 80, 50, 70, 20)
+
+    GUICtrlCreateTabItem("tab----1")
+    GUICtrlCreateLabel("label1", 30, 80, 50, 20)
+    GUICtrlCreateCombo("", 20, 50, 60, 120)
+    GUICtrlSetData(-1, "Trids|CyberSlug|Larry|Jon|Tylo|guinness", "Jon") ; default Jon
+    GUICtrlCreateButton("OK1", 80, 50, 50, 20)
+
+    GUICtrlCreateTabItem("tab2")
+    GUICtrlSetState(-1, $GUI_SHOW) ; will be display first
+    GUICtrlCreateLabel("label2", 30, 80, 50, 20)
+    GUICtrlCreateButton("OK2", 140, 50, 50)
+
+    GUICtrlCreateTabItem("") ; end tabitem definition
+
+    GUICtrlCreateLabel("label3", 20, 130, 50, 20)
+
+    GUISetState(@SW_SHOW)
+
+    Local $idMsg
+    ; Loop until the user exits.
+    While 1
+        $idMsg = GUIGetMsg()
+
+        Switch $idMsg
+			Case $GUI_EVENT_CLOSE
+				ExitLoop
+
+			Case $ok
+				MsgBox(Default,Default,"aha")
+
+		EndSwitch
+    WEnd
 EndFunc   ;==>Example

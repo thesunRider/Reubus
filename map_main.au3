@@ -39,6 +39,7 @@ While 1
 
 		Case $btn
 			_zoomtoaddress($lat,$long)
+			_drawcircle("first crime",$lat,$long,1000,'#AA0000',0.5)
 
     EndSwitch
 WEnd
@@ -53,8 +54,10 @@ $mainmap.document.getElementById("latlong").value = ""
 Return $curlatlong
 EndFunc
 
-Func _drawcircle($lat,$long,$radius,$color)
-
+Func _drawcircle($title,$lat,$long,$radius,$color,$opac)
+$exec = "drawcircle('" &$title &"'," &$lat &"," &$long &"," &$radius*0.621371 &",'" &$color &"'," &$opac &");"
+ConsoleWrite($exec)
+$mainmap.document.parentwindow.eval($exec)
 EndFunc
 
 Func _execjavascript($web,$js)
