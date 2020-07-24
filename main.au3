@@ -152,8 +152,10 @@ _IENavigate($grph_hndl, "http://localhost:8843/")
 
 GUICtrlCreateTabItem("tab2")
 
-GUICtrlCreateObj($mainmap, 0, 79, 600, 481)
+GUICtrlCreateObj($mainmap, 400, 79, 600, 481)
 _IENavigate($mainmap,"http://localhost:8843/map_test.html")
+
+$crimlst = GUICtrlCreateListView("Crime ID|latitude|Longitude",10,100,400,500)
 
 
 GUICtrlCreateTabItem("")
