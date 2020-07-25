@@ -40,6 +40,7 @@ Run("RunDll32.exe InetCpl.cpl,ClearMyTracksByProcess " & $ClearID)
 
 
 Global $mapaddress = "http://localhost:8843/map_test.html"
+Global $lastid = 0
 
 #EndRegion
 
@@ -113,18 +114,9 @@ $maintab = GUICtrlCreateTab(600,100)
 Global $grph_hndl = _IECreateEmbedded()
 Global $mainmap = _IECreateEmbedded()
 
+
 GUICtrlCreateTabItem("tab1")
-
-GUICtrlCreateLabel("", 0, $ui_h*.05, $ui_w, $ui_h*.05); toppanel
-GUICtrlSetState(-1, 128); $GUI_DISABLE
-GUICtrlSetBkColor(-1, 0x666666)
-
-GUICtrlCreatePic("logo.jpg",5,5,88,30) ;logo
-
-GUICtrlCreateLabel("", 0, $ui_h-$ui_h*0.04, $ui_w, $ui_h*0.04) ;bottompannel
-GUICtrlSetState(-1, 128); $GUI_DISABLE
-GUICtrlSetBkColor(-1,  0x191919)
-
+#Region Tab1
 GUICtrlCreateLabel("", 0, $ui_h*.65, $ui_w, $ui_h*.31) ;statusbar
 GUICtrlSetState(-1, 128); $GUI_DISABLE
 GUICtrlSetBkColor(-1, 0x333333)
@@ -252,20 +244,7 @@ GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor($predict_movement, 0x7f7f7f)
 
-$file_button = GUICtrlCreateButton("FILE", 10, $ui_h*0.06, 80, 25)                  ;file button
-GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xffffff)
-GUICtrlSetBkColor($file_button, 0x323232)
 
-$save_button = GUICtrlCreateButton("SAVE", 100, $ui_h*0.06, 80, 25)          ;save button
-GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xffffff)
-GUICtrlSetBkColor($save_button, 0x7f7f7f)
-
-$settings_button = GUICtrlCreateButton("SETTINGS", 190, $ui_h*0.06, 80, 25)          ;save button
-GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xffffff)
-GUICtrlSetBkColor($settings_button, 0x7f7f7f)
 
 $show_fir = GUICtrlCreateButton("SHOW FIR",$ui_w*.65+8, $ui_h*.1+5, 80, 25)          ;show fir button
 GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
@@ -283,6 +262,54 @@ GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor($delete_node, 0x7f7f7f)
 
 
+Global $grph = GUICtrlCreateObj($grph_hndl, 0, $ui_h*.1, $ui_w*.65, $ui_h*.55)
+GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
+
+_IENavigate($grph_hndl, "http://localhost:8843/")
+
+
+#EndRegion
+
+GUICtrlCreateTabItem("tab2")
+#Region Tab2
+GUICtrlCreateObj($mainmap, 400, 79, 600, 481)
+_IENavigate($mainmap,"http://localhost:8843/map_test.html")
+
+$crimlst = GUICtrlCreateListView("Crime ID|latitude|Longitude",10,100,400,500)
+
+#EndRegion
+
+GUICtrlCreateTabItem("")
+
+
+;Stuff that should be always there irrespective of tabs
+#Region Persistenet stuff across tabs
+
+GUICtrlCreateLabel("", 0, $ui_h*.05, $ui_w, $ui_h*.05); toppanel
+GUICtrlSetState(-1, 128); $GUI_DISABLE
+GUICtrlSetBkColor(-1, 0x666666)
+
+GUICtrlCreatePic("logo.jpg",5,5,88,30) ;logo
+
+GUICtrlCreateLabel("", 0, $ui_h-$ui_h*0.04, $ui_w, $ui_h*0.04) ;bottompannel
+GUICtrlSetState(-1, 128); $GUI_DISABLE
+GUICtrlSetBkColor(-1,  0x191919)
+
+$file_button = GUICtrlCreateButton("FILE", 10, $ui_h*0.06, 80, 25)                  ;file button
+GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor($file_button, 0x323232)
+
+$save_button = GUICtrlCreateButton("SAVE", 100, $ui_h*0.06, 80, 25)          ;save button
+GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor($save_button, 0x323232)
+
+$settings_button = GUICtrlCreateButton("SETTINGS", 190, $ui_h*0.06, 80, 25)          ;save button
+GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor($settings_button, 0x323232)
+
 $scene = GUICtrlCreateButton("SCENE", 0, $ui_h-$ui_h*0.04, 150, $ui_h*0.04);scene tab
 GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
@@ -298,39 +325,13 @@ GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor($DB, 0x191919)
 
-
-
-
-
-
-Global $grph = GUICtrlCreateObj($grph_hndl, 0, $ui_h*.1, $ui_w*.65, $ui_h*.55)
-GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
-
-_IENavigate($grph_hndl, "http://localhost:8843/")
-
-
-
-
-GUICtrlCreateTabItem("tab2")
-
-GUICtrlCreateObj($mainmap, 400, 79, 600, 481)
-_IENavigate($mainmap,"http://localhost:8843/map_test.html")
-
-$crimlst = GUICtrlCreateListView("Crime ID|latitude|Longitude",10,100,400,500)
-
-
-GUICtrlCreateTabItem("")
-
-
-
-
-
+#EndRegion
 
 Do
 Sleep(50)
 Until $mainmap.document.getElementById("debug").value == "1256"
 
-
+GUIRegisterMsg($WM_COMMAND, "WM_COMMAND")
 
 ;$nodeserial = _execjavascript($grph_hndl,"JSON.stringify(graph.serialize());")
 ConsoleWrite("Passed all functions")
@@ -346,8 +347,12 @@ While 1
 			GUISetState(@SW_MINIMIZE, $gui)
 
 		Case $scene
-			ConsoleWrite("clicked")
+			ConsoleWrite("clicked scne "&@CRLF)
 			_GUICtrlTab_ActivateTab($maintab,0)
+
+		Case $map
+			ConsoleWrite("clicked map "&@CRLF)
+			_GUICtrlTab_ActivateTab($maintab,1)
 
 
 	EndSwitch
@@ -356,6 +361,42 @@ WEnd
 #EndRegion
 
 #Region Functions
+
+Func _hovermethod($id)
+;make current button to another color on click
+Switch $id
+	Case $scene,$map,$DB
+		GUICtrlSetBkColor($id, 0x323232)
+
+	Case $file_button,$save_button,$settings_button
+		GUICtrlSetBkColor($id, 0x7f7f7f)
+
+EndSwitch
+
+;return the button clicked before this button to its original color
+Switch $lastid
+	Case $scene,$map,$DB
+		GUICtrlSetBkColor($lastid ,  0x191919)
+
+	Case $file_button,$save_button,$settings_button
+		GUICtrlSetBkColor($lastid,0x323232)
+
+
+EndSwitch
+$lastid = $id
+
+EndFunc
+
+
+Func WM_COMMAND($hWnd, $iMsg, $wParam, $lParam)
+	Local $nNotifyCode = _WinAPI_HiWord($wParam)
+	Local $iId = _WinAPI_LoWord($wParam)
+	Local $hCtrl = $lParam
+
+	If $iId <> 2 And $nNotifyCode = 0 Then ; Check for IDCANCEL - 2
+		_hovermethod($iId)
+	EndIf
+EndFunc   ;==>WM_COMMAND
 
 Func _loadpic($iPic,$picture)
 Global $hImage = _GDIPlus_ImageLoadFromFile($picture)
