@@ -94,7 +94,7 @@ WEnd
 
 ;Sleep(2000) ;Loading........
 
-Global $gui = _Metro_CreateGUI("Reubus", 1024 , 768, -1, -1,True)
+Global $gui = _Metro_CreateGUI("Reubus", @DesktopWidth , @DesktopHeight, 0, 0,True)
 $Control_Buttons = _Metro_AddControlButtons(True, False, True, False, False)
 
 $GUI_CLOSE_BUTTON = $Control_Buttons_welcome[0]
@@ -105,44 +105,173 @@ $GUI_FULLSCREEN_BUTTON = $Control_Buttons[4]
 $GUI_FSRestore_BUTTON = $Control_Buttons[5]
 $GUI_MENU_BUTTON = $Control_Buttons[6]
 
+$ui_w = @DesktopWidth
+$ui_h = @DesktopHeight
 
 $maintab = GUICtrlCreateTab(600,100)
 
 Global $grph_hndl = _IECreateEmbedded()
 Global $mainmap = _IECreateEmbedded()
 
-
 GUICtrlCreateTabItem("tab1")
 
-GUICtrlCreatePic(@ScriptDir &"\gui_components\low_layout.jpg",0,@DesktopHeight-304,1920,304)
-GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
-GUICtrlCreatePic(@ScriptDir &"\gui_components\low_status_layout.jpg",0,@DesktopHeight-42,1920,42)
-GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
-GUICtrlCreatePic(@ScriptDir &"\gui_components\seperator1_layout.jpg",200,560,3,259)
-GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
-GUICtrlCreatePic(@ScriptDir &"\gui_components\seperator1_layout.jpg",475,560,3,259)
-GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
-GUICtrlCreatePic(@ScriptDir &"\gui_components\seperator1_layout.jpg",600,78,3,483)
-GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
+GUICtrlCreateLabel("", 0, $ui_h*.05, $ui_w, $ui_h*.05); toppanel
+GUICtrlSetState(-1, 128); $GUI_DISABLE
+GUICtrlSetBkColor(-1, 0x666666)
 
-$LabelFPS=GUICtrlCreateLabel("FPS RELATED INFO",10,570,200,50)
-GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
-GUICtrlSetColor(-1, 0xFFFFFF)
-GUICtrlSetFont($LabelFPS,10,20,0,"Times New Roman")
-$LabelCPU=GUICtrlCreateLabel("CPU DRAW",10,610,150,50)
-GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
-GUICtrlSetColor(-1, 0xFFFFFF)
-GUICtrlSetFont($LabelCPU,10,20,0,"Times New Roman")
-$LabelRAM=GUICtrlCreateLabel("RAM DRAW",10,650,150,50)
-GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
-GUICtrlSetColor(-1, 0xFFFFFF)
-GUICtrlSetFont($LabelRAM,10,20,0,"Times New Roman")
+GUICtrlCreatePic("logo.jpg",5,5,88,30) ;logo
+
+GUICtrlCreateLabel("", 0, $ui_h-$ui_h*0.04, $ui_w, $ui_h*0.04) ;bottompannel
+GUICtrlSetState(-1, 128); $GUI_DISABLE
+GUICtrlSetBkColor(-1,  0x191919)
+
+GUICtrlCreateLabel("", 0, $ui_h*.65, $ui_w, $ui_h*.31) ;statusbar
+GUICtrlSetState(-1, 128); $GUI_DISABLE
+GUICtrlSetBkColor(-1, 0x333333)
+
+GUICtrlCreateLabel("", $ui_w*.65, $ui_h*.1, 3, $ui_h*.55) ;main seprator
+GUICtrlSetState(-1, 128); $GUI_DISABLE
+GUICtrlSetBkColor(-1, 0x999999)
+
+GUICtrlCreateLabel("", $ui_w*.65, $ui_h*.1, 1, $ui_h*.55);main seprator shade
+GUICtrlSetState(-1, 128); $GUI_DISABLE
+GUICtrlSetBkColor(-1, 0x00000)
+
+GUICtrlCreateLabel("", $ui_w*0.23, $ui_h*.65, 5,$ui_h*.31 ) ;status seprator1
+GUICtrlSetState(-1, 128); $GUI_DISABLE
+GUICtrlSetBkColor(-1, 0xcccccc)
+
+GUICtrlCreateLabel("",$ui_w*0.23+5 , $ui_h*.65, 2, $ui_h*.31) ;status seprator1 shade
+GUICtrlSetState(-1, 128); $GUI_DISABLE
+GUICtrlSetBkColor(-1, 0x00000)
+
+GUICtrlCreateLabel("",$ui_w*.65+3, $ui_h*.1, $ui_w*.35, $ui_h*.55) ;FILE REPORT BG
+GUICtrlSetState(-1, 128); $GUI_DISABLE
+GUICtrlSetBkColor(-1, 0x191919)
+
+GUICtrlCreateLabel("", $ui_w*.5, $ui_h*.65, 5, $ui_h*.31) ;status seprator2
+GUICtrlSetState(-1, 128); $GUI_DISABLE
+GUICtrlSetBkColor(-1, 0xcccccc)
+
+GUICtrlCreateLabel("", $ui_w*.5+5, $ui_h*.65, 2, $ui_h*.31) ;status seprator2 shade
+GUICtrlSetState(-1, 128); $GUI_DISABLE
+GUICtrlSetBkColor(-1, 0x00000)
+
+GUICtrlCreateLabel("", 0, $ui_h*.65, $ui_w, 2) ;upper border of status bar
+GUICtrlSetState(-1, 128); $GUI_DISABLE
+GUICtrlSetBkColor(-1, 0x5e5e5e)
+
+GUICtrlCreateLabel("Scene FPS:", 10, $ui_h*.66, 100, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+GUICtrlCreateLabel("Database:", 150, $ui_h*.66, 100, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+GUICtrlCreateLabel("CPU DRAW:", 10, $ui_h*.68, 100, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+GUICtrlCreateLabel("RAM DRAW:", 10, $ui_h*.70, 100, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+GUICtrlCreateLabel("Current Case:", 10, $ui_h*.72, 100, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+GUICtrlCreateLabel("Current FIR:", 10, $ui_h*.74, 100, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+GUICtrlCreateLabel("No of Sets in Model:", 10, $ui_h*.80, 140, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+GUICtrlCreateLabel("categories in Model:", 10, $ui_h*.82, 140, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+GUICtrlCreateLabel("Installed Packages:", 10, $ui_h*.84, 140, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+GUICtrlCreateLabel("Ping:", 10, $ui_h*.86, 140, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+GUICtrlCreateLabel("Use model set:", $ui_w*0.23+20, $ui_h*.68, 100, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+GUICtrlCreateLabel("Train model set using current Scene", $ui_w*0.23+20,  $ui_h*.73, 250, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, $GUI_FONTUNDER , "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+$browse_model = GUICtrlCreateButton(" O O O ",$ui_w*0.23+125,$ui_h*.686,50,18)
+GUICtrlSetFont(-1, 6, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor($browse_model,0xbcbcbc)
+
+$generate_report = GUICtrlCreateButton("GENERATE REPORT", $ui_w*0.23+20, $ui_h*.78, 120, 30)
+GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor($generate_report, 0x7f7f7f)
+
+$generate_match = GUICtrlCreateButton("GENERATE MATCH", $ui_w*0.23+150, $ui_h*.78, 120, 30)
+GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor($generate_match, 0x7f7f7f)
+
+$personality_todb = GUICtrlCreateButton("WRITE PERSONALITY TO DB", $ui_w*0.23+20, $ui_h*.83, 250, 30)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor($personality_todb, 0x7f7f7f)
+
+$predict_movement = GUICtrlCreateButton("PREDICT CONVICTS NEXT MOVEMENT", $ui_w*0.23+30, $ui_h*.88, 230, 40)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor($predict_movement, 0x7f7f7f)
+
+$file_button = GUICtrlCreateButton("FILE", 10, $ui_h*0.06, 80, 25)                  ;file button
+GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor($file_button, 0x323232)
+
+$save_button = GUICtrlCreateButton("SAVE", 100, $ui_h*0.06, 80, 25)          ;save button
+GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor($save_button, 0x7f7f7f)
+
+$settings_button = GUICtrlCreateButton("SETTINGS", 190, $ui_h*0.06, 80, 25)          ;save button
+GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor($settings_button, 0x7f7f7f)
+
+$show_fir = GUICtrlCreateButton("SHOW FIR",$ui_w*.65+8, $ui_h*.1+5, 80, 25)          ;show fir button
+GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor($show_fir, 0x7f7f7f)
+
+$scene = GUICtrlCreateButton("SCENE", 0, $ui_h-$ui_h*0.04, 150, $ui_h*0.04);scene tab
+GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor($scene,  0x191919)
+
+$map = GUICtrlCreateButton("MAP", 150, $ui_h-$ui_h*0.04, 150, $ui_h*0.04)  ;map tab
+GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor($map,  0x191919)
+
+$DB = GUICtrlCreateButton("DB", 300,$ui_h-$ui_h*0.04, 150, $ui_h*0.04,-1)   ; DB tab
+GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor($DB, 0x191919)
 
 
-;$sm = GUICtrlCreatePic("logo.jpg",0,1642,1920,42)
-;GUICtrlCreatePic(@ScriptDir &"\gui_components\low_status_layout.jpg",0,@DesktopHeight-42,1920,42)
 
-Global $grph = GUICtrlCreateObj($grph_hndl, 0, 79, 600, 481)
+Global $grph = GUICtrlCreateObj($grph_hndl, 0, $ui_h*.1, $ui_w*.65, $ui_h*.55)
 GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
 
 _IENavigate($grph_hndl, "http://localhost:8843/")
@@ -160,53 +289,8 @@ $crimlst = GUICtrlCreateListView("Crime ID|latitude|Longitude",10,100,400,500)
 
 GUICtrlCreateTabItem("")
 
-GUICtrlCreatePic(@ScriptDir &"\gui_components\Layer 2_layout.jpg",0,39,1920,39)
-GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
-GUICtrlCreatePic("",10,46,121,24)
-GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
-_loadpic(-1,@ScriptDir &"\gui_components\png\Layer 3_layout.png")
-GUICtrlCreatePic("",141,46,121,24)
-GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
-_loadpic(-1,@ScriptDir &"\gui_components\png\Layer 5_layout.png")
-$LabelFile=GUICtrlCreateLabel("file",55,48,50,50)
-GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
-GUICtrlSetColor(-1, 0xFFFFFF)
-GUICtrlSetBkColor(-1, $GUI_BKCOLOR_TRANSPARENT)
-GUICtrlSetFont($LabelFile,15,20,0,"Times New Roman")
-$LabelSave=GUICtrlCreateLabel("save",185,48,50,50)
-GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
-GUICtrlSetColor(-1, 0xFFFFFF)
-GUICtrlSetBkColor(-1, $GUI_BKCOLOR_TRANSPARENT)
-GUICtrlSetFont($LabelSave,15,20,0,"Times New Roman")
-
-GUICtrlCreatePic(@ScriptDir &"\gui_components\low_status_layout.jpg",0,738,1920,42)
-GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
-$sc1 = GUICtrlCreatePic("",0,738,155,38)
-GUICtrlSetResizing(-1,$GUI_DOCKAUTO )
-_loadpic(-1,@ScriptDir &"\gui_components\png\scene_in_focus_layout.png")
-$sc2 = GUICtrlCreatePic("",148,738,155,38)
-GUICtrlSetResizing(-1,$GUI_DOCKAUTO )
-_loadpic(-1,@ScriptDir &"\gui_components\png\scene_out_focus_layout.png")
-$sc3 = GUICtrlCreatePic("",296,738,155,38)
-GUICtrlSetResizing(-1,$GUI_DOCKAUTO )
-_loadpic(-1,@ScriptDir &"\gui_components\png\scene_out_focus_layout.png")
 
 
-$LabelScene1=GUICtrlCreateLabel("SCENE1",60,745,70,50)
-GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
-GUICtrlSetColor(-1, 0xFFFFFF)
-GUICtrlSetBkColor(-1, $GUI_BKCOLOR_TRANSPARENT)
-GUICtrlSetFont($LabelScene1,10,20,0,"Times New Roman")
-$LabelScene2=GUICtrlCreateLabel("SCENE2",208,745,70,50)
-GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
-GUICtrlSetColor(-1, 0xFFFFFF)
-GUICtrlSetBkColor(-1, $GUI_BKCOLOR_TRANSPARENT)
-GUICtrlSetFont($LabelScene2,10,20,0,"Times New Roman")
-$LabelScene3=GUICtrlCreateLabel("SCENE3",356,745,70,50)
-GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
-GUICtrlSetColor(-1, 0xFFFFFF)
-GUICtrlSetBkColor(-1, $GUI_BKCOLOR_TRANSPARENT)
-GUICtrlSetFont($LabelScene3,10,20,0,"Times New Roman")
 
 
 
@@ -229,7 +313,7 @@ While 1
 		Case $GUI_MINIMIZE_BUTTON
 			GUISetState(@SW_MINIMIZE, $gui)
 
-		Case $LabelScene1
+		Case $scene
 			ConsoleWrite("clicked")
 			_GUICtrlTab_ActivateTab($maintab,0)
 
