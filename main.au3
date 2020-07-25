@@ -137,25 +137,35 @@ GUICtrlCreateLabel("", $ui_w*.65, $ui_h*.1, 1, $ui_h*.55);main seprator shade
 GUICtrlSetState(-1, 128); $GUI_DISABLE
 GUICtrlSetBkColor(-1, 0x00000)
 
-GUICtrlCreateLabel("", $ui_w*0.23, $ui_h*.65, 5,$ui_h*.31 ) ;status seprator1
-GUICtrlSetState(-1, 128); $GUI_DISABLE
-GUICtrlSetBkColor(-1, 0xcccccc)
-
-GUICtrlCreateLabel("",$ui_w*0.23+5 , $ui_h*.65, 2, $ui_h*.31) ;status seprator1 shade
-GUICtrlSetState(-1, 128); $GUI_DISABLE
-GUICtrlSetBkColor(-1, 0x00000)
-
 GUICtrlCreateLabel("",$ui_w*.65+3, $ui_h*.1, $ui_w*.35, $ui_h*.55) ;FILE REPORT BG
 GUICtrlSetState(-1, 128); $GUI_DISABLE
 GUICtrlSetBkColor(-1, 0x191919)
 
-GUICtrlCreateLabel("", $ui_w*.5, $ui_h*.65, 5, $ui_h*.31) ;status seprator2
+GUICtrlCreateLabel("", $ui_w*0.21, $ui_h*.65, 5,$ui_h*.31 ) ;status seprator1
 GUICtrlSetState(-1, 128); $GUI_DISABLE
 GUICtrlSetBkColor(-1, 0xcccccc)
 
-GUICtrlCreateLabel("", $ui_w*.5+5, $ui_h*.65, 2, $ui_h*.31) ;status seprator2 shade
+GUICtrlCreateLabel("",$ui_w*0.21+5 , $ui_h*.65, 2, $ui_h*.31) ;status seprator1 shade
 GUICtrlSetState(-1, 128); $GUI_DISABLE
 GUICtrlSetBkColor(-1, 0x00000)
+
+GUICtrlCreateLabel("", $ui_w*.43, $ui_h*.65, 5, $ui_h*.31) ;status seprator2
+GUICtrlSetState(-1, 128); $GUI_DISABLE
+GUICtrlSetBkColor(-1, 0xcccccc)
+
+GUICtrlCreateLabel("", $ui_w*.43+5, $ui_h*.65, 2, $ui_h*.31) ;status seprator2 shade
+GUICtrlSetState(-1, 128); $GUI_DISABLE
+GUICtrlSetBkColor(-1, 0x00000)
+
+GUICtrlCreateLabel("", $ui_w*.84, $ui_h*.65, 5, $ui_h*.31) ;status seprator3
+GUICtrlSetState(-1, 128); $GUI_DISABLE
+GUICtrlSetBkColor(-1, 0xcccccc)
+
+GUICtrlCreateLabel("", $ui_w*.84+5, $ui_h*.65, 2, $ui_h*.31) ;status seprator3 shade
+GUICtrlSetState(-1, 128); $GUI_DISABLE
+GUICtrlSetBkColor(-1, 0x00000)
+
+GUICtrlCreateLabel("", $ui_w*.44, $ui_h*.665, $ui_w*.395, $ui_h*.283, $WS_BORDER)
 
 GUICtrlCreateLabel("", 0, $ui_h*.65, $ui_w, 2) ;upper border of status bar
 GUICtrlSetState(-1, 128); $GUI_DISABLE
@@ -201,35 +211,43 @@ GUICtrlCreateLabel("Ping:", 10, $ui_h*.86, 140, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xd5d5d5)
 
-GUICtrlCreateLabel("Use model set:", $ui_w*0.23+20, $ui_h*.68, 100, 28, 0x0200)
+GUICtrlCreateLabel("Use model set:", $ui_w*0.21+20, $ui_h*.68, 100, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xd5d5d5)
 
-GUICtrlCreateLabel("Train model set using current Scene", $ui_w*0.23+20,  $ui_h*.73, 250, 28, 0x0200)
+GUICtrlCreateLabel("Train model set using current Scene", $ui_w*0.21+20,  $ui_h*.73, 250, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, $GUI_FONTUNDER , "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xd5d5d5)
 
-$browse_model = GUICtrlCreateButton(" O O O ",$ui_w*0.23+125,$ui_h*.686,50,18)
+GUICtrlCreateLabel("NODE CATEGORIES:", $ui_w*0.43+25, $ui_h*.9, 115, 28, 0x0200)
+GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+GUICtrlCreateLabel("CURRENT NODE INFO:", $ui_w*0.84+10,$ui_h*.655, 125, 28, 0x0200)
+GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+$browse_model = GUICtrlCreateButton(" O O O ",$ui_w*0.21+125,$ui_h*.686,50,18)
 GUICtrlSetFont(-1, 6, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor($browse_model,0xbcbcbc)
 
-$generate_report = GUICtrlCreateButton("GENERATE REPORT", $ui_w*0.23+20, $ui_h*.78, 120, 30)
+$generate_report = GUICtrlCreateButton("GENERATE REPORT", $ui_w*0.21+20, $ui_h*.78, 120, 30)
 GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor($generate_report, 0x7f7f7f)
 
-$generate_match = GUICtrlCreateButton("GENERATE MATCH", $ui_w*0.23+150, $ui_h*.78, 120, 30)
+$generate_match = GUICtrlCreateButton("GENERATE MATCH", $ui_w*0.21+150, $ui_h*.78, 120, 30)
 GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor($generate_match, 0x7f7f7f)
 
-$personality_todb = GUICtrlCreateButton("WRITE PERSONALITY TO DB", $ui_w*0.23+20, $ui_h*.83, 250, 30)
+$personality_todb = GUICtrlCreateButton("WRITE PERSONALITY TO DB", $ui_w*0.21+20, $ui_h*.83, 250, 30)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor($personality_todb, 0x7f7f7f)
 
-$predict_movement = GUICtrlCreateButton("PREDICT CONVICTS NEXT MOVEMENT", $ui_w*0.23+30, $ui_h*.88, 230, 40)
+$predict_movement = GUICtrlCreateButton("PREDICT CONVICTS NEXT MOVEMENT", $ui_w*0.21+30, $ui_h*.88, 230, 40)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor($predict_movement, 0x7f7f7f)
@@ -254,6 +272,17 @@ GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor($show_fir, 0x7f7f7f)
 
+$add_node = GUICtrlCreateButton("ADD NEW NODE MODEL", $ui_w*0.43+25, $ui_h*.675, 140, 25)
+GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor($add_node, 0x7f7f7f)
+
+$delete_node = GUICtrlCreateButton("DELETE CURRENT NODE", $ui_w*0.43+25, $ui_h*.72, 140, 25)
+GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor($delete_node, 0x7f7f7f)
+
+
 $scene = GUICtrlCreateButton("SCENE", 0, $ui_h-$ui_h*0.04, 150, $ui_h*0.04);scene tab
 GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
@@ -268,6 +297,9 @@ $DB = GUICtrlCreateButton("DB", 300,$ui_h-$ui_h*0.04, 150, $ui_h*0.04,-1)   ; DB
 GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor($DB, 0x191919)
+
+
+
 
 
 
