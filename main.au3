@@ -109,7 +109,7 @@ $GUI_MENU_BUTTON = $Control_Buttons[6]
 $ui_w = @DesktopWidth
 $ui_h = @DesktopHeight
 
-$maintab = GUICtrlCreateTab(600,100)
+$maintab = GUICtrlCreateTab(-600,-100)
 
 Global $grph_hndl = _IECreateEmbedded()
 Global $mainmap = _IECreateEmbedded()
