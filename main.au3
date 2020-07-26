@@ -10,7 +10,7 @@
 #include <GDIPlus.au3>
 #include <Json.au3>
 #include <WindowsConstants.au3>
-
+#include <SQLite.au3>
 
 ;!Highly recommended for improved overall performance and responsiveness of the GUI effects etc.! (after compiling):
 #AutoIt3Wrapper_Run_Au3Stripper=y
@@ -27,6 +27,7 @@
 
 _Metro_EnableHighDPIScaling()
 _SetTheme("DarkTeal")
+_SQLite_Startup()
 _GDIPlus_Startup()
 
 ;enable activeX
@@ -98,7 +99,7 @@ WEnd
 Global $gui = _Metro_CreateGUI("Reubus", @DesktopWidth , @DesktopHeight, 0, 0,True)
 $Control_Buttons = _Metro_AddControlButtons(True, False, True, False, False)
 
-$GUI_CLOSE_BUTTON = $Control_Buttons_welcome[0]
+$GUI_CLOSE_BUTTON = $Control_Buttons[0]
 $GUI_MAXIMIZE_BUTTON = $Control_Buttons[1]
 $GUI_RESTORE_BUTTON = $Control_Buttons[2]
 $GUI_MINIMIZE_BUTTON = $Control_Buttons[3]
@@ -160,23 +161,15 @@ GUICtrlCreateLabel("", $ui_w*.84+5, $ui_h*.65, 2, $ui_h*.31) ;status seprator3 s
 GUICtrlSetState(-1, 128); $GUI_DISABLE
 GUICtrlSetBkColor(-1, 0x00000)
 
-GUICtrlCreateLabel("", $ui_w*.44, $ui_h*.665, $ui_w*.395, $ui_h*.283, $WS_BORDER)
-
 GUICtrlCreateLabel("", 0, $ui_h*.65, $ui_w, 2) ;upper border of status bar
 GUICtrlSetState(-1, 128); $GUI_DISABLE
 GUICtrlSetBkColor(-1, 0x5e5e5e)
 
 
-;BUTTON IN SECOND DIVISION
-
 $show_fir = GUICtrlCreateButton("SHOW FIR",$ui_w*.65+8, $ui_h*.1+5, 80, 25)          ;show fir button
 GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor($show_fir, 0x7f7f7f)
-
-
-
-;LABELS IN 1ST STATUS BAR
 
 GUICtrlCreateLabel("Scene FPS:", 10, $ui_h*.66, 100, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
@@ -232,7 +225,13 @@ GUICtrlCreateLabel("NODE CATEGORIES:", $ui_w*0.43+25, $ui_h*.9, 115, 28, 0x0200)
 GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xd5d5d5)
 
-$browse_model = GUICtrlCreateButton(" O O O ",$ui_w*0.21+125,$ui_h*.686,50,18)
+
+GUICtrlCreateLabel("CURRENT NODE INFO:", $ui_w*0.84+10,$ui_h*.655, 125, 28, 0x0200)
+GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+$browse_model = GUICtrlCreateButton(" . . . ",$ui_w*0.21+125,$ui_h*.686,50,18)
+
 GUICtrlSetFont(-1, 6, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor($browse_model,0xbcbcbc)
@@ -269,12 +268,8 @@ GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor($delete_node, 0x7f7f7f)
 
-;LABELS IN 4TH STATUS BAR
 
-GUICtrlCreateLabel("CURRENT NODE INFO:", $ui_w*0.84+10,$ui_h*.655, 125, 28, 0x0200)
-GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xd5d5d5)
-
+GUICtrlCreateLabel("", $ui_w*.44, $ui_h*.665, $ui_w*.395, $ui_h*.283, $WS_BORDER) ; border to node section
 
 Global $grph = GUICtrlCreateObj($grph_hndl, 0, $ui_h*.1, $ui_w*.65, $ui_h*.55)
 GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
@@ -655,6 +650,9 @@ While 1
 			ConsoleWrite("clicked map "&@CRLF)
 			_GUICtrlTab_ActivateTab($maintab,1)
 
+		Case $add_node
+			_nodeaddnode()
+
 
 	EndSwitch
 WEnd
@@ -662,6 +660,70 @@ WEnd
 #EndRegion
 
 #Region Functions
+
+Func _nodeaddnode()
+$nodeadd = _Metro_CreateGUI("Add Node Model", $ui_w*.3, $ui_h*.50)
+ConsoleWrite($ui_w*.3&"-" & $ui_h*.55)
+$Control_Buttons1 = _Metro_AddControlButtons(True, False, True, False, False)
+$GUI_CLOSE_BUTTON1 = $Control_Buttons1[0]
+$GUI_MINIMIZE_BUTTON1 = $Control_Buttons1[3]
+
+GUICtrlCreateLabel("Node Title:", 32, 24, 56, 17)
+GUICtrlSetColor(-1, 0xd5d5d5)
+$nod_title = GUICtrlCreateInput("nod_title", 104, 24, 129, 21)
+$add_inputs = GUICtrlCreateButton("Add inputs", 24, 64, 73, 25)
+$inputs = GUICtrlCreateInput("inputs", 104, 64, 129, 21)
+$Label1 = GUICtrlCreateLabel("Current no of inputs:", 296, 144, 99, 17)
+
+GUICtrlSetColor(-1, 0xd5d5d5)
+$outputs = GUICtrlCreateButton("Add outputs", 24, 104, 73, 25)
+$output = GUICtrlCreateInput("output", 104, 104, 129, 21)
+$List1 = GUICtrlCreateList("", 24, 136, 257, 214)
+$ninp = GUICtrlCreateLabel("ninp", 408, 144, 24, 17)
+
+GUICtrlSetColor(-1, 0xd5d5d5)
+GUICtrlCreateLabel("Current no of outputs:", 291, 172, 106, 17)
+
+GUICtrlSetColor(-1, 0xd5d5d5)
+$nop = GUICtrlCreateLabel("nop", 408, 168, 22, 17)
+
+GUICtrlSetColor(-1, 0xd5d5d5)
+GUICtrlCreateLabel("Current Selection:", 296, 200, 88, 17)
+
+GUICtrlSetColor(-1, 0xd5d5d5)
+$cursel = GUICtrlCreateLabel("cursel", 400, 200, 32, 17)
+
+GUICtrlSetColor(-1, 0xd5d5d5)
+$remcur = GUICtrlCreateButton("Remove Current Selection", 296, 232, 145, 33)
+$adddb = GUICtrlCreateButton("Add to Database", 24, 368, 129, 33)
+$ldjs = GUICtrlCreateButton("Load from js", 176, 368, 97, 33)
+GUICtrlCreateLabel("Type:", 248, 72, 31, 17)
+
+GUICtrlSetColor(-1, 0xd5d5d5)
+GUICtrlCreateLabel("Type:", 247, 110, 31, 17)
+
+GUICtrlSetColor(-1, 0xd5d5d5)
+$typinp = GUICtrlCreateCombo("none|boolean|number|string", 288, 64, 105, 25, BitOR($CBS_DROPDOWN,$CBS_AUTOHSCROLL))
+$typout = GUICtrlCreateCombo("none|boolean|number|string", 288, 104, 105, 25, BitOR($CBS_DROPDOWN,$CBS_AUTOHSCROLL))
+$execfunc = GUICtrlCreateCheckbox("Execute on connection", 296, 280, 169, 17)
+GUICtrlSetColor(-1, 0xd5d5d5)
+$ldjsfunc = GUICtrlCreateButton("Load js function", 296, 304, 145, 33)
+
+
+GUISetState(@SW_SHOW,$nodeadd)
+While 1
+$nMsg = GUIGetMsg()
+	Switch $nMsg
+		Case $GUI_CLOSE_BUTTON1
+			_Metro_GUIDelete($nodeadd)
+			ExitLoop
+
+		Case $GUI_MINIMIZE_BUTTON1
+			GUISetState(@SW_MINIMIZE, $nodeadd)
+
+	EndSwitch
+WEnd
+EndFunc
 
 Func _hovermethod($id)
 ;make current button to another color on click
