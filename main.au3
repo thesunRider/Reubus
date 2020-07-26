@@ -6,8 +6,10 @@
 #include "MetroGUI-UDF\MetroGUI_UDF.au3"
 #include "MetroGUI-UDF\_GUIDisable.au3" ; For dim effects when msgbox is displayed
 #include <GUIConstants.au3>
+#include <GuiListView.au3>
 #include <GuiTab.au3>
 #include <GDIPlus.au3>
+#include <String.au3>
 #include <Json.au3>
 #include <WindowsConstants.au3>
 #include <SQLite.au3>
@@ -662,6 +664,7 @@ WEnd
 #Region Functions
 
 Func _nodeaddnode()
+_GUIDisable($gui, 0, 30)
 $nodeadd = _Metro_CreateGUI("Add Node Model", $ui_w*.3, $ui_h*.50)
 ConsoleWrite($ui_w*.3&"-" & $ui_h*.55)
 $Control_Buttons1 = _Metro_AddControlButtons(True, False, True, False, False)
@@ -671,30 +674,16 @@ $GUI_MINIMIZE_BUTTON1 = $Control_Buttons1[3]
 GUICtrlCreateLabel("Node Title:", 32, 24, 56, 17)
 GUICtrlSetColor(-1, 0xd5d5d5)
 $nod_title = GUICtrlCreateInput("nod_title", 104, 24, 129, 21)
-$add_inputs = GUICtrlCreateButton("Add inputs", 24, 64, 73, 25)
-$inputs = GUICtrlCreateInput("inputs", 104, 64, 129, 21)
-$Label1 = GUICtrlCreateLabel("Current no of inputs:", 296, 144, 99, 17)
-
+GUICtrlCreateLabel("Add inputs:", 24, 64, 73, 25)
 GUICtrlSetColor(-1, 0xd5d5d5)
-$outputs = GUICtrlCreateButton("Add outputs", 24, 104, 73, 25)
-$output = GUICtrlCreateInput("output", 104, 104, 129, 21)
-$List1 = GUICtrlCreateList("", 24, 136, 257, 214)
-$ninp = GUICtrlCreateLabel("ninp", 408, 144, 24, 17)
-
+$inputs = GUICtrlCreateInput("0", 104, 64, 129, 21)
+GUICtrlCreateUpdown(-1)
+GUICtrlCreateLabel("Add outputs:", 24, 104, 73, 25)
 GUICtrlSetColor(-1, 0xd5d5d5)
-GUICtrlCreateLabel("Current no of outputs:", 291, 172, 106, 17)
-
-GUICtrlSetColor(-1, 0xd5d5d5)
-$nop = GUICtrlCreateLabel("nop", 408, 168, 22, 17)
-
-GUICtrlSetColor(-1, 0xd5d5d5)
-GUICtrlCreateLabel("Current Selection:", 296, 200, 88, 17)
-
-GUICtrlSetColor(-1, 0xd5d5d5)
-$cursel = GUICtrlCreateLabel("cursel", 400, 200, 32, 17)
-
-GUICtrlSetColor(-1, 0xd5d5d5)
-$remcur = GUICtrlCreateButton("Remove Current Selection", 296, 232, 145, 33)
+$output = GUICtrlCreateInput("1", 104, 104, 129, 21)
+GUICtrlCreateUpdown(-1)
+$listadd = GUICtrlCreateListView("Node Title|Node Type input|Node Type output|Node Outputs|Node Inputs", 24, 136, 257, 214)
+$remcur = GUICtrlCreateButton("Remove Current Selection", 296, 192, 145, 33)
 $adddb = GUICtrlCreateButton("Add to Database", 24, 368, 129, 33)
 $ldjs = GUICtrlCreateButton("Load from js", 176, 368, 97, 33)
 GUICtrlCreateLabel("Type:", 248, 72, 31, 17)
@@ -703,26 +692,65 @@ GUICtrlSetColor(-1, 0xd5d5d5)
 GUICtrlCreateLabel("Type:", 247, 110, 31, 17)
 
 GUICtrlSetColor(-1, 0xd5d5d5)
-$typinp = GUICtrlCreateCombo("none|boolean|number|string", 288, 64, 105, 25, BitOR($CBS_DROPDOWN,$CBS_AUTOHSCROLL))
-$typout = GUICtrlCreateCombo("none|boolean|number|string", 288, 104, 105, 25, BitOR($CBS_DROPDOWN,$CBS_AUTOHSCROLL))
-$execfunc = GUICtrlCreateCheckbox("Execute on connection", 296, 280, 169, 17)
-GUICtrlSetColor(-1, 0xd5d5d5)
-$ldjsfunc = GUICtrlCreateButton("Load js function", 296, 304, 145, 33)
+$typinp = GUICtrlCreateCombo("", 288, 64, 105, 25, BitOR($CBS_DROPDOWN,$CBS_AUTOHSCROLL))
+GUICtrlSetData(-1, "none|boolean|number|string", "none")
+$typout = GUICtrlCreateCombo("", 288, 104, 105, 25, BitOR($CBS_DROPDOWN,$CBS_AUTOHSCROLL))
+GUICtrlSetData(-1, "none|boolean|number|string", "none")
+$add_nodem = GUICtrlCreateButton("Add node",296,144,145,33)
 
 
 GUISetState(@SW_SHOW,$nodeadd)
 While 1
 $nMsg = GUIGetMsg()
 	Switch $nMsg
-		Case $GUI_CLOSE_BUTTON1
+		Case $GUI_CLOSE_BUTTON1,$GUI_EVENT_CLOSE
 			_Metro_GUIDelete($nodeadd)
 			ExitLoop
 
 		Case $GUI_MINIMIZE_BUTTON1
 			GUISetState(@SW_MINIMIZE, $nodeadd)
 
+		Case $add_nodem
+			;Node Title|Node Type input|Node Type output|Node Outputs|Node Inputs
+			GUICtrlCreateListViewItem(GUICtrlRead($nod_title) &"|" &GUICtrlRead($typinp) &"|" &GUICtrlRead($typout) &"|" &GUICtrlRead($output) &"|" & GUICtrlRead($inputs),$listadd)
+
+		Case $remcur
+			_GUICtrlListView_DeleteItemsSelected($listadd)
+
+		Case $adddb
+			$nodetits = ''
+			If _GUICtrlListView_GetItemCount($listadd) > 0 Then
+				For $i = 0 To _GUICtrlListView_GetItemCount($listadd) - 1
+					$nodetits &= _GUICtrlListView_GetItem($listadd,$i,0)[3] &@CRLF
+				Next
+				ConsoleWrite($nodetits)
+				_GUIDisable($nodeadd, 0, 30) ;For better visibility of the MsgBox on top of the first GUI.
+				$yno = _Metro_MsgBox(4, "Add node", "Do you wish to add the following nodes: " &@CRLF &$nodetits, 350, 11, $nodeadd)
+				_GUIDisable($nodeadd)
+				If $yno Then
+					For $i = 0 To _GUICtrlListView_GetItemCount($listadd) - 1
+						_addnodetodb(_GUICtrlListView_GetItemTextArray($listadd, $i))
+					Next
+				EndIf
+			EndIf
+
 	EndSwitch
+_GUIDisable($gui)
 WEnd
+
+EndFunc
+
+Func _addnodetodb($node)
+_ArrayDisplay($node)
+$inp = StringTrimRight(_StringRepeat('"' &$node[2] &'",',$node[5]),1)
+;'Node Title|Node Type input|Node Type output|Node Outputs|Node Inputs'
+$fnc = ''
+$fnc &= 'function test(a,b)' &@CRLF
+$fnc &= '{'&@CRLF
+$fnc &= 'return a+b;' &@CRLF
+$fnc &= '}'&@CRLF
+$fnc &= 'LiteGraph.wrapFunctionAsNode("' &$node[1] &'",test,['&$inp&'],'&$node[3]&');'&@CRLF
+MsgBox(Default,Default,$fnc)
 EndFunc
 
 Func _hovermethod($id)
