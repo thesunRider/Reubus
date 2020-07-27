@@ -6,11 +6,13 @@
 #include "MetroGUI-UDF\MetroGUI_UDF.au3"
 #include "MetroGUI-UDF\_GUIDisable.au3" ; For dim effects when msgbox is displayed
 #include <GUIConstants.au3>
+#include <GuiListView.au3>
 #include <GuiTab.au3>
 #include <GDIPlus.au3>
+#include <String.au3>
 #include <Json.au3>
 #include <WindowsConstants.au3>
-
+#include <SQLite.au3>
 
 ;!Highly recommended for improved overall performance and responsiveness of the GUI effects etc.! (after compiling):
 #AutoIt3Wrapper_Run_Au3Stripper=y
@@ -27,6 +29,7 @@
 
 _Metro_EnableHighDPIScaling()
 _SetTheme("DarkTeal")
+_SQLite_Startup()
 _GDIPlus_Startup()
 
 ;enable activeX
@@ -98,7 +101,7 @@ WEnd
 Global $gui = _Metro_CreateGUI("Reubus", @DesktopWidth , @DesktopHeight, 0, 0,True)
 $Control_Buttons = _Metro_AddControlButtons(True, False, True, False, False)
 
-$GUI_CLOSE_BUTTON = $Control_Buttons_welcome[0]
+$GUI_CLOSE_BUTTON = $Control_Buttons[0]
 $GUI_MAXIMIZE_BUTTON = $Control_Buttons[1]
 $GUI_RESTORE_BUTTON = $Control_Buttons[2]
 $GUI_MINIMIZE_BUTTON = $Control_Buttons[3]
@@ -117,6 +120,9 @@ Global $mainmap = _IECreateEmbedded()
 
 GUICtrlCreateTabItem("tab1")
 #Region Tab1
+
+;GUI BACKGROUND
+
 GUICtrlCreateLabel("", 0, $ui_h*.65, $ui_w, $ui_h*.31) ;statusbar
 GUICtrlSetState(-1, 128); $GUI_DISABLE
 GUICtrlSetBkColor(-1, 0x333333)
@@ -157,11 +163,15 @@ GUICtrlCreateLabel("", $ui_w*.84+5, $ui_h*.65, 2, $ui_h*.31) ;status seprator3 s
 GUICtrlSetState(-1, 128); $GUI_DISABLE
 GUICtrlSetBkColor(-1, 0x00000)
 
-GUICtrlCreateLabel("", $ui_w*.44, $ui_h*.665, $ui_w*.395, $ui_h*.283, $WS_BORDER)
-
 GUICtrlCreateLabel("", 0, $ui_h*.65, $ui_w, 2) ;upper border of status bar
 GUICtrlSetState(-1, 128); $GUI_DISABLE
 GUICtrlSetBkColor(-1, 0x5e5e5e)
+
+
+$show_fir = GUICtrlCreateButton("SHOW FIR",$ui_w*.65+8, $ui_h*.1+5, 80, 25)          ;show fir button
+GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor($show_fir, 0x7f7f7f)
 
 GUICtrlCreateLabel("Scene FPS:", 10, $ui_h*.66, 100, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
@@ -203,6 +213,8 @@ GUICtrlCreateLabel("Ping:", 10, $ui_h*.86, 140, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xd5d5d5)
 
+; LABELS AND BUTTONS IN SECOND STATUS BAR
+
 GUICtrlCreateLabel("Use model set:", $ui_w*0.21+20, $ui_h*.68, 100, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xd5d5d5)
@@ -215,11 +227,13 @@ GUICtrlCreateLabel("NODE CATEGORIES:", $ui_w*0.43+25, $ui_h*.9, 115, 28, 0x0200)
 GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xd5d5d5)
 
+
 GUICtrlCreateLabel("CURRENT NODE INFO:", $ui_w*0.84+10,$ui_h*.655, 125, 28, 0x0200)
 GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xd5d5d5)
 
-$browse_model = GUICtrlCreateButton(" O O O ",$ui_w*0.21+125,$ui_h*.686,50,18)
+$browse_model = GUICtrlCreateButton(" . . . ",$ui_w*0.21+125,$ui_h*.686,50,18)
+
 GUICtrlSetFont(-1, 6, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor($browse_model,0xbcbcbc)
@@ -244,12 +258,7 @@ GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor($predict_movement, 0x7f7f7f)
 
-
-
-$show_fir = GUICtrlCreateButton("SHOW FIR",$ui_w*.65+8, $ui_h*.1+5, 80, 25)          ;show fir button
-GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xffffff)
-GUICtrlSetBkColor($show_fir, 0x7f7f7f)
+;LABELS IN 3RD STATUS BAR
 
 $add_node = GUICtrlCreateButton("ADD NEW NODE MODEL", $ui_w*0.43+25, $ui_h*.675, 140, 25)
 GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
@@ -262,6 +271,8 @@ GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor($delete_node, 0x7f7f7f)
 
 
+GUICtrlCreateLabel("", $ui_w*.44, $ui_h*.665, $ui_w*.395, $ui_h*.283, $WS_BORDER) ; border to node section
+
 Global $grph = GUICtrlCreateObj($grph_hndl, 0, $ui_h*.1, $ui_w*.65, $ui_h*.55)
 GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
 
@@ -270,12 +281,300 @@ _IENavigate($grph_hndl, "http://localhost:8843/")
 
 #EndRegion
 
+
+
+
+
+
 GUICtrlCreateTabItem("tab2")
 #Region Tab2
-GUICtrlCreateObj($mainmap, 400, 79, 600, 481)
+
+;TAB2 DESIGN
+GUICtrlCreateLabel("", 0, $ui_h*.65, $ui_w, $ui_h*.31) ;statusbar
+GUICtrlSetState(-1, 128); $GUI_DISABLE
+GUICtrlSetBkColor(-1, 0x333333)
+
+GUICtrlCreateLabel("", $ui_w*0.21, $ui_h*.65, 5,$ui_h*.31 ) ;status seprator1
+GUICtrlSetState(-1, 128); $GUI_DISABLE
+GUICtrlSetBkColor(-1, 0xcccccc)
+
+GUICtrlCreateLabel("",$ui_w*0.21+5 , $ui_h*.65, 2, $ui_h*.31) ;status seprator1 shade
+GUICtrlSetState(-1, 128); $GUI_DISABLE
+GUICtrlSetBkColor(-1, 0x00000)
+
+GUICtrlCreateLabel("", $ui_w*.45, $ui_h*.65, 5, $ui_h*.31) ;status seprator2
+GUICtrlSetState(-1, 128); $GUI_DISABLE
+GUICtrlSetBkColor(-1, 0xcccccc)
+
+GUICtrlCreateLabel("", $ui_w*.45+5, $ui_h*.65, 2, $ui_h*.31) ;status seprator2 shade
+GUICtrlSetState(-1, 128); $GUI_DISABLE
+GUICtrlSetBkColor(-1, 0x00000)
+
+GUICtrlCreateLabel("", $ui_w*.67, $ui_h*.65, 5, $ui_h*.31) ;status seprator3
+GUICtrlSetState(-1, 128); $GUI_DISABLE
+GUICtrlSetBkColor(-1, 0xcccccc)
+
+GUICtrlCreateLabel("", $ui_w*.67+5, $ui_h*.65, 2, $ui_h*.31) ;status seprator3 shade
+GUICtrlSetState(-1, 128); $GUI_DISABLE
+GUICtrlSetBkColor(-1, 0x00000)
+
+GUICtrlCreateLabel("", 0, $ui_h*.65, $ui_w, 2) ;upper border of status bar
+GUICtrlSetState(-1, 128); $GUI_DISABLE
+GUICtrlSetBkColor(-1, 0x5e5e5e)
+
+GUICtrlCreateLabel("",0, $ui_h*.1, $ui_w*.3, $ui_h*.55) ;left layout bg
+GUICtrlSetState(-1, 128); $GUI_DISABLE
+GUICtrlSetBkColor(-1, 0x191919)
+
+GUICtrlCreateLabel("",$ui_w*.7, $ui_h*.1, $ui_w*.3, $ui_h*.55) ;right layout bg
+GUICtrlSetState(-1, 128); $GUI_DISABLE
+GUICtrlSetBkColor(-1, 0x191919)
+
+GUICtrlCreateLabel("",$ui_w*.71, $ui_h*.12, $ui_w*.28, $ui_h*.51, $WS_BORDER)
+
+;LABELS AND BUTTONS IN FIRST DIVISION
+
+$search_id = GUICtrlCreateInput("", $ui_w*.061, $ui_h*.105, 200, 22) ; search id input box
+
+$OPEN_FIR = GUICtrlCreateButton(" O O O ",$ui_w*.01+70, $ui_h*.595+7,40,15)
+GUICtrlSetFont(-1, 6, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor($OPEN_FIR,0xbcbcbc)
+
+GUICtrlCreateLabel("SEARCH ID:", $ui_w*.01, $ui_h*.10, 80, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("CRIME ID:", $ui_w*.01, $ui_h*.52, 140, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("LATITUDE:", $ui_w*.01, $ui_h*.545, 140, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("LONGITUDE:", $ui_w*.01, $ui_h*.57, 140, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("OPEN FIR:", $ui_w*.01, $ui_h*.595, 140, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("TIME:", $ui_w*.15, $ui_h*.52, 140, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("NEAREST CRIME ID:", $ui_w*.15, $ui_h*.545, 140, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+
+;LABELS AND BUTTON IN 3RD DIVISION
+
+GUICtrlCreateLabel("GRAPHS", $ui_w*.715, $ui_h*.12, 140, 28, 0x0200)
+GUICtrlSetFont(-1, 11, Default, $GUI_FONTUNDER, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("GRAPH TYPE:", $ui_w*.725, $ui_h*.16, 140, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("GRAPH STYLE:", $ui_w*.86, $ui_h*.16, 140, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("GRAPH DATE-RANGE:", $ui_w*.725, $ui_h*.185, 140, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("GRAPH HIGHEST:", $ui_w*.725, $ui_h*.57, 140, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("GRAPH LOWEST:", $ui_w*.86, $ui_h*.57, 140, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("GRAPH MEAN:", $ui_w*.725, $ui_h*.595, 140, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+;LABELS IN FIRST STATUS BAR
+
+GUICtrlCreateLabel("Scene FPS:", 10, $ui_h*.66, 100, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+GUICtrlCreateLabel("Database:", 150, $ui_h*.66, 100, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+GUICtrlCreateLabel("CPU DRAW:", 10, $ui_h*.68, 100, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+GUICtrlCreateLabel("RAM DRAW:", 10, $ui_h*.70, 100, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+GUICtrlCreateLabel("Current Case:", 10, $ui_h*.72, 100, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+GUICtrlCreateLabel("Current FIR:", 10, $ui_h*.74, 100, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+GUICtrlCreateLabel("No of Sets in Model:", 10, $ui_h*.80, 140, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+GUICtrlCreateLabel("categories in Model:", 10, $ui_h*.82, 140, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+GUICtrlCreateLabel("Installed Packages:", 10, $ui_h*.84, 140, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+GUICtrlCreateLabel("Ping:", 10, $ui_h*.86, 140, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+;LABELS AND BUTTON IN 2ND STATUS BAR
+
+$browse_model = GUICtrlCreateButton(" O O O ",$ui_w*0.21+125,$ui_h*.686,50,18)
+GUICtrlSetFont(-1, 6, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor($browse_model,0xbcbcbc)
+
+$START_DRAW = GUICtrlCreateButton("START", $ui_w*0.21+245, $ui_h*.765, 100, 40)
+GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor($START_DRAW, 0x7f7f7f)
+
+$generate_report = GUICtrlCreateButton("GENERATE REPORT", $ui_w*0.21+20, $ui_h*.83, 120, 30)
+GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor($generate_report, 0x7f7f7f)
+
+$REDRAW_MAP = GUICtrlCreateButton("REDRAW MAP", $ui_w*0.21+200, $ui_h*.83, 120, 30)
+GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor($REDRAW_MAP, 0x7f7f7f)
+
+$CLEAR_MAP = GUICtrlCreateButton("CLEAR MAP", $ui_w*0.21+20, $ui_h*.89, 120, 30)
+GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor($CLEAR_MAP, 0x7f7f7f)
+
+$generate_MAP = GUICtrlCreateButton("SHOW SUGGESTIONS", $ui_w*0.21+200, $ui_h*.89, 120, 30)
+GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor($generate_MAP, 0x7f7f7f)
+
+GUICtrlCreateLabel("Use model set:", $ui_w*0.21+20, $ui_h*.68, 100, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+GUICtrlCreateLabel("Include changes to dataset and redraw", $ui_w*0.21+20,  $ui_h*.73, 260, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, $GUI_FONTUNDER , "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+GUICtrlCreateLabel("Calculate and Draw predicted Target based on pattern", $ui_w*0.21+20, $ui_h*.77, 198, 50)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+GUICtrlCreateLabel(":",$ui_w*0.21+230, $ui_h*.77, 5, 28, 0x0200)
+GUICtrlSetFont(-1, 11, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+
+
+;LABELS AND BUTTON IN 3RD STATUS BAR
+
+GUICtrlCreateLabel("LOAD PATTERN BASED ON:", $ui_w*0.45+20, $ui_h*.67, 160, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, $GUI_FONTUNDER, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+GUICtrlCreateLabel("TIME RANGE:", $ui_w*0.45+25, $ui_h*.73, 160, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("LAT/LONG RANGE:", $ui_w*0.45+25, $ui_h*.76, 160, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("CONVICT ID:", $ui_w*0.45+25, $ui_h*.79, 160, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("CONVICT PARAM:", $ui_w*0.45+25, $ui_h*.82, 160, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("CRIME TYPE:", $ui_w*0.45+25, $ui_h*.85, 160, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+;LABELS AND BUTTON IN 4TH STATUS BAR
+
+$GOTO_BUTTON = GUICtrlCreateButton("GO TO", $ui_w*.68, $ui_h*.68, 80, 65)
+GUICtrlSetFont(-1, 11, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor($GOTO_BUTTON, 0x7f7f7f)
+
+$LAT_IN = GUICtrlCreateInput("", $ui_w*.74+35, $ui_h*.675+3, 145, 22) ; LAT input box
+
+$LONG_IN = GUICtrlCreateInput("", $ui_w*.87+40, $ui_h*.675+3, 145, 22) ; LAT input box
+
+$ADDRESS_IN = GUICtrlCreateInput("", $ui_w*.74+70, $ui_h*.725+3, 180, 22) ; LAT input box
+
+$DROP_CIRCLE = GUICtrlCreateButton("DROP CIRCLE", $ui_w*.68, $ui_h*.81, 120,45)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor($DROP_CIRCLE, 0x7f7f7f)
+
+$browse_COLOUR = GUICtrlCreateButton(" O O O ",$ui_w*.77+53, $ui_h*.802,40,16)
+GUICtrlSetFont(-1, 6, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor($browse_COLOUR,0xbcbcbc)
+
+GUICtrlCreateLabel("LAT:", $ui_w*.74, $ui_h*.675, 30, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("LONG:", $ui_w*.87, $ui_h*.675, 35, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("ADDRESS:", $ui_w*.74, $ui_h*.725, 65, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("COLOUR:", $ui_w*.77, $ui_h*.795, 48, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("RANGE:", $ui_w*.77, $ui_h*.835, 160, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("OPACITY:", $ui_w*.89, $ui_h*.835, 160, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("CIRCLE", $ui_w*.961, $ui_h*.79, 160, 28, 0x0200)
+GUICtrlSetFont(-1, 11, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("", $ui_w*.677, $ui_h*.79, $ui_w*.32, $ui_h*.1, $WS_BORDER)
+
+GUICtrlCreateObj($mainmap,$ui_w*.3, $ui_h*.1, $ui_w*.4, $ui_h*.55)
 _IENavigate($mainmap,"http://localhost:8843/map_test.html")
 
-$crimlst = GUICtrlCreateListView("Crime ID|latitude|Longitude",10,100,400,500)
+$crimlst = GUICtrlCreateListView("Crime ID|latitude|Longitude",$ui_w*.01, $ui_h*.14, $ui_w*.28, $ui_h*.38)
 
 #EndRegion
 
@@ -354,6 +653,9 @@ While 1
 			ConsoleWrite("clicked map "&@CRLF)
 			_GUICtrlTab_ActivateTab($maintab,1)
 
+		Case $add_node
+			_nodeaddnode()
+
 
 	EndSwitch
 WEnd
@@ -361,6 +663,96 @@ WEnd
 #EndRegion
 
 #Region Functions
+
+Func _nodeaddnode()
+_GUIDisable($gui, 0, 30)
+$nodeadd = _Metro_CreateGUI("Add Node Model", $ui_w*.3, $ui_h*.50)
+ConsoleWrite($ui_w*.3&"-" & $ui_h*.55)
+$Control_Buttons1 = _Metro_AddControlButtons(True, False, True, False, False)
+$GUI_CLOSE_BUTTON1 = $Control_Buttons1[0]
+$GUI_MINIMIZE_BUTTON1 = $Control_Buttons1[3]
+
+GUICtrlCreateLabel("Node Title:", 32, 24, 56, 17)
+GUICtrlSetColor(-1, 0xd5d5d5)
+$nod_title = GUICtrlCreateInput("nod_title", 104, 24, 129, 21)
+GUICtrlCreateLabel("Add inputs:", 24, 64, 73, 25)
+GUICtrlSetColor(-1, 0xd5d5d5)
+$inputs = GUICtrlCreateInput("0", 104, 64, 129, 21)
+GUICtrlCreateUpdown(-1)
+GUICtrlCreateLabel("Add outputs:", 24, 104, 73, 25)
+GUICtrlSetColor(-1, 0xd5d5d5)
+$output = GUICtrlCreateInput("1", 104, 104, 129, 21)
+GUICtrlCreateUpdown(-1)
+$listadd = GUICtrlCreateListView("Node Title|Node Type input|Node Type output|Node Outputs|Node Inputs", 24, 136, 257, 214)
+$remcur = GUICtrlCreateButton("Remove Current Selection", 296, 192, 145, 33)
+$adddb = GUICtrlCreateButton("Add to Database", 24, 368, 129, 33)
+$ldjs = GUICtrlCreateButton("Load from js", 176, 368, 97, 33)
+GUICtrlCreateLabel("Type:", 248, 72, 31, 17)
+
+GUICtrlSetColor(-1, 0xd5d5d5)
+GUICtrlCreateLabel("Type:", 247, 110, 31, 17)
+
+GUICtrlSetColor(-1, 0xd5d5d5)
+$typinp = GUICtrlCreateCombo("", 288, 64, 105, 25, BitOR($CBS_DROPDOWN,$CBS_AUTOHSCROLL))
+GUICtrlSetData(-1, "none|boolean|number|string", "none")
+$typout = GUICtrlCreateCombo("", 288, 104, 105, 25, BitOR($CBS_DROPDOWN,$CBS_AUTOHSCROLL))
+GUICtrlSetData(-1, "none|boolean|number|string", "none")
+$add_nodem = GUICtrlCreateButton("Add node",296,144,145,33)
+
+
+GUISetState(@SW_SHOW,$nodeadd)
+While 1
+$nMsg = GUIGetMsg()
+	Switch $nMsg
+		Case $GUI_CLOSE_BUTTON1,$GUI_EVENT_CLOSE
+			_Metro_GUIDelete($nodeadd)
+			ExitLoop
+
+		Case $GUI_MINIMIZE_BUTTON1
+			GUISetState(@SW_MINIMIZE, $nodeadd)
+
+		Case $add_nodem
+			;Node Title|Node Type input|Node Type output|Node Outputs|Node Inputs
+			GUICtrlCreateListViewItem(GUICtrlRead($nod_title) &"|" &GUICtrlRead($typinp) &"|" &GUICtrlRead($typout) &"|" &GUICtrlRead($output) &"|" & GUICtrlRead($inputs),$listadd)
+
+		Case $remcur
+			_GUICtrlListView_DeleteItemsSelected($listadd)
+
+		Case $adddb
+			$nodetits = ''
+			If _GUICtrlListView_GetItemCount($listadd) > 0 Then
+				For $i = 0 To _GUICtrlListView_GetItemCount($listadd) - 1
+					$nodetits &= _GUICtrlListView_GetItem($listadd,$i,0)[3] &@CRLF
+				Next
+				ConsoleWrite($nodetits)
+				_GUIDisable($nodeadd, 0, 30) ;For better visibility of the MsgBox on top of the first GUI.
+				$yno = _Metro_MsgBox(4, "Add node", "Do you wish to add the following nodes: " &@CRLF &$nodetits, 350, 11, $nodeadd)
+				_GUIDisable($nodeadd)
+				If $yno Then
+					For $i = 0 To _GUICtrlListView_GetItemCount($listadd) - 1
+						_addnodetodb(_GUICtrlListView_GetItemTextArray($listadd, $i))
+					Next
+				EndIf
+			EndIf
+
+	EndSwitch
+_GUIDisable($gui)
+WEnd
+
+EndFunc
+
+Func _addnodetodb($node)
+_ArrayDisplay($node)
+$inp = StringTrimRight(_StringRepeat('"' &$node[2] &'",',$node[5]),1)
+;'Node Title|Node Type input|Node Type output|Node Outputs|Node Inputs'
+$fnc = ''
+$fnc &= 'function test(a,b)' &@CRLF
+$fnc &= '{'&@CRLF
+$fnc &= 'return a+b;' &@CRLF
+$fnc &= '}'&@CRLF
+$fnc &= 'LiteGraph.wrapFunctionAsNode("' &$node[1] &'",test,['&$inp&'],'&$node[3]&');'&@CRLF
+MsgBox(Default,Default,$fnc)
+EndFunc
 
 Func _hovermethod($id)
 ;make current button to another color on click
