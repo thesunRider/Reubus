@@ -1,45 +1,30 @@
-; Trap COM errors so that 'Back' and 'Forward'
-; outside of history bounds does not abort script
-; (expect COM errors to be sent to the console)
-
 #include <GUIConstantsEx.au3>
-#include <IE.au3>
-#include <WindowsConstants.au3>
-#include "MetroGUI-UDF\MetroGUI_UDF.au3"
-#include "MetroGUI-UDF\_GUIDisable.au3"
+#include <GuiListView.au3>
+#include <MsgBoxConstants.au3>
 
-Local $oIE = _IECreateEmbedded()
-Local $oIE2 = _IECreateEmbedded()
-;Enable high DPI support: Detects the users DPI settings and resizes GUI and all controls to look perfectly sharp.
-_Metro_EnableHighDPIScaling() ; Note: Requries "#AutoIt3Wrapper_Res_HiDpi=y" for compiling. To see visible changes without compiling, you have to disable dpi scaling in compatibility settings of Autoit3.exe
+Example()
 
-;Set Theme
-_SetTheme("DarkTeal") ;See MetroThemes.au3 for selectable themes or to add more
+Func Example()
+	Local $idListview
 
-;Create resizable Metro GUI
-$Form1 = _Metro_CreateGUI("Example", 1700, 600, -1, -1, True)
+	GUICreate("ListView Get Selected Indices", 400, 300)
+	$idListview = GUICtrlCreateListView("", 2, 2, 394, 268, BitOR($LVS_SHOWSELALWAYS, $LVS_REPORT))
+	GUISetState(@SW_SHOW)
 
-;Add/create control buttons to the GUI
-$Control_Buttons = _Metro_AddControlButtons(True, True, True, True, True)
+	; Add columns
+	_GUICtrlListView_AddColumn($idListview, "Column 1", 100)
 
-GUICtrlCreateObj($oIE, 0, 40, 600, 460)
-GUICtrlCreateObj($oIE2, 700, 40, 600, 460)
-GUISetState(@SW_SHOW) ;Show GUI
+	; Add items
+	_GUICtrlListView_AddItem($idListview, "Item 1")
+	_GUICtrlListView_AddItem($idListview, "Item 2")
+	_GUICtrlListView_AddItem($idListview, "Item 3")
 
-_IENavigate($oIE, "http://localhost:8843")
-Sleep(4000)
-_IENavigate($oIE2, "http://localhost:8843")
-; Waiting for user to close the window
-While 1
-    Local $iMsg = GUIGetMsg()
-    Select
-        Case $iMsg = $GUI_EVENT_CLOSE
-            ExitLoop
+	; Select multiple items
+	_GUICtrlListView_SetItemSelected($idListview, 1)
+	MsgBox($MB_SYSTEMMODAL, "Information", "Selected Indices: " & _GUICtrlListView_GetSelectedIndices($idListview))
 
-    EndSelect
-WEnd
-
-GUIDelete()
-
-Exit
-
+	; Loop until the user exits.
+	Do
+	Until GUIGetMsg() = $GUI_EVENT_CLOSE
+	GUIDelete()
+EndFunc   ;==>Example
