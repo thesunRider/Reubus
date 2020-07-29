@@ -27,33 +27,6 @@ var node_watch = LiteGraph.createNode("basic/watch");
 node_watch.pos = [700,200];
 graph.add(node_watch);
 
-//node constructor class
-function MyAddNode()
-{
-  this.addInput("A","number");
-  this.addInput("B","number");
-  this.addOutput("A+B","number");
-  this.properties = { precision: 1 };
-}
-
-//name to show
-MyAddNode.title = "Sum";
-
-//function to call when the node is executed
-MyAddNode.prototype.onExecute = function()
-{
-  var A = this.getInputData(0);
-  if( A === undefined )
-    A = 0;
-  var B = this.getInputData(1);
-  if( B === undefined )
-    B = 0;
-  this.setOutputData( 0, A + B );
-}
-
-//register in the system
-LiteGraph.registerNodeType("basic/sumsun", MyAddNode );
-
 node_const.connect(0, node_watch, 0 );
 
 
@@ -67,5 +40,7 @@ function sum(a,b)
    return a+b;
 }
 </script>
+<script type="text/javascript" src="nodes/default_nodes.js"></script>
+<script type="text/javascript" src="nodes/customnode_ref.js"></script>
 </body>
 </html>

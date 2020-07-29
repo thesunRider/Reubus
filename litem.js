@@ -10556,8 +10556,8 @@ LGraphNode.prototype.executeAction = function(action)
             }
         }
 
-        root.style.left = left + "px";
-        root.style.top = top + "px";
+        root.style.left = left + "100px";
+        root.style.top = top + "100px";
 
         if (options.scale) {
             root.style.transform = "scale(" + options.scale + ")";
