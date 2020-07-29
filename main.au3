@@ -39,7 +39,7 @@ RegWrite("HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Internet Explorer\MAIN\FeatureCo
 
 ;delete cache
 $ClearID = "8"
-Run("RunDll32.exe InetCpl.cpl,ClearMyTracksByProcess " & $ClearID)
+RunWait("RunDll32.exe InetCpl.cpl,ClearMyTracksByProcess " & $ClearID)
 
 
 Global $mapaddress = "http://localhost:8843/map_test.html"
@@ -266,6 +266,11 @@ $delete_node = GUICtrlCreateButton("DELETE CURRENT NODE", $ui_w*0.43+25, $ui_h*.
 GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor($delete_node, 0x7f7f7f)
+
+$clear_nodes = GUICtrlCreateButton("Clear Graph", $ui_w*0.43+25, $ui_h*.77, 140, 25)
+GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor(-1, 0x7f7f7f)
 
 
 GUICtrlCreateLabel("", $ui_w*.44, $ui_h*.665, $ui_w*.395, $ui_h*.283, $WS_BORDER) ; border to node section
@@ -631,7 +636,7 @@ Global $grph = GUICtrlCreateObj($grph_hndl, 0, $ui_h*.1, $ui_w*.65, $ui_h*.55)
 GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
 _IENavigate($grph_hndl, "http://localhost:8843")
 
-;$nodeserial = _execjavascript($grph_hndl,"JSON.stringify(graph.serialize());")
+$nodeserial = _execjavascript($grph_hndl,"JSON.stringify(graph.serialize());")
 ConsoleWrite("Passed all functions")
 GUISetState(@SW_SHOW)
 
@@ -658,6 +663,10 @@ While 1
 		Case $add_node
 			_nodeaddnode()
 
+		Case $clear_nodes
+			_IEAction($grph_hndl,"refresh")
+
+
 
 	EndSwitch
 WEnd
@@ -681,24 +690,22 @@ GUICtrlCreateLabel("Add inputs:", 24, 64, 73, 25)
 GUICtrlSetColor(-1, 0xd5d5d5)
 $inputs = GUICtrlCreateInput("0", 104, 64, 129, 21)
 GUICtrlCreateUpdown(-1)
-GUICtrlCreateLabel("Add outputs:", 24, 104, 73, 25)
+GUICtrlCreateLabel("Outputs Add", 24, 104, 73, 25)
 GUICtrlSetColor(-1, 0xd5d5d5)
-$output = GUICtrlCreateInput("1", 104, 104, 129, 21)
-GUICtrlCreateUpdown(-1)
-$listadd = GUICtrlCreateListView("Node Title|Node Type input|Node Type output|Node Outputs|Node Inputs", 24, 136, 257, 214)
+$listadd = GUICtrlCreateListView("Node Title|Node Type input|Node Type output|Node Inputs", 24, 136, 257, 214)
 $remcur = GUICtrlCreateButton("Remove Current Selection", 296, 192, 145, 33)
 $adddb = GUICtrlCreateButton("Add to Database", 24, 368, 129, 33)
 $ldjs = GUICtrlCreateButton("Load from js", 176, 368, 97, 33)
 GUICtrlCreateLabel("Type:", 248, 72, 31, 17)
 
 GUICtrlSetColor(-1, 0xd5d5d5)
-GUICtrlCreateLabel("Type:", 247, 110, 31, 17)
+GUICtrlCreateLabel("Type:", 147, 105, 31, 17)
 
 GUICtrlSetColor(-1, 0xd5d5d5)
 $typinp = GUICtrlCreateCombo("", 288, 64, 105, 25, BitOR($CBS_DROPDOWN,$CBS_AUTOHSCROLL))
-GUICtrlSetData(-1, "none|boolean|number|string", "none")
-$typout = GUICtrlCreateCombo("", 288, 104, 105, 25, BitOR($CBS_DROPDOWN,$CBS_AUTOHSCROLL))
-GUICtrlSetData(-1, "none|boolean|number|string", "none")
+GUICtrlSetData(-1, "*|boolean|number|string", "*")
+$typout = GUICtrlCreateCombo("", 188, 100, 105, 25, BitOR($CBS_DROPDOWN,$CBS_AUTOHSCROLL))
+GUICtrlSetData(-1, "*|boolean|number|string", "*")
 $add_nodem = GUICtrlCreateButton("Add node",296,144,145,33)
 
 
@@ -715,7 +722,7 @@ $nMsg = GUIGetMsg()
 
 		Case $add_nodem
 			;Node Title|Node Type input|Node Type output|Node Outputs|Node Inputs
-			GUICtrlCreateListViewItem(GUICtrlRead($nod_title) &"|" &GUICtrlRead($typinp) &"|" &GUICtrlRead($typout) &"|" &GUICtrlRead($output) &"|" & GUICtrlRead($inputs),$listadd)
+			GUICtrlCreateListViewItem(GUICtrlRead($nod_title) &"|" &GUICtrlRead($typinp) &"|" &GUICtrlRead($typout)  &"|" & GUICtrlRead($inputs),$listadd)
 
 		Case $remcur
 			_GUICtrlListView_DeleteItemsSelected($listadd)
@@ -734,6 +741,8 @@ $nMsg = GUIGetMsg()
 					For $i = 0 To _GUICtrlListView_GetItemCount($listadd) - 1
 						_addnodetodb(_GUICtrlListView_GetItemTextArray($listadd, $i))
 					Next
+					_GUICtrlListView_DeleteAllItems ($listadd)
+					GUISetState(@SW_RESTORE,$nodeadd)
 				EndIf
 			EndIf
 
@@ -744,16 +753,11 @@ WEnd
 EndFunc
 
 Func _addnodetodb($node)
-_ArrayDisplay($node)
-$inp = StringTrimRight(_StringRepeat('"' &$node[2] &'",',$node[5]),1)
+$inp = StringTrimRight(_StringRepeat('"' &$node[2] &'",',$node[4]),1)
 ;'Node Title|Node Type input|Node Type output|Node Outputs|Node Inputs'
-$fnc = ''
-$fnc &= 'function test(a,b)' &@CRLF
-$fnc &= '{'&@CRLF
-$fnc &= 'return a+b;' &@CRLF
-$fnc &= '}'&@CRLF
-$fnc &= 'LiteGraph.wrapFunctionAsNode("' &$node[1] &'",test,['&$inp&'],'&$node[3]&');'&@CRLF
-MsgBox(Default,Default,$fnc)
+$fnc = 'LiteGraph.wrapFunctionAsNode("' &$node[1] &'",node' &$node[4] &',"['&$inp&']","'&$node[3]&'");'&@CRLF
+FileWriteLine(@ScriptDir &"\nodes\customnode_ref.js",$fnc)
+_IEAction($grph_hndl, "refresh")
 EndFunc
 
 Func _hovermethod($id)
