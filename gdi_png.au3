@@ -1,27 +1,45 @@
-#include <SQLite.au3>
-#include <SQLite.dll.au3>
+; Trap COM errors so that 'Back' and 'Forward'
+; outside of history bounds does not abort script
+; (expect COM errors to be sent to the console)
 
-Local $hQuery, $aRow, $aNames
-_SQLite_Startup()
-ConsoleWrite("_SQLite_LibVersion=" & _SQLite_LibVersion() & @CRLF)
-_SQLite_Open() ; open :memory: Database
-_SQLite_Exec(-1, "CREATE TABLE aTest (A,B,C);")
-_SQLite_Exec(-1, "INSERT INTO aTest(a,b,c) VALUES ('c','2','World');")
-_SQLite_Exec(-1, "INSERT INTO aTest(a,b,c) VALUES ('b','3',' ');")
-_SQLite_Exec(-1, "INSERT INTO aTest(a,b,c) VALUES ('a','1','Hello');")
-_SQLite_Query(-1, "SELECT ROWID,* FROM aTest ORDER BY a;", $hQuery)
-_SQLite_FetchNames($hQuery, $aNames)
-ConsoleWrite(StringFormat(" %-10s  %-10s  %-10s  %-10s ", $aNames[0], $aNames[1], $aNames[2], $aNames[3]) & @CRLF)
-While _SQLite_FetchData($hQuery, $aRow, False, False) = $SQLITE_OK ; Read Out the next Row
-    ConsoleWrite(StringFormat(" %-10s  %-10s  %-10s  %-10s ", $aRow[0], $aRow[1], $aRow[2], $aRow[3]) & @CRLF)
+#include <GUIConstantsEx.au3>
+#include <IE.au3>
+#include <WindowsConstants.au3>
+#include "MetroGUI-UDF\MetroGUI_UDF.au3"
+#include "MetroGUI-UDF\_GUIDisable.au3"
+
+Local $oIE = _IECreateEmbedded()
+Local $oIE2 = _IECreateEmbedded()
+;Enable high DPI support: Detects the users DPI settings and resizes GUI and all controls to look perfectly sharp.
+_Metro_EnableHighDPIScaling() ; Note: Requries "#AutoIt3Wrapper_Res_HiDpi=y" for compiling. To see visible changes without compiling, you have to disable dpi scaling in compatibility settings of Autoit3.exe
+
+;Set Theme
+_SetTheme("DarkTeal") ;See MetroThemes.au3 for selectable themes or to add more
+
+;Create resizable Metro GUI
+$Form1 = _Metro_CreateGUI("Example", 1700, 600, -1, -1, True)
+
+;Add/create control buttons to the GUI
+$Control_Buttons = _Metro_AddControlButtons(True, True, True, True, True)
+
+GUICtrlCreateObj($oIE, 0, 40, 600, 460)
+GUICtrlCreateObj($oIE2, 700, 40, 600, 460)
+GUISetState(@SW_SHOW) ;Show GUI
+
+_IENavigate($oIE, "http://localhost:8843")
+Sleep(4000)
+_IENavigate($oIE2, "http://localhost:8843")
+; Waiting for user to close the window
+While 1
+    Local $iMsg = GUIGetMsg()
+    Select
+        Case $iMsg = $GUI_EVENT_CLOSE
+            ExitLoop
+
+    EndSelect
 WEnd
-_SQLite_QueryFinalize($hQuery)
-_SQLite_Exec(-1, "DROP TABLE aTest;")
-_SQLite_Close()
-_SQLite_Shutdown()
 
-; Output:
-; rowid       A           B           C
-; 3           a           1           Hello
-; 2           b           3
-; 1           c           2           World
+GUIDelete()
+
+Exit
+

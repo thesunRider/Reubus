@@ -113,16 +113,13 @@ $ui_w = @DesktopWidth
 $ui_h = @DesktopHeight
 
 $maintab = GUICtrlCreateTab(-600,-100)
-
-Global $grph_hndl = _IECreateEmbedded()
 Global $mainmap = _IECreateEmbedded()
-
 
 GUICtrlCreateTabItem("tab1")
 #Region Tab1
 
 ;GUI BACKGROUND
-
+Global $grph_hndl = _IECreateEmbedded()
 GUICtrlCreateLabel("", 0, $ui_h*.65, $ui_w, $ui_h*.31) ;statusbar
 GUICtrlSetState(-1, 128); $GUI_DISABLE
 GUICtrlSetBkColor(-1, 0x333333)
@@ -273,11 +270,6 @@ GUICtrlSetBkColor($delete_node, 0x7f7f7f)
 
 GUICtrlCreateLabel("", $ui_w*.44, $ui_h*.665, $ui_w*.395, $ui_h*.283, $WS_BORDER) ; border to node section
 
-Global $grph = GUICtrlCreateObj($grph_hndl, 0, $ui_h*.1, $ui_w*.65, $ui_h*.55)
-GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
-
-_IENavigate($grph_hndl, "http://localhost:8843/")
-
 
 #EndRegion
 
@@ -287,6 +279,8 @@ _IENavigate($grph_hndl, "http://localhost:8843/")
 
 
 GUICtrlCreateTabItem("tab2")
+
+
 #Region Tab2
 
 ;TAB2 DESIGN
@@ -569,8 +563,9 @@ GUICtrlSetFont(-1, 11, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
 
-
 GUICtrlCreateObj($mainmap,$ui_w*.3, $ui_h*.1, $ui_w*.4, $ui_h*.55)
+GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
+
 _IENavigate($mainmap,"http://localhost:8843/map_test.html")
 
 $crimlst = GUICtrlCreateListView("Crime ID|latitude|Longitude",$ui_w*.01, $ui_h*.14, $ui_w*.28, $ui_h*.38)
@@ -631,6 +626,11 @@ Until $mainmap.document.getElementById("debug").value == "1256"
 
 GUIRegisterMsg($WM_COMMAND, "WM_COMMAND")
 
+;This should be here due to some unknown error in autoit
+Global $grph = GUICtrlCreateObj($grph_hndl, 0, $ui_h*.1, $ui_w*.65, $ui_h*.55)
+GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
+_IENavigate($grph_hndl, "http://localhost:8843")
+
 ;$nodeserial = _execjavascript($grph_hndl,"JSON.stringify(graph.serialize());")
 ConsoleWrite("Passed all functions")
 GUISetState(@SW_SHOW)
@@ -641,15 +641,18 @@ While 1
 		Case $GUI_EVENT_CLOSE, $GUI_CLOSE_BUTTON
 			_Metro_GUIDelete($gui) ;Delete GUI/release resources, make sure you use this when working with multiple GUIs!
 			Exit
+
 		Case $GUI_MINIMIZE_BUTTON
 			GUISetState(@SW_MINIMIZE, $gui)
 
 		Case $scene
 			ConsoleWrite("clicked scne "&@CRLF)
+			GUICtrlSetState($grph,$GUI_SHOW)
 			_GUICtrlTab_ActivateTab($maintab,0)
 
 		Case $map
 			ConsoleWrite("clicked map "&@CRLF)
+			GUICtrlSetState($grph,$GUI_HIDE)
 			_GUICtrlTab_ActivateTab($maintab,1)
 
 		Case $add_node

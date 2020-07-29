@@ -10,7 +10,7 @@
 <body style='width:100%; height:100%'>
 <div id="main" style='width:100%; height:100%'>
 <input type="hidden" id="debug" value="out" >
-<canvas id='mycanvas' width='1800px' height='1200vh'  style='border: 0px solid ;position: fixed '></canvas>
+<canvas id='mycanvas' width='1800px' height='1200px'  style='border: 0px solid ;position: fixed '></canvas>
 </div>
 <script>
 var graph = new LGraph();
@@ -19,6 +19,7 @@ var canvas = new LGraphCanvas("#mycanvas", graph);
 
 var node_const = LiteGraph.createNode("basic/const");
 node_const.pos = [200,200];
+node_const.title = "Time of crime";
 graph.add(node_const);
 node_const.setValue(4.5);
 
