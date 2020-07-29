@@ -1,4 +1,4 @@
-LiteGraph.wrapFunctionAsNode("crime/nod_title_main",node1,"["*"]","*");//Description:Just a test node
-LiteGraph.wrapFunctionAsNode("crime/nod_tit_main",node2,"["*","*"]","*");//Description:another test node for fun
-LiteGraph.wrapFunctionAsNode("node_puthiyatha",node0,"[]","*");//Description:nodeinodu kalikalle
-LiteGraph.wrapFunctionAsNode("kootilatta_node",node0,"[]","*");//Description:Avan oru pavam node arnu\nonnum ariyilarnu\nmandarnu\nsarvailla\n
+LiteGraph.wrapFunctionAsNode("node_puthiyatha",node0,"[]","*");//Description:Supa node\nverum pwoliya
+LiteGraph.wrapFunctionAsNode("node_poliyaa",node0,"[]","*");//Description:Nenak ariyilla ee nodinekurich
+LiteGraph.wrapFunctionAsNode("node_kalikalle",node0,"[]","*");//Description:Itrem nalla node vere engum ella mone
+LiteGraph.wrapFunctionAsNode("node_verumsanam",node0,"[]","*");//Description:Ith oru verum poli ode anu

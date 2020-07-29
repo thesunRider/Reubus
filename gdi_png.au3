@@ -1,30 +1,17 @@
-#include <GUIConstantsEx.au3>
-#include <GuiListView.au3>
-#include <MsgBoxConstants.au3>
+#include <array.au3>
+#include <File.au3>
+#include "XML.au3"
 
-Example()
+$pth = "test.xml"
+$doc = FileRead($pth)
+MsgBox(Default,Default,$doc)
+Local $oXMLDoc = _XML_CreateDOMDocument(Default)
+_XML_LoadXml($oXMLDoc, $doc)
+Local $oNodesColl = _XML_SelectNodes($oXMLDoc, "//place")
+Local $aNodesColl = _XML_Array_GetNodesProperties($oNodesColl)
 
-Func Example()
-	Local $idListview
 
-	GUICreate("ListView Get Selected Indices", 400, 300)
-	$idListview = GUICtrlCreateListView("", 2, 2, 394, 268, BitOR($LVS_SHOWSELALWAYS, $LVS_REPORT))
-	GUISetState(@SW_SHOW)
+Local $oAttriubtes = _XML_GetAllAttribIndex($oXMLDoc, '//place', 1)
+Local $aAttributesList = _XML_Array_GetAttributesProperties($oAttriubtes)
 
-	; Add columns
-	_GUICtrlListView_AddColumn($idListview, "Column 1", 100)
-
-	; Add items
-	_GUICtrlListView_AddItem($idListview, "Item 1")
-	_GUICtrlListView_AddItem($idListview, "Item 2")
-	_GUICtrlListView_AddItem($idListview, "Item 3")
-
-	; Select multiple items
-	_GUICtrlListView_SetItemSelected($idListview, 1)
-	MsgBox($MB_SYSTEMMODAL, "Information", "Selected Indices: " & _GUICtrlListView_GetSelectedIndices($idListview))
-
-	; Loop until the user exits.
-	Do
-	Until GUIGetMsg() = $GUI_EVENT_CLOSE
-	GUIDelete()
-EndFunc   ;==>Example
+	_ArrayDisplay($aAttributesList, '$aAttributesList')
