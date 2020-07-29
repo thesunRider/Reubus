@@ -3,52 +3,52 @@ function node0()
  return 0;
 }
 
-function node1(a)
+function node1(input1)
 {
-return a;
+return input1;
 }
 
-function node2(a,b)
+function node2(input1,input2)
 {
-return a;
+return input1;
 }
 
-function node3(a,b,c)
+function node3(input1,input2,input3)
 {
-return a;
+return input1;
 }
 
-function node4(a,b,c,d)
+function node4(input1,input2,input3,input4)
 {
-return a;
+return input1;
 }
 
-function node5(a,b,c,d,e)
+function node5(input1,input2,input3,input4,input5)
 {
-return a;
+return input1;
 }
 
-function node6(a,b,c,d,e,f)
+function node6(input1,input2,input3,input4,input5,input6)
 {
-return a;
+return input1;
 }
 
-function node7(a,b,c,d,e,f,g)
+function node7(input1,input2,input3,input4,input5,input6,input7)
 {
-return a;
+return input1;
 }
 
-function node8(a,b,c,d,e,f,g,h)
+function node8(input1,input2,input3,input4,input5,input6,input7,input8)
 {
-return a;
+return input1;
 }
 
-function node9(a,b,c,d,e,f,g,h,i)
+function node9(input1,input2,input3,input4,input5,input6,input7,input8,input9)
 {
-return a;
+return input1;
 }
 
-function node10(a,b,c,d,e,f,g,h,i,j)
+function node10(input1,input2,input3,input4,input5,input6,input7,input8,input9,input10)
 {
-return a;
+return input1;
 }

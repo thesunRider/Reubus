@@ -120,6 +120,12 @@ GUICtrlCreateTabItem("tab1")
 
 ;GUI BACKGROUND
 Global $grph_hndl = _IECreateEmbedded()
+
+$list_nodeedit = GUICtrlCreateInput("Description",1500,100,20,100);$ui_w*0.74,$ui_h*.68,$ui_w*.09, $ui_h*.25)
+
+
+$list_nodeclass = GUICtrlCreateListView("Folder|Node|Number of Inputs",$ui_w*0.55, $ui_h*.68, $ui_w*.18, $ui_h*.25)
+
 GUICtrlCreateLabel("", 0, $ui_h*.65, $ui_w, $ui_h*.31) ;statusbar
 GUICtrlSetState(-1, 128); $GUI_DISABLE
 GUICtrlSetBkColor(-1, 0x333333)
@@ -165,7 +171,7 @@ GUICtrlSetState(-1, 128); $GUI_DISABLE
 GUICtrlSetBkColor(-1, 0x5e5e5e)
 
 
-$show_fir = GUICtrlCreateButton("SHOW FIR",$ui_w*.65+8, $ui_h*.1+5, 80, 25)          ;show fir button
+$show_fir = GUICtrlCreateButton("LOAD FIR",$ui_w*.65+8, $ui_h*.1+5, 80, 25)          ;show fir button
 GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor($show_fir, 0x7f7f7f)
@@ -271,6 +277,7 @@ $clear_nodes = GUICtrlCreateButton("Clear Graph", $ui_w*0.43+25, $ui_h*.77, 140,
 GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor(-1, 0x7f7f7f)
+
 
 
 GUICtrlCreateLabel("", $ui_w*.44, $ui_h*.665, $ui_w*.395, $ui_h*.283, $WS_BORDER) ; border to node section
@@ -625,9 +632,9 @@ GUICtrlSetBkColor($DB, 0x191919)
 
 #EndRegion
 
-Do
-Sleep(50)
-Until $mainmap.document.getElementById("debug").value == "1256"
+;Do
+;Sleep(50)
+;Until $mainmap.document.getElementById("debug").value == "1256"
 
 GUIRegisterMsg($WM_COMMAND, "WM_COMMAND")
 
@@ -639,6 +646,8 @@ _IENavigate($grph_hndl, "http://localhost:8843")
 $nodeserial = _execjavascript($grph_hndl,"JSON.stringify(graph.serialize());")
 ConsoleWrite("Passed all functions")
 GUISetState(@SW_SHOW)
+_updatelistnodeclass()
+
 
 While 1
 	$nMsg = GUIGetMsg()
@@ -662,6 +671,7 @@ While 1
 
 		Case $add_node
 			_nodeaddnode()
+			_GUICtrlListView_DeleteAllItems($list_nodeclass)
 
 		Case $clear_nodes
 			_IEAction($grph_hndl,"refresh")
@@ -674,6 +684,25 @@ WEnd
 #EndRegion
 
 #Region Functions
+
+Func _updatelistnodeclass()
+_GUICtrlListView_DeleteAllItems($list_nodeclass)
+$nodeclasses = FileReadToArray(@ScriptDir &"\nodes\customnode_ref.js")
+For $i = 0 To UBound($nodeclasses) - 1
+	If Not StringIsSpace($nodeclasses[$i]) Then
+		$nam = _StringBetween($nodeclasses[$i],'.wrapFunctionAsNode("','",')
+		If StringInStr($nam[0],"/") Then
+		$kam = StringReplace($nam[0],"/","|",1)
+		Else
+		$kam = "Parent|"&$nam[0]
+		EndIf
+		$ind = _StringBetween($nodeclasses[$i],",node",",")
+		GUICtrlCreateListViewItem($kam&"|" &$ind[0],$list_nodeclass)
+	EndIf
+Next
+
+
+EndFunc
 
 Func _nodeaddnode()
 _GUIDisable($gui, 0, 30)

@@ -7,6 +7,13 @@
 #include <WindowsConstants.au3>
 #include "MetroGUI-UDF\MetroGUI_UDF.au3"
 #include "MetroGUI-UDF\_GUIDisable.au3"
+#include <GUIConstantsEx.au3>
+#include <MsgBoxConstants.au3>
+#include <StaticConstants.au3>
+#include <TreeViewConstants.au3>
+#include <WindowsConstants.au3>
+
+
 
 Local $oIE = _IECreateEmbedded()
 Local $oIE2 = _IECreateEmbedded()
@@ -17,18 +24,25 @@ _Metro_EnableHighDPIScaling() ; Note: Requries "#AutoIt3Wrapper_Res_HiDpi=y" for
 _SetTheme("DarkTeal") ;See MetroThemes.au3 for selectable themes or to add more
 
 ;Create resizable Metro GUI
-$Form1 = _Metro_CreateGUI("Example", 1700, 600, -1, -1, True)
+$Form1 = _Metro_CreateGUI("Example", 1000, 600, -1, -1, True)
 
 ;Add/create control buttons to the GUI
 $Control_Buttons = _Metro_AddControlButtons(True, True, True, True, True)
 
-GUICtrlCreateObj($oIE, 0, 40, 600, 460)
-GUICtrlCreateObj($oIE2, 700, 40, 600, 460)
+    Local $idTreeview = GUICtrlCreateTreeView(6, 206, 100, 150, BitOR($TVS_HASBUTTONS, $TVS_HASLINES, $TVS_LINESATROOT, $TVS_DISABLEDRAGDROP, $TVS_SHOWSELALWAYS), $WS_EX_CLIENTEDGE)
+    Local $idGeneralitem = GUICtrlCreateTreeViewItem("General", $idTreeview)
+    GUICtrlSetColor(-1, 0x0000C0)
+    Local $idDisplayitem = GUICtrlCreateTreeViewItem("Display", $idTreeview)
+    GUICtrlSetColor(-1, 0x0000C0)
+    Local $idAboutitem = GUICtrlCreateTreeViewItem("About", $idGeneralitem)
+    Local $idCompitem = GUICtrlCreateTreeViewItem("Computer", $idGeneralitem)
+    GUICtrlCreateTreeViewItem("User", $idGeneralitem)
+    GUICtrlCreateTreeViewItem("Resolution", $idDisplayitem)
+    GUICtrlCreateTreeViewItem("Other", $idDisplayitem)
+
 GUISetState(@SW_SHOW) ;Show GUI
 
-_IENavigate($oIE, "http://localhost:8843")
-Sleep(4000)
-_IENavigate($oIE2, "http://localhost:8843")
+
 ; Waiting for user to close the window
 While 1
     Local $iMsg = GUIGetMsg()
