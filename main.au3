@@ -328,7 +328,14 @@ GUICtrlCreateLabel("",$ui_w*.71, $ui_h*.12, $ui_w*.28, $ui_h*.51, $WS_BORDER)
 
 ;LABELS AND BUTTONS IN FIRST DIVISION
 
-GUICtrlCreateLabel("SEARCH ID:", $ui_w*.01, $ui_h*.10, 140, 28, 0x0200)
+$search_id = GUICtrlCreateInput("", $ui_w*.061, $ui_h*.105, 200, 22) ; search id input box
+
+$OPEN_FIR = GUICtrlCreateButton(" O O O ",$ui_w*.01+70, $ui_h*.595+7,40,15)
+GUICtrlSetFont(-1, 6, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor($OPEN_FIR,0xbcbcbc)
+
+GUICtrlCreateLabel("SEARCH ID:", $ui_w*.01, $ui_h*.10, 80, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
@@ -348,11 +355,6 @@ GUICtrlCreateLabel("OPEN FIR:", $ui_w*.01, $ui_h*.595, 140, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
-$OPEN_FIR = GUICtrlCreateButton(" O O O ",$ui_w*.01+70, $ui_h*.595+7,40,15)
-GUICtrlSetFont(-1, 6, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xffffff)
-GUICtrlSetBkColor($OPEN_FIR,0xbcbcbc)
-
 GUICtrlCreateLabel("TIME:", $ui_w*.15, $ui_h*.52, 140, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
@@ -361,7 +363,6 @@ GUICtrlCreateLabel("NEAREST CRIME ID:", $ui_w*.15, $ui_h*.545, 140, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
-$search_id = GUICtrlCreateInput("", $ui_w*.061, $ui_h*.105, 200, 22) ; search id input box
 
 ;LABELS AND BUTTON IN 3RD DIVISION
 
@@ -437,26 +438,10 @@ GUICtrlSetColor(-1, 0xd5d5d5)
 
 ;LABELS AND BUTTON IN 2ND STATUS BAR
 
-GUICtrlCreateLabel("Use model set:", $ui_w*0.21+20, $ui_h*.68, 100, 28, 0x0200)
-GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xd5d5d5)
-
 $browse_model = GUICtrlCreateButton(" O O O ",$ui_w*0.21+125,$ui_h*.686,50,18)
 GUICtrlSetFont(-1, 6, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor($browse_model,0xbcbcbc)
-
-GUICtrlCreateLabel("Include changes to dataset and redraw", $ui_w*0.21+20,  $ui_h*.73, 260, 28, 0x0200)
-GUICtrlSetFont(-1, 10, Default, $GUI_FONTUNDER , "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xd5d5d5)
-
-GUICtrlCreateLabel("Calculate and Draw predicted Target based on pattern", $ui_w*0.21+20, $ui_h*.77, 200, 100)
-GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xd5d5d5)
-
-GUICtrlCreateLabel(":",$ui_w*0.21+230, $ui_h*.77, 140, 28, 0x0200)
-GUICtrlSetFont(-1, 11, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xffffff)
 
 $START_DRAW = GUICtrlCreateButton("START", $ui_w*0.21+245, $ui_h*.765, 100, 40)
 GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
@@ -482,6 +467,24 @@ $generate_MAP = GUICtrlCreateButton("SHOW SUGGESTIONS", $ui_w*0.21+200, $ui_h*.8
 GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor($generate_MAP, 0x7f7f7f)
+
+GUICtrlCreateLabel("Use model set:", $ui_w*0.21+20, $ui_h*.68, 100, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+GUICtrlCreateLabel("Include changes to dataset and redraw", $ui_w*0.21+20,  $ui_h*.73, 260, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, $GUI_FONTUNDER , "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+GUICtrlCreateLabel("Calculate and Draw predicted Target based on pattern", $ui_w*0.21+20, $ui_h*.77, 198, 50)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+GUICtrlCreateLabel(":",$ui_w*0.21+230, $ui_h*.77, 5, 28, 0x0200)
+GUICtrlSetFont(-1, 11, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+
 
 ;LABELS AND BUTTON IN 3RD STATUS BAR
 
@@ -516,21 +519,9 @@ GUICtrlSetFont(-1, 11, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor($GOTO_BUTTON, 0x7f7f7f)
 
-GUICtrlCreateLabel("LAT:", $ui_w*.74, $ui_h*.675, 140, 28, 0x0200)
-GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xffffff)
-
 $LAT_IN = GUICtrlCreateInput("", $ui_w*.74+35, $ui_h*.675+3, 145, 22) ; LAT input box
 
-GUICtrlCreateLabel("LONG:", $ui_w*.87, $ui_h*.675, 140, 28, 0x0200)
-GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xffffff)
-
 $LONG_IN = GUICtrlCreateInput("", $ui_w*.87+40, $ui_h*.675+3, 145, 22) ; LAT input box
-
-GUICtrlCreateLabel("ADDRESS:", $ui_w*.74, $ui_h*.725, 140, 28, 0x0200)
-GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xffffff)
 
 $ADDRESS_IN = GUICtrlCreateInput("", $ui_w*.74+70, $ui_h*.725+3, 180, 22) ; LAT input box
 
@@ -539,16 +530,26 @@ GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor($DROP_CIRCLE, 0x7f7f7f)
 
-GUICtrlCreateLabel("", $ui_w*.677, $ui_h*.79, $ui_w*.32, $ui_h*.1, $WS_BORDER)
-
-GUICtrlCreateLabel("COLOUR:", $ui_w*.77, $ui_h*.795, 160, 28, 0x0200)
-GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xffffff)
-
-$browse_COLOUR = GUICtrlCreateButton(" O O O ",$ui_w*.77+50, $ui_h*.802,35,15)
+$browse_COLOUR = GUICtrlCreateButton(" O O O ",$ui_w*.77+53, $ui_h*.802,40,16)
 GUICtrlSetFont(-1, 6, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor($browse_COLOUR,0xbcbcbc)
+
+GUICtrlCreateLabel("LAT:", $ui_w*.74, $ui_h*.675, 30, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("LONG:", $ui_w*.87, $ui_h*.675, 35, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("ADDRESS:", $ui_w*.74, $ui_h*.725, 65, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("COLOUR:", $ui_w*.77, $ui_h*.795, 48, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
 
 GUICtrlCreateLabel("RANGE:", $ui_w*.77, $ui_h*.835, 160, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
@@ -561,7 +562,6 @@ GUICtrlSetColor(-1, 0xffffff)
 GUICtrlCreateLabel("CIRCLE", $ui_w*.961, $ui_h*.79, 160, 28, 0x0200)
 GUICtrlSetFont(-1, 11, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
-
 
 GUICtrlCreateObj($mainmap,$ui_w*.3, $ui_h*.1, $ui_w*.4, $ui_h*.55)
 GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
