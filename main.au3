@@ -281,6 +281,11 @@ GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor(-1, 0x7f7f7f)
 
+$export_node_connection = GUICtrlCreateButton("EXPORT JSON GRAPH", $ui_w*0.43+25, $ui_h*.86, 140, 25)
+GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor(-1, 0x7f7f7f)
+
 GUICtrlCreateLabel("", $ui_w*.44, $ui_h*.665, $ui_w*.395, $ui_h*.283, $WS_BORDER) ; border to node section
 
 
@@ -644,11 +649,10 @@ Global $grph = GUICtrlCreateObj($grph_hndl, 0, $ui_h*.1, $ui_w*.65, $ui_h*.55)
 GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
 _IENavigate($grph_hndl, "http://localhost:8843")
 
-$nodeserial = _execjavascript($grph_hndl,"JSON.stringify(graph.serialize());")
 ConsoleWrite("Passed all functions")
 GUISetState(@SW_SHOW)
 _updatelistnodeclass()
-GUICtrlSetData($list_nodeedit,"Description goes here")
+GUICtrlSetData($list_nodeedit,"Description goes here..")
 
 
 While 1
@@ -660,6 +664,11 @@ While 1
 
 		Case $GUI_MINIMIZE_BUTTON
 			GUISetState(@SW_MINIMIZE, $gui)
+
+		Case $export_node_connection
+			$nodeserial = _execjavascript($grph_hndl,"JSON.stringify(graph.serialize(),null,2);")
+			$path = FileSaveDialog("Save Json As",@ScriptDir &"\Json\","Jsons (*.json)",$FD_PATHMUSTEXIST)
+			FileWrite($path,$nodeserial)
 
 		Case $scene
 			ConsoleWrite("clicked scne "&@CRLF)
