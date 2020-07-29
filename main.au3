@@ -121,9 +121,7 @@ GUICtrlCreateTabItem("tab1")
 ;GUI BACKGROUND
 Global $grph_hndl = _IECreateEmbedded()
 
-$list_nodeedit = GUICtrlCreateInput("Description",1500,100,20,100);$ui_w*0.74,$ui_h*.68,$ui_w*.09, $ui_h*.25)
-
-
+$list_nodeedit = GUICtrlCreateEdit("Description",$ui_w*0.74,$ui_h*.68,$ui_w*.09, $ui_h*.25,$ES_READONLY)
 $list_nodeclass = GUICtrlCreateListView("Folder|Node|Number of Inputs",$ui_w*0.55, $ui_h*.68, $ui_w*.18, $ui_h*.25)
 
 GUICtrlCreateLabel("", 0, $ui_h*.65, $ui_w, $ui_h*.31) ;statusbar
@@ -273,12 +271,15 @@ GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor($delete_node, 0x7f7f7f)
 
-$clear_nodes = GUICtrlCreateButton("Clear Graph", $ui_w*0.43+25, $ui_h*.77, 140, 25)
+$clear_nodes = GUICtrlCreateButton("CLEAR GRAPH", $ui_w*0.43+25, $ui_h*.77, 140, 25)
 GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor(-1, 0x7f7f7f)
 
-
+$get_nodes_description = GUICtrlCreateButton("GET NODE DESCRIPTION", $ui_w*0.43+25, $ui_h*.82, 140, 25)
+GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor(-1, 0x7f7f7f)
 
 GUICtrlCreateLabel("", $ui_w*.44, $ui_h*.665, $ui_w*.395, $ui_h*.283, $WS_BORDER) ; border to node section
 
@@ -647,6 +648,7 @@ $nodeserial = _execjavascript($grph_hndl,"JSON.stringify(graph.serialize());")
 ConsoleWrite("Passed all functions")
 GUISetState(@SW_SHOW)
 _updatelistnodeclass()
+GUICtrlSetData($list_nodeedit,"Description goes here")
 
 
 While 1
@@ -672,11 +674,26 @@ While 1
 		Case $add_node
 			_nodeaddnode()
 			_GUICtrlListView_DeleteAllItems($list_nodeclass)
+			_updatelistnodeclass()
 
 		Case $clear_nodes
 			_IEAction($grph_hndl,"refresh")
 
-
+		Case $get_nodes_description
+				$clmn_selc = (StringStripWS(_GUICtrlListView_GetSelectedIndices($list_nodeclass),8)-1)+1 ;added -1 + 1 I Dont know some error maybe
+				$rd_fle = FileReadToArray(@ScriptDir &"\nodes\customnode_ref.js")
+				;MsgBox(Default,Default,$clmn_selc)
+				For $i = 0 To UBound($rd_fle)-1
+					;MsgBox(Default,Default,_StringBetween($rd_fle[$i],_StringBetween($rd_fle[$i],'.wrapFunctionAsNode("','/')[0] &'/','",')[0] &@CRLF &_GUICtrlListView_GetItem($list_nodeclass,$clmn_selc,1)[3])
+					If _GUICtrlListView_GetItem($list_nodeclass,$clmn_selc,0)[3] == 'Parent' Then
+						$kamal = ""
+					Else
+						$kamal = _GUICtrlListView_GetItem($list_nodeclass,$clmn_selc,0)[3] &"/"
+					EndIf
+					If _StringBetween($rd_fle[$i],'.wrapFunctionAsNode("','",')[0] == $kamal & _GUICtrlListView_GetItem($list_nodeclass,$clmn_selc,1)[3] Then
+						GUICtrlSetData($list_nodeedit,StringReplace(_StringBetween($rd_fle[$i],"//Description:","")[0],"\n",@CRLF))
+					EndIf
+				Next
 
 	EndSwitch
 WEnd
@@ -684,6 +701,7 @@ WEnd
 #EndRegion
 
 #Region Functions
+
 
 Func _updatelistnodeclass()
 _GUICtrlListView_DeleteAllItems($list_nodeclass)
@@ -721,12 +739,11 @@ $inputs = GUICtrlCreateInput("0", 104, 64, 129, 21)
 GUICtrlCreateUpdown(-1)
 GUICtrlCreateLabel("Outputs Add", 24, 104, 73, 25)
 GUICtrlSetColor(-1, 0xd5d5d5)
-$listadd = GUICtrlCreateListView("Node Title|Node Type input|Node Type output|Node Inputs", 24, 136, 257, 214)
+$listadd = GUICtrlCreateListView("Node Title|Node Type input|Node Type output|Node Inputs|Node description", 24, 136, 257, 214)
 $remcur = GUICtrlCreateButton("Remove Current Selection", 296, 192, 145, 33)
 $adddb = GUICtrlCreateButton("Add to Database", 24, 368, 129, 33)
 $ldjs = GUICtrlCreateButton("Load from js", 176, 368, 97, 33)
 GUICtrlCreateLabel("Type:", 248, 72, 31, 17)
-
 GUICtrlSetColor(-1, 0xd5d5d5)
 GUICtrlCreateLabel("Type:", 147, 105, 31, 17)
 
@@ -736,6 +753,10 @@ GUICtrlSetData(-1, "*|boolean|number|string", "*")
 $typout = GUICtrlCreateCombo("", 188, 100, 105, 25, BitOR($CBS_DROPDOWN,$CBS_AUTOHSCROLL))
 GUICtrlSetData(-1, "*|boolean|number|string", "*")
 $add_nodem = GUICtrlCreateButton("Add node",296,144,145,33)
+GUICtrlCreateLabel("Add Description:",296,230,100)
+GUICtrlSetColor(-1, 0xd5d5d5)
+$node_descp = GUICtrlCreateEdit("Type your node description here.",296,250,145,150)
+
 
 
 GUISetState(@SW_SHOW,$nodeadd)
@@ -751,7 +772,7 @@ $nMsg = GUIGetMsg()
 
 		Case $add_nodem
 			;Node Title|Node Type input|Node Type output|Node Outputs|Node Inputs
-			GUICtrlCreateListViewItem(GUICtrlRead($nod_title) &"|" &GUICtrlRead($typinp) &"|" &GUICtrlRead($typout)  &"|" & GUICtrlRead($inputs),$listadd)
+			GUICtrlCreateListViewItem(GUICtrlRead($nod_title) &"|" &GUICtrlRead($typinp) &"|" &GUICtrlRead($typout)  &"|" & GUICtrlRead($inputs)&"|" & GUICtrlRead($node_descp),$listadd)
 
 		Case $remcur
 			_GUICtrlListView_DeleteItemsSelected($listadd)
@@ -784,7 +805,7 @@ EndFunc
 Func _addnodetodb($node)
 $inp = StringTrimRight(_StringRepeat('"' &$node[2] &'",',$node[4]),1)
 ;'Node Title|Node Type input|Node Type output|Node Outputs|Node Inputs'
-$fnc = 'LiteGraph.wrapFunctionAsNode("' &$node[1] &'",node' &$node[4] &',"['&$inp&']","'&$node[3]&'");'&@CRLF
+$fnc = 'LiteGraph.wrapFunctionAsNode("' &$node[1] &'",node' &$node[4] &',"['&$inp&']","'&$node[3]&'");//Description:'&StringReplace($node[5],@CRLF,"\n") &@CRLF
 FileWriteLine(@ScriptDir &"\nodes\customnode_ref.js",$fnc)
 _IEAction($grph_hndl, "refresh")
 EndFunc
@@ -823,6 +844,10 @@ Func WM_COMMAND($hWnd, $iMsg, $wParam, $lParam)
 	If $iId <> 2 And $nNotifyCode = 0 Then ; Check for IDCANCEL - 2
 		_hovermethod($iId)
 	EndIf
+
+	ConsoleWrite($iId)
+
+
 EndFunc   ;==>WM_COMMAND
 
 Func _loadpic($iPic,$picture)

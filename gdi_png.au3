@@ -1,59 +1,30 @@
-; Trap COM errors so that 'Back' and 'Forward'
-; outside of history bounds does not abort script
-; (expect COM errors to be sent to the console)
-
 #include <GUIConstantsEx.au3>
-#include <IE.au3>
-#include <WindowsConstants.au3>
-#include "MetroGUI-UDF\MetroGUI_UDF.au3"
-#include "MetroGUI-UDF\_GUIDisable.au3"
-#include <GUIConstantsEx.au3>
+#include <GuiListView.au3>
 #include <MsgBoxConstants.au3>
-#include <StaticConstants.au3>
-#include <TreeViewConstants.au3>
-#include <WindowsConstants.au3>
 
+Example()
 
+Func Example()
+	Local $idListview
 
-Local $oIE = _IECreateEmbedded()
-Local $oIE2 = _IECreateEmbedded()
-;Enable high DPI support: Detects the users DPI settings and resizes GUI and all controls to look perfectly sharp.
-_Metro_EnableHighDPIScaling() ; Note: Requries "#AutoIt3Wrapper_Res_HiDpi=y" for compiling. To see visible changes without compiling, you have to disable dpi scaling in compatibility settings of Autoit3.exe
+	GUICreate("ListView Get Selected Indices", 400, 300)
+	$idListview = GUICtrlCreateListView("", 2, 2, 394, 268, BitOR($LVS_SHOWSELALWAYS, $LVS_REPORT))
+	GUISetState(@SW_SHOW)
 
-;Set Theme
-_SetTheme("DarkTeal") ;See MetroThemes.au3 for selectable themes or to add more
+	; Add columns
+	_GUICtrlListView_AddColumn($idListview, "Column 1", 100)
 
-;Create resizable Metro GUI
-$Form1 = _Metro_CreateGUI("Example", 1000, 600, -1, -1, True)
+	; Add items
+	_GUICtrlListView_AddItem($idListview, "Item 1")
+	_GUICtrlListView_AddItem($idListview, "Item 2")
+	_GUICtrlListView_AddItem($idListview, "Item 3")
 
-;Add/create control buttons to the GUI
-$Control_Buttons = _Metro_AddControlButtons(True, True, True, True, True)
+	; Select multiple items
+	_GUICtrlListView_SetItemSelected($idListview, 1)
+	MsgBox($MB_SYSTEMMODAL, "Information", "Selected Indices: " & _GUICtrlListView_GetSelectedIndices($idListview))
 
-    Local $idTreeview = GUICtrlCreateTreeView(6, 206, 100, 150, BitOR($TVS_HASBUTTONS, $TVS_HASLINES, $TVS_LINESATROOT, $TVS_DISABLEDRAGDROP, $TVS_SHOWSELALWAYS), $WS_EX_CLIENTEDGE)
-    Local $idGeneralitem = GUICtrlCreateTreeViewItem("General", $idTreeview)
-    GUICtrlSetColor(-1, 0x0000C0)
-    Local $idDisplayitem = GUICtrlCreateTreeViewItem("Display", $idTreeview)
-    GUICtrlSetColor(-1, 0x0000C0)
-    Local $idAboutitem = GUICtrlCreateTreeViewItem("About", $idGeneralitem)
-    Local $idCompitem = GUICtrlCreateTreeViewItem("Computer", $idGeneralitem)
-    GUICtrlCreateTreeViewItem("User", $idGeneralitem)
-    GUICtrlCreateTreeViewItem("Resolution", $idDisplayitem)
-    GUICtrlCreateTreeViewItem("Other", $idDisplayitem)
-
-GUISetState(@SW_SHOW) ;Show GUI
-
-
-; Waiting for user to close the window
-While 1
-    Local $iMsg = GUIGetMsg()
-    Select
-        Case $iMsg = $GUI_EVENT_CLOSE
-            ExitLoop
-
-    EndSelect
-WEnd
-
-GUIDelete()
-
-Exit
-
+	; Loop until the user exits.
+	Do
+	Until GUIGetMsg() = $GUI_EVENT_CLOSE
+	GUIDelete()
+EndFunc   ;==>Example
