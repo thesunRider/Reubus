@@ -665,16 +665,6 @@ While 1
 		Case $GUI_MINIMIZE_BUTTON
 			GUISetState(@SW_MINIMIZE, $gui)
 
-		Case $export_node_connection
-			$nodeserial = _execjavascript($grph_hndl,"JSON.stringify(graph.serialize(),null,2);")
-			$path = FileSaveDialog("Save Json As",@ScriptDir &"\Json\","Jsons (*.json)",$FD_PATHMUSTEXIST)
-			FileWrite($path,$nodeserial)
-
-		Case $scene
-			ConsoleWrite("clicked scne "&@CRLF)
-			GUICtrlSetState($grph,$GUI_SHOW)
-			_GUICtrlTab_ActivateTab($maintab,0)
-
 		Case $map
 			ConsoleWrite("clicked map "&@CRLF)
 			GUICtrlSetState($grph,$GUI_HIDE)
@@ -684,6 +674,18 @@ While 1
 			_nodeaddnode()
 			_GUICtrlListView_DeleteAllItems($list_nodeclass)
 			_updatelistnodeclass()
+
+		;GUI Response for Scene
+
+		Case $export_node_connection
+			$nodeserial = _execjavascript($grph_hndl,"JSON.stringify(graph.serialize(),null,2);")
+			$path = FileSaveDialog("Save Json As",@ScriptDir &"\Json\","Jsons (*.json)",$FD_PATHMUSTEXIST)
+			FileWrite($path,$nodeserial)
+
+		Case $scene
+			ConsoleWrite("clicked scne "&@CRLF)
+			GUICtrlSetState($grph,$GUI_SHOW)
+			_GUICtrlTab_ActivateTab($maintab,0)
 
 		Case $clear_nodes
 			_IEAction($grph_hndl,"refresh")
@@ -703,6 +705,10 @@ While 1
 						GUICtrlSetData($list_nodeedit,StringReplace(_StringBetween($rd_fle[$i],"//Description:","")[0],"\n",@CRLF))
 					EndIf
 				Next
+
+
+		;Gui response for map
+
 
 	EndSwitch
 WEnd
