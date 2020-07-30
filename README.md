@@ -62,7 +62,7 @@ If the application to be embedded is in python make sure that POPUP windows styl
 * **Arjun**
 * **Govind** 
 * **Surya**
-**Sandra**
+* **Sandra**
 * **Leos**
 
 See list of contributers: [contributors](https://github.com/HacKP-CyberDome/reubus-app/network/dependencies) who participated in this project.
