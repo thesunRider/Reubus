@@ -8,6 +8,7 @@
 #include <GUIConstants.au3>
 #include <GuiListView.au3>
 #include <GuiTab.au3>
+#include <Xml.au3>
 #include <GDIPlus.au3>
 #include <String.au3>
 #include <Json.au3>
@@ -30,6 +31,7 @@
 _Metro_EnableHighDPIScaling()
 _SetTheme("DarkTeal")
 _SQLite_Startup()
+_SQLite_Open("store.db")
 _GDIPlus_Startup()
 
 ;enable activeX
@@ -38,8 +40,8 @@ RegWrite("HKEY_CURRENT_USER\Software\Microsoft\Internet Explorer\Main\FeatureCon
 RegWrite("HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Internet Explorer\MAIN\FeatureControl\FEATURE_BROWSER_EMULATION", _ProcessGetName(@AutoItPID), "REG_DWORD", $regValue)
 
 ;delete cache
-$ClearID = "8"
-Run("RunDll32.exe InetCpl.cpl,ClearMyTracksByProcess " & $ClearID)
+;$ClearID = "8"
+;RunWait("RunDll32.exe InetCpl.cpl,ClearMyTracksByProcess " & $ClearID)
 
 
 Global $mapaddress = "http://localhost:8843/map_test.html"
@@ -113,15 +115,16 @@ $ui_w = @DesktopWidth
 $ui_h = @DesktopHeight
 
 $maintab = GUICtrlCreateTab(-600,-100)
-
-Global $grph_hndl = _IECreateEmbedded()
 Global $mainmap = _IECreateEmbedded()
-
 
 GUICtrlCreateTabItem("tab1")
 #Region Tab1
 
 ;GUI BACKGROUND
+Global $grph_hndl = _IECreateEmbedded()
+
+$list_nodeedit = GUICtrlCreateEdit("Description",$ui_w*0.74,$ui_h*.68,$ui_w*.09, $ui_h*.25,$ES_READONLY)
+$list_nodeclass = GUICtrlCreateListView("Folder|Node|Number of Inputs",$ui_w*0.55, $ui_h*.68, $ui_w*.18, $ui_h*.25)
 
 GUICtrlCreateLabel("", 0, $ui_h*.65, $ui_w, $ui_h*.31) ;statusbar
 GUICtrlSetState(-1, 128); $GUI_DISABLE
@@ -168,7 +171,7 @@ GUICtrlSetState(-1, 128); $GUI_DISABLE
 GUICtrlSetBkColor(-1, 0x5e5e5e)
 
 
-$show_fir = GUICtrlCreateButton("SHOW FIR",$ui_w*.65+8, $ui_h*.1+5, 80, 25)          ;show fir button
+$show_fir = GUICtrlCreateButton("LOAD FIR",$ui_w*.65+8, $ui_h*.1+5, 80, 25)          ;show fir button
 GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor($show_fir, 0x7f7f7f)
@@ -265,18 +268,27 @@ GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor($add_node, 0x7f7f7f)
 
-$delete_node = GUICtrlCreateButton("DELETE CURRENT NODE", $ui_w*0.43+25, $ui_h*.72, 140, 25)
+$delete_node = GUICtrlCreateButton("DELETE NODE MODEL", $ui_w*0.43+25, $ui_h*.72, 140, 25)
 GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor($delete_node, 0x7f7f7f)
 
+$clear_nodes = GUICtrlCreateButton("CLEAR-RELOAD GRAPH", $ui_w*0.43+25, $ui_h*.77, 140, 25)
+GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor(-1, 0x7f7f7f)
+
+$get_nodes_description = GUICtrlCreateButton("GET NODE DESCRIPTION", $ui_w*0.43+25, $ui_h*.82, 140, 25)
+GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor(-1, 0x7f7f7f)
+
+$export_node_connection = GUICtrlCreateButton("EXPORT JSON GRAPH", $ui_w*0.43+25, $ui_h*.86, 140, 25)
+GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor(-1, 0x7f7f7f)
 
 GUICtrlCreateLabel("", $ui_w*.44, $ui_h*.665, $ui_w*.395, $ui_h*.283, $WS_BORDER) ; border to node section
-
-Global $grph = GUICtrlCreateObj($grph_hndl, 0, $ui_h*.1, $ui_w*.65, $ui_h*.55)
-GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
-
-_IENavigate($grph_hndl, "http://localhost:8843/")
 
 
 #EndRegion
@@ -287,6 +299,8 @@ _IENavigate($grph_hndl, "http://localhost:8843/")
 
 
 GUICtrlCreateTabItem("tab2")
+
+
 #Region Tab2
 
 ;TAB2 DESIGN
@@ -569,9 +583,9 @@ GUICtrlCreateLabel("CIRCLE", $ui_w*.961, $ui_h*.79, 160, 28, 0x0200)
 GUICtrlSetFont(-1, 11, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
-GUICtrlCreateLabel("", $ui_w*.677, $ui_h*.79, $ui_w*.32, $ui_h*.1, $WS_BORDER)
-
 GUICtrlCreateObj($mainmap,$ui_w*.3, $ui_h*.1, $ui_w*.4, $ui_h*.55)
+GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
+
 _IENavigate($mainmap,"http://localhost:8843/map_test.html")
 
 $crimlst = GUICtrlCreateListView("Crime ID|latitude|Longitude",$ui_w*.01, $ui_h*.14, $ui_w*.28, $ui_h*.38)
@@ -626,35 +640,113 @@ GUICtrlSetBkColor($DB, 0x191919)
 
 #EndRegion
 
-Do
-Sleep(50)
-Until $mainmap.document.getElementById("debug").value == "1256"
+;Do
+;Sleep(50)
+;Until $mainmap.document.getElementById("debug").value == "1256"
 
 GUIRegisterMsg($WM_COMMAND, "WM_COMMAND")
 
-;$nodeserial = _execjavascript($grph_hndl,"JSON.stringify(graph.serialize());")
+;This should be here due to some unknown error in autoit
+Global $grph = GUICtrlCreateObj($grph_hndl, 0, $ui_h*.1, $ui_w*.65, $ui_h*.55)
+GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
+_IENavigate($grph_hndl, "http://localhost:8843")
+
 ConsoleWrite("Passed all functions")
+_updatelistnodeclass()
+_loadlatlonglist()
 GUISetState(@SW_SHOW)
+GUICtrlSetData($list_nodeedit,"Description goes here..")
+
 
 While 1
 	$nMsg = GUIGetMsg()
 	Switch $nMsg
 		Case $GUI_EVENT_CLOSE, $GUI_CLOSE_BUTTON
 			_Metro_GUIDelete($gui) ;Delete GUI/release resources, make sure you use this when working with multiple GUIs!
+			_GDIPlus_Shutdown()
+			_SQLite_Close()
+			_SQLite_Shutdown()
 			Exit
+
 		Case $GUI_MINIMIZE_BUTTON
 			GUISetState(@SW_MINIMIZE, $gui)
 
-		Case $scene
-			ConsoleWrite("clicked scne "&@CRLF)
-			_GUICtrlTab_ActivateTab($maintab,0)
-
 		Case $map
 			ConsoleWrite("clicked map "&@CRLF)
+			GUICtrlSetState($grph,$GUI_HIDE)
 			_GUICtrlTab_ActivateTab($maintab,1)
 
 		Case $add_node
 			_nodeaddnode()
+			_GUICtrlListView_DeleteAllItems($list_nodeclass)
+			_updatelistnodeclass()
+
+		;GUI Response for Scene
+
+		Case $export_node_connection
+			$nodeserial = _execjavascript($grph_hndl,"JSON.stringify(graph.serialize(),null,2);")
+			$path = FileSaveDialog("Save Json As",@ScriptDir &"\Json\","Jsons (*.json)",$FD_PATHMUSTEXIST)
+			FileWrite($path,$nodeserial)
+
+		Case $scene
+			ConsoleWrite("clicked scne "&@CRLF)
+			GUICtrlSetState($grph,$GUI_SHOW)
+			_GUICtrlTab_ActivateTab($maintab,0)
+
+		Case $clear_nodes
+			_IEAction($grph_hndl,"refresh")
+
+		Case $get_nodes_description
+				$clmn_selc = (StringStripWS(_GUICtrlListView_GetSelectedIndices($list_nodeclass),8)-1)+1 ;added -1 + 1 I Dont know some error maybe
+				$rd_fle = FileReadToArray(@ScriptDir &"\nodes\customnode_ref.js")
+				;MsgBox(Default,Default,$clmn_selc)
+				For $i = 0 To UBound($rd_fle)-1
+					;MsgBox(Default,Default,_StringBetween($rd_fle[$i],_StringBetween($rd_fle[$i],'.wrapFunctionAsNode("','/')[0] &'/','",')[0] &@CRLF &_GUICtrlListView_GetItem($list_nodeclass,$clmn_selc,1)[3])
+					If _GUICtrlListView_GetItem($list_nodeclass,$clmn_selc,0)[3] == 'Parent' Then
+						$kamal = ""
+					Else
+						$kamal = _GUICtrlListView_GetItem($list_nodeclass,$clmn_selc,0)[3] &"/"
+					EndIf
+					If _StringBetween($rd_fle[$i],'.wrapFunctionAsNode("','",')[0] == $kamal & _GUICtrlListView_GetItem($list_nodeclass,$clmn_selc,1)[3] Then
+						GUICtrlSetData($list_nodeedit,StringReplace(_StringBetween($rd_fle[$i],"//Description:","")[0],"\n",@CRLF))
+					EndIf
+				Next
+
+		Case $delete_node
+			$clmn_selc = (StringStripWS(_GUICtrlListView_GetSelectedIndices($list_nodeclass),8)-1)+1 ;added -1 + 1 I Dont know some error maybe
+				$rd_fle = FileReadToArray(@ScriptDir &"\nodes\customnode_ref.js")
+				;MsgBox(Default,Default,$clmn_selc)
+				For $i = 0 To UBound($rd_fle)-1
+					If _GUICtrlListView_GetItem($list_nodeclass,$clmn_selc,0)[3] == 'Parent' Then
+						$kamal = ""
+					Else
+						$kamal = _GUICtrlListView_GetItem($list_nodeclass,$clmn_selc,0)[3] &"/"
+					EndIf
+					If _StringBetween($rd_fle[$i],'.wrapFunctionAsNode("','",')[0] == $kamal & _GUICtrlListView_GetItem($list_nodeclass,$clmn_selc,1)[3] Then
+						_GUIDisable($gui, 0, 30) ;For better visibility of the MsgBox on top of the first GUI.
+						$yno = _Metro_MsgBox(4, "Delete node", "Do you wish to Delete the following nodes: " &@CRLF &_GUICtrlListView_GetItem($list_nodeclass,$clmn_selc,1)[3], 350, 11, $gui)
+						_GUIDisable($gui)
+						If $yno == 'Yes' Then
+							_ArrayDelete($rd_fle,$i)
+							_FileWriteFromArray(@ScriptDir &"\nodes\customnode_ref.js",$rd_fle)
+							_updatelistnodeclass()
+						EndIf
+						ExitLoop
+					EndIf
+				Next
+
+
+		;Gui response for map
+		Case $GOTO_BUTTON
+			$latn = guictrlread($LAT_IN)
+			$longn = GUICtrlRead($LONG_IN)
+			$query = GUICtrlRead($ADDRESS_IN)
+			If Not StringIsSpace($latn) And Not StringIsSpace($longn) Then
+				_zoomtoaddress($latn,$longn)
+			ElseIf Not StringIsSpace($query) Then
+				$mapkom = _getlatlong($query)
+				If IsArray($mapkom) Then _zoomtoaddress($mapkom[2],$mapkom[3])
+			EndIf
 
 
 	EndSwitch
@@ -663,6 +755,39 @@ WEnd
 #EndRegion
 
 #Region Functions
+
+Func _writetodb($lat,$lon,$rad,$clr,$crimid,$opac,$time,$title)
+
+EndFunc
+
+Func _loadlatlonglist()
+_GUICtrlListView_DeleteAllItems($crimlst)
+Local $hQuery,$aRow
+_SQLite_Query(-1, "SELECT * FROM map ;", $hQuery)
+While _SQLite_FetchData($hQuery, $aRow, False, False) = $SQLITE_OK
+	GUICtrlCreateListViewItem($aRow[5]&"|"&$aRow[1]&"|"&$aRow[2],$crimlst)
+WEnd
+_SQLite_QueryFinalize($hQuery)
+EndFunc
+
+Func _updatelistnodeclass()
+_GUICtrlListView_DeleteAllItems($list_nodeclass)
+$nodeclasses = FileReadToArray(@ScriptDir &"\nodes\customnode_ref.js")
+For $i = 0 To UBound($nodeclasses) - 1
+	If Not StringIsSpace($nodeclasses[$i]) Then
+		$nam = _StringBetween($nodeclasses[$i],'.wrapFunctionAsNode("','",')
+		If StringInStr($nam[0],"/") Then
+		$kam = StringReplace($nam[0],"/","|",1)
+		Else
+		$kam = "Parent|"&$nam[0]
+		EndIf
+		$ind = _StringBetween($nodeclasses[$i],",node",",")
+		GUICtrlCreateListViewItem($kam&"|" &$ind[0],$list_nodeclass)
+	EndIf
+Next
+
+
+EndFunc
 
 Func _nodeaddnode()
 _GUIDisable($gui, 0, 30)
@@ -679,25 +804,26 @@ GUICtrlCreateLabel("Add inputs:", 24, 64, 73, 25)
 GUICtrlSetColor(-1, 0xd5d5d5)
 $inputs = GUICtrlCreateInput("0", 104, 64, 129, 21)
 GUICtrlCreateUpdown(-1)
-GUICtrlCreateLabel("Add outputs:", 24, 104, 73, 25)
+GUICtrlCreateLabel("Outputs Add", 24, 104, 73, 25)
 GUICtrlSetColor(-1, 0xd5d5d5)
-$output = GUICtrlCreateInput("1", 104, 104, 129, 21)
-GUICtrlCreateUpdown(-1)
-$listadd = GUICtrlCreateListView("Node Title|Node Type input|Node Type output|Node Outputs|Node Inputs", 24, 136, 257, 214)
+$listadd = GUICtrlCreateListView("Node Title|Node Type input|Node Type output|Node Inputs|Node description", 24, 136, 257, 214)
 $remcur = GUICtrlCreateButton("Remove Current Selection", 296, 192, 145, 33)
 $adddb = GUICtrlCreateButton("Add to Database", 24, 368, 129, 33)
 $ldjs = GUICtrlCreateButton("Load from js", 176, 368, 97, 33)
 GUICtrlCreateLabel("Type:", 248, 72, 31, 17)
-
 GUICtrlSetColor(-1, 0xd5d5d5)
-GUICtrlCreateLabel("Type:", 247, 110, 31, 17)
+GUICtrlCreateLabel("Type:", 147, 105, 31, 17)
 
 GUICtrlSetColor(-1, 0xd5d5d5)
 $typinp = GUICtrlCreateCombo("", 288, 64, 105, 25, BitOR($CBS_DROPDOWN,$CBS_AUTOHSCROLL))
-GUICtrlSetData(-1, "none|boolean|number|string", "none")
-$typout = GUICtrlCreateCombo("", 288, 104, 105, 25, BitOR($CBS_DROPDOWN,$CBS_AUTOHSCROLL))
-GUICtrlSetData(-1, "none|boolean|number|string", "none")
+GUICtrlSetData(-1, "*|boolean|number|string", "*")
+$typout = GUICtrlCreateCombo("", 188, 100, 105, 25, BitOR($CBS_DROPDOWN,$CBS_AUTOHSCROLL))
+GUICtrlSetData(-1, "*|boolean|number|string", "*")
 $add_nodem = GUICtrlCreateButton("Add node",296,144,145,33)
+GUICtrlCreateLabel("Add Description:",296,230,100)
+GUICtrlSetColor(-1, 0xd5d5d5)
+$node_descp = GUICtrlCreateEdit("Type your node description here.",296,250,145,150)
+
 
 
 GUISetState(@SW_SHOW,$nodeadd)
@@ -713,7 +839,7 @@ $nMsg = GUIGetMsg()
 
 		Case $add_nodem
 			;Node Title|Node Type input|Node Type output|Node Outputs|Node Inputs
-			GUICtrlCreateListViewItem(GUICtrlRead($nod_title) &"|" &GUICtrlRead($typinp) &"|" &GUICtrlRead($typout) &"|" &GUICtrlRead($output) &"|" & GUICtrlRead($inputs),$listadd)
+			GUICtrlCreateListViewItem(GUICtrlRead($nod_title) &"|" &GUICtrlRead($typinp) &"|" &GUICtrlRead($typout)  &"|" & GUICtrlRead($inputs)&"|" & GUICtrlRead($node_descp),$listadd)
 
 		Case $remcur
 			_GUICtrlListView_DeleteItemsSelected($listadd)
@@ -728,10 +854,12 @@ $nMsg = GUIGetMsg()
 				_GUIDisable($nodeadd, 0, 30) ;For better visibility of the MsgBox on top of the first GUI.
 				$yno = _Metro_MsgBox(4, "Add node", "Do you wish to add the following nodes: " &@CRLF &$nodetits, 350, 11, $nodeadd)
 				_GUIDisable($nodeadd)
-				If $yno Then
+				If $yno == 'Yes' Then
 					For $i = 0 To _GUICtrlListView_GetItemCount($listadd) - 1
 						_addnodetodb(_GUICtrlListView_GetItemTextArray($listadd, $i))
 					Next
+					_GUICtrlListView_DeleteAllItems ($listadd)
+					GUISetState(@SW_RESTORE,$nodeadd)
 				EndIf
 			EndIf
 
@@ -742,16 +870,11 @@ WEnd
 EndFunc
 
 Func _addnodetodb($node)
-_ArrayDisplay($node)
-$inp = StringTrimRight(_StringRepeat('"' &$node[2] &'",',$node[5]),1)
+$inp = StringTrimRight(_StringRepeat('"' &$node[2] &'",',$node[4]),1)
 ;'Node Title|Node Type input|Node Type output|Node Outputs|Node Inputs'
-$fnc = ''
-$fnc &= 'function test(a,b)' &@CRLF
-$fnc &= '{'&@CRLF
-$fnc &= 'return a+b;' &@CRLF
-$fnc &= '}'&@CRLF
-$fnc &= 'LiteGraph.wrapFunctionAsNode("' &$node[1] &'",test,['&$inp&'],'&$node[3]&');'&@CRLF
-MsgBox(Default,Default,$fnc)
+$fnc = 'LiteGraph.wrapFunctionAsNode("' &$node[1] &'",node' &$node[4] &',"['&$inp&']","'&$node[3]&'");//Description:'&StringReplace($node[5],@CRLF,"\n") &@CRLF
+FileWriteLine(@ScriptDir &"\nodes\customnode_ref.js",$fnc)
+_IEAction($grph_hndl, "refresh")
 EndFunc
 
 Func _hovermethod($id)
@@ -788,6 +911,10 @@ Func WM_COMMAND($hWnd, $iMsg, $wParam, $lParam)
 	If $iId <> 2 And $nNotifyCode = 0 Then ; Check for IDCANCEL - 2
 		_hovermethod($iId)
 	EndIf
+
+	ConsoleWrite($iId)
+
+
 EndFunc   ;==>WM_COMMAND
 
 Func _loadpic($iPic,$picture)
@@ -830,6 +957,63 @@ Func _zoomtoaddress($lat,$long)
 $mainmap.document.parentwindow.eval("zoomtolocation(" &$lat &"," &$long &");")
 EndFunc
 
+Func _getlatlong($query)
+$whergui = _Metro_CreateGUI("Address finder", 382, 424, 289, 194)
+$Control_Buttons2 = _Metro_AddControlButtons(True, False, True, False, False)
+$GUI_CLOSE_BUTTON2 = $Control_Buttons2[0]
+$GUI_MINIMIZE_BUTTON2 = $Control_Buttons2[3]
+
+GUICtrlCreateLabel("Where do you wish to go", 16, 16, 122, 17)
+GUICtrlSetColor(-1, 0xd5d5d5)
+GUICtrlCreateLabel("Query:", 16, 40, 35, 17)
+GUICtrlSetColor(-1, 0xd5d5d5)
+$qurinp = GUICtrlCreateInput($query, 56, 40, 145, 21)
+GUICtrlCreateLabel("Possible Hits:", 16, 80, 67, 17)
+GUICtrlSetColor(-1, 0xd5d5d5)
+$Listbar = GUICtrlCreateListView("display_name|latitude|longitude", 16, 104, 345, 227)
+$gotoloc = GUICtrlCreateButton("Goto location", 96, 352, 193, 33)
+$findloc = GUICtrlCreateButton("Find", 216, 40, 65, 25)
+_getlatlongquery($query,$Listbar)
+GUISetState(@SW_SHOW,$whergui)
+While 1
+	$nMsg = GUIGetMsg()
+	Switch $nMsg
+		Case $GUI_CLOSE_BUTTON2,$GUI_EVENT_CLOSE
+			$ret = ''
+			ExitLoop
+
+		Case $findloc
+			$query = GUICtrlRead($qurinp)
+			_getlatlongquery($query,$Listbar)
+
+		Case $gotoloc
+			$clmn_selc = (StringStripWS(_GUICtrlListView_GetSelectedIndices($Listbar),8)-1)+1
+			$ret = _GUICtrlListView_GetItemTextArray($Listbar,$clmn_selc)
+			;_ArrayDisplay($ret)
+			ExitLoop
+
+	EndSwitch
+WEnd
+_Metro_GUIDelete($whergui)
+Return $ret
+EndFunc
+
+Func _getlatlongquery($query,$Listbar)
+$urlqur = "https://nominatim.openstreetmap.org/search?q="&$query&"&format=xml"
+$xmlpars = BinaryToString(InetRead($urlqur))
+
+$oXMLDoc = _XML_CreateDOMDocument(Default)
+_XML_LoadXml($oXMLDoc, $xmlpars)
+$oNodesColl = _XML_SelectNodes($oXMLDoc, "//place")
+$aNodesColl = _XML_Array_GetNodesProperties($oNodesColl)
+
+For $i = 0 To UBound($aNodesColl)-2
+$oAttriubtes = _XML_GetAllAttribIndex($oXMLDoc, '//place', $i)
+$attrl = _XML_Array_GetAttributesProperties($oAttriubtes)
+GUICtrlCreateListViewItem($attrl[_ArraySearch($attrl,"display_name",0,0,0,1,1,0)][3]&"|"&$attrl[_ArraySearch($attrl,"lat",0,0,0,1,1,0)][3]&"|"&$attrl[_ArraySearch($attrl,"lon",0,0,0,1,1,0)][3],$Listbar)
+Next
+
+EndFunc
 
 Func _URIEncode($sData)
     ; Prog@ndy
