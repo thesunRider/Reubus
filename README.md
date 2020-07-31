@@ -66,7 +66,7 @@ If the application to be embedded is in python make sure that POPUP windows styl
 * [Javascript](https://rometools.github.io/rome/) - Communicate with server end and Autoit
 
 
-##**Relevance in future policing**
+**Relevance in future policing**
  The system is built to aid the police department by providing insights on the criminal activities that they handle. It can be used as an effective software to analyze crimes. The software will improve over time by gathering the data. Over time it can gather the information of all criminal activities in the state and find patterns in the crime. When a new crime is reported the software can analyze and compare with existing crime patterns. Thereby, providing valuable insights on the suspect or the next possible action by the suspect. The software also provides features like predicting future crime hotspots and statics of crimes in various places.
 
  ## Authors 
