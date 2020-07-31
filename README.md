@@ -13,7 +13,7 @@ which is backed by ML:
 - F.I.R filter.The database contains all the records of the F.I.Rs as well as the node information.
 
 *See deployment for notes on how to deploy*
-###**Implementation Architecture**
+###Implementation Architecture
 • The F.I.R is fed into the application(Reubus).
 • The application extracts the information from the F.I.R and stores it in its database.
 • The ML agent as been trained with previous data. The agent now inputs the new information from the database and returns the predicted insights and results to the database.
