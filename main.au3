@@ -300,11 +300,7 @@ GUICtrlCreateLabel("", $ui_w*.44, $ui_h*.665, $ui_w*.395, $ui_h*.283, $WS_BORDER
 #EndRegion
 
 
-
-
 GUICtrlCreateTabItem("tab2")
-
-
 #Region Tab2
 
 ;TAB2 DESIGN
@@ -529,7 +525,7 @@ GUICtrlSetColor(-1, 0xffffff)
 
 ;LABELS AND BUTTON IN 3RD STATUS BAR
 
-GUICtrlCreateLabel("LOAD PATTERN BASED ON SQL QUERY:", $ui_w*0.45+20, $ui_h*.67, 250, 28, 0x0200)
+GUICtrlCreateLabel("LOAD MAP PATTERN BASED ON SQL QUERY:", $ui_w*0.45+20, $ui_h*.67, 250, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, $GUI_FONTUNDER, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xd5d5d5)
 
@@ -1037,8 +1033,6 @@ Func _CheckHover($inpgui,$cntrl)
 		GUICtrlSetColor ($cntrl,$COLOR_WHITE)
     EndIf
 EndFunc   ;==>_CheckHover
-
-
 
 Func _getcurlatln()
 $curlatlong = $mainmap.document.getElementById("latlong").value
