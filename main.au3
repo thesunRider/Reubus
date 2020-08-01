@@ -4,6 +4,7 @@
 #include <ColorConstants.au3>
 #include <Process.au3>
 #include "MetroGUI-UDF\MetroGUI_UDF.au3"
+#include <Math.au3>
 #include "MetroGUI-UDF\_GUIDisable.au3" ; For dim effects when msgbox is displayed
 #include <GUIConstants.au3>
 #include <GuiListView.au3>
@@ -353,10 +354,15 @@ GUICtrlCreateLabel("",$ui_w*.71, $ui_h*.12, $ui_w*.28, $ui_h*.51, $WS_BORDER)
 
 $search_id = GUICtrlCreateInput("", $ui_w*.061, $ui_h*.105, 200, 22) ; search id input box
 
-$OPEN_FIR = GUICtrlCreateButton(" O O O ",$ui_w*.01+70, $ui_h*.595+7,40,15)
+$LINK_FIR = GUICtrlCreateButton(" O O O ",$ui_w*.01+110, $ui_h*.595+7,40,15)
 GUICtrlSetFont(-1, 6, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
-GUICtrlSetBkColor($OPEN_FIR,0xbcbcbc)
+GUICtrlSetBkColor(-1,0xbcbcbc)
+
+$Delete_currentloc = GUICtrlCreateButton("Delete Current",$ui_w*.01+200, $ui_h*.578+7,120,30)
+GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor(-1, 0x7f7f7f)
 
 GUICtrlCreateLabel("SEARCH ID:", $ui_w*.01, $ui_h*.10, 80, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
@@ -382,7 +388,7 @@ $longvar = GUICtrlCreateLabel("0.0", $ui_w*.055, $ui_h*.57, 140, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
-GUICtrlCreateLabel("OPEN FIR:", $ui_w*.01, $ui_h*.595, 140, 28, 0x0200)
+GUICtrlCreateLabel("LINK TO FIR DB:", $ui_w*.01, $ui_h*.595, 200, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
@@ -391,6 +397,10 @@ GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
 GUICtrlCreateLabel("NEAREST CRIME ID:", $ui_w*.15, $ui_h*.545, 140, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+$nearid = GUICtrlCreateLabel("<ID>", $ui_w*.23, $ui_h*.545, 140, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
@@ -808,6 +818,13 @@ While 1
 			_SQLite_GetTable2d(-1,"Select * FROM map;",$arysql,$aryrowsql,$aryclmnsql)
 			_ArrayDisplay($arysql,"Map database")
 
+		Case $Delete_currentloc
+			$seleccrim = _GUICtrlListView_GetItemTextArray($crimlst)
+			If Not @error Then
+				_SQLite_Exec ( -1, "DELETE FROM map WHERE latitude like " &$seleccrim[2]   &" AND longitude like " &$seleccrim[3] &";")
+				_loadlatlonglist()
+			EndIf
+
 
 
 
@@ -818,6 +835,11 @@ If $curlatln <> '' Then
 	$currentlatln = StringSplit(StringTrimRight(StringTrimLeft($curlatln,1),1),",", $STR_NOCOUNT )
 	GUICtrlSetData($latvar,$currentlatln[0])
 	GUICtrlSetData($longvar,$currentlatln[1])
+	Local $hQuery,$aRow
+	_SQLite_Query(-1, 'SELECT * FROM map ORDER BY ABS(latitude - '&$currentlatln[0]&') + ABS(longitude - ' &$currentlatln[1] &') ASC;', $hQuery)
+	_SQLite_FetchData($hQuery, $aRow, False, False)
+	$crmid_near = $aRow[5]
+	GUICtrlSetData($nearid,$crmid_near)
 EndIf
 
 WEnd
@@ -825,6 +847,14 @@ WEnd
 #EndRegion
 
 #Region Functions
+
+Func distancebtwnlatlongMeters($lat1, $lon1, $lat2, $lon2)
+  $x = _Radian( $lon1 - $lon2 ) * cos( _Radian( ($lat1+$lat2) /2 ) )
+  $y = _Radian( $lat1 - $lat2 )
+  $dist = 6371000.0 * sqrt( $x*$x + $y*$y )
+
+  return $dist
+EndFunc
 
 Func _writetodb($curdrops)
 _SQLite_Exec(-1, "INSERT INTO map (latitude,longitude,radius,color,crimeid,opacity,time,title,type) VALUES ('" &_ArrayToString($curdrops,"','") &"');")
