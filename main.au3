@@ -350,23 +350,16 @@ GUICtrlCreateLabel("",$ui_w*.71, $ui_h*.12, $ui_w*.28, $ui_h*.51, $WS_BORDER)
 
 $search_id = GUICtrlCreateInput("", $ui_w*.061, $ui_h*.105, 200, 22) ; search id input box
 
-$LINK_FIR = GUICtrlCreateButton(" O O O ",$ui_w*.01+110, $ui_h*.595+7,40,15)
-GUICtrlSetFont(-1, 6, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xffffff)
-GUICtrlSetBkColor(-1,0xbcbcbc)
 
-$Delete_currentloc = GUICtrlCreateButton("Delete Current",$ui_w*.01+230, $ui_h*.575+7,120,30)
+$Delete_currentloc = GUICtrlCreateButton("DELETE CURRENT SELECTION",$ui_w*.01+210, $ui_h*.6,220,30)
 GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor(-1, 0x7f7f7f)
 
-GUICtrlCreateLabel("SEARCH ID:", $ui_w*.01, $ui_h*.10, 80, 28, 0x0200)
+GUICtrlCreateLabel("SEARCH  :", $ui_w*.01, $ui_h*.10, 80, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
-GUICtrlCreateLabel("CRIME ID:", $ui_w*.01, $ui_h*.52, 140, 28, 0x0200)
-GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xffffff)
 
 GUICtrlCreateLabel("LATITUDE:", $ui_w*.01, $ui_h*.545, 140, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
@@ -384,11 +377,12 @@ $longvar = GUICtrlCreateLabel("0.0", $ui_w*.055, $ui_h*.57, 140, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
-GUICtrlCreateLabel("LINK TO FIR DB:", $ui_w*.01, $ui_h*.595, 200, 28, 0x0200)
-GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+$goto_selection = GUICtrlCreateButton("GOTO SELECTION", $ui_w*.01, $ui_h*.6, 200, 28)
+GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor(-1, 0x7f7f7f)
 
-GUICtrlCreateLabel("TIME:", $ui_w*.15, $ui_h*.52, 140, 28, 0x0200)
+GUICtrlCreateLabel("TIME:", $ui_w*.15, $ui_h*.57, 140, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
@@ -529,7 +523,7 @@ GUICtrlCreateLabel("LOAD MAP PATTERN BASED ON SQL QUERY:", $ui_w*0.45+20, $ui_h*
 GUICtrlSetFont(-1, 10, Default, $GUI_FONTUNDER, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xd5d5d5)
 
-$sql_filterquery = GUICtrlCreateEdit("ALL", $ui_w*0.45+25, $ui_h*.71, 280, 140)
+$sql_filterquery = GUICtrlCreateEdit("SELECT * FROM map", $ui_w*0.45+25, $ui_h*.71, 280, 140)
 
 $exec_query = GUICtrlCreateButton("Execute query", $ui_w*0.45+40, $ui_h*.90, 120, 30)
 GUICtrlSetFont(-1, 11, Default, Default, "Consolas", 5); 5 = Clear Type
@@ -704,6 +698,7 @@ _loadlatlonglist()
 GUICtrlSetBkColor($scene, 0x323232)
 GUISetState(@SW_SHOW)
 GUICtrlSetData($list_nodeedit,"Description goes here..")
+_redrawmap()
 
 While 1
 	$nMsg = GUIGetMsg()
@@ -806,7 +801,7 @@ While 1
 		Case $DROP_CIRCLE
 			Local $curdrop[] = [$currentlatln[0],$currentlatln[1],GUICtrlRead($rangcirc),GUICtrlRead($color_selected),GUICtrlRead($crimidcirc),GUICtrlRead($opacirc),GUICtrlRead($timecirc),GUICtrlRead($titlcirc),GUICtrlRead($crmtyp)]
 			_ArrayAdd($drop_array,$curdrop)
-			_drawcircle($curdrop[7],$curdrop[0],$curdrop[1],$curdrop[2],$curdrop[3],$curdrop[5])
+			_drawcircle($curdrop[7]&":"&$curdrop[4],$curdrop[0],$curdrop[1],$curdrop[2],$curdrop[3],$curdrop[5])
 			_writetodb($curdrop)
 
 		Case $view_mapdb
@@ -824,6 +819,20 @@ While 1
 		Case $search_id
 			$iI = _GUICtrlListView_FindInText($crimlst, GUICtrlRead($search_id), -1)
 			_GUICtrlListView_EnsureVisible($crimlst, $iI)
+
+		Case $REDRAW_MAP
+			_redrawmap()
+
+		Case $goto_selection
+			$seleccrim = _GUICtrlListView_GetItemTextArray($crimlst)
+			_zoomtoaddress($seleccrim[2],$seleccrim[3])
+
+		Case $exec_query
+			_redrawbasedonquery(GUICtrlRead($sql_filterquery))
+
+		Case $CLEAR_MAP
+			_IENavigate($mainmap,"refresh")
+
 
 	EndSwitch
 
@@ -844,6 +853,28 @@ WEnd
 #EndRegion
 
 #Region Functions
+
+Func _redrawbasedonquery($querypass)
+Local $arysql,$aryrowsql,$aryclmnsql
+$ret = _SQLite_GetTable2d(-1,$querypass,$arysql,$aryrowsql,$aryclmnsql)
+If Not @error Then
+_IEAction($mainmap,"refresh")
+For $i = 1 to UBound($arysql)-1
+	_drawcircle($arysql[$i][8]&":"&$arysql[$i][5],$arysql[$i][1],$arysql[$i][2],$arysql[$i][3],$arysql[$i][4],$arysql[$i][6])
+Next
+Else
+MsgBox($MB_ICONERROR,"Error Query","Error in sql query " &@CRLF &_SQLite_ErrMsg() &@CRLF &"Please validate your query")
+EndIf
+EndFunc
+
+Func _redrawmap()
+Local $arysql,$aryrowsql,$aryclmnsql
+_SQLite_GetTable2d(-1,"Select * FROM map;",$arysql,$aryrowsql,$aryclmnsql)
+_IEAction($mainmap,"refresh")
+For $i = 1 to UBound($arysql)-1
+	_drawcircle($arysql[$i][8]&":"&$arysql[$i][5],$arysql[$i][1],$arysql[$i][2],$arysql[$i][3],$arysql[$i][4],$arysql[$i][6])
+Next
+EndFunc
 
 Func distancebtwnlatlongMeters($lat1, $lon1, $lat2, $lon2)
   $x = _Radian( $lon1 - $lon2 ) * cos( _Radian( ($lat1+$lat2) /2 ) )
