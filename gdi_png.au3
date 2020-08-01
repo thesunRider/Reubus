@@ -1,17 +1,10 @@
-#include <array.au3>
-#include <File.au3>
-#include "XML.au3"
+#include <Array.au3>
+#include <MsgBoxConstants.au3>
 
-$pth = "test.xml"
-$doc = FileRead($pth)
-MsgBox(Default,Default,$doc)
-Local $oXMLDoc = _XML_CreateDOMDocument(Default)
-_XML_LoadXml($oXMLDoc, $doc)
-Local $oNodesColl = _XML_SelectNodes($oXMLDoc, "//place")
-Local $aNodesColl = _XML_Array_GetNodesProperties($oNodesColl)
+Local $aArray[20]
+For $i = 0 To 19
+	$aArray[$i] = $i
+Next
+_ArrayDisplay($aArray, "1D Array")
+MsgBox($MB_SYSTEMMODAL, "Items 1-7", _ArrayToString($aArray,"','"))
 
-
-Local $oAttriubtes = _XML_GetAllAttribIndex($oXMLDoc, '//place', 1)
-Local $aAttributesList = _XML_Array_GetAttributesProperties($oAttriubtes)
-
-	_ArrayDisplay($aAttributesList, '$aAttributesList')
