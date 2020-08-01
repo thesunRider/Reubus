@@ -359,7 +359,7 @@ GUICtrlSetFont(-1, 6, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor(-1,0xbcbcbc)
 
-$Delete_currentloc = GUICtrlCreateButton("Delete Current",$ui_w*.01+200, $ui_h*.578+7,120,30)
+$Delete_currentloc = GUICtrlCreateButton("Delete Current",$ui_w*.01+230, $ui_h*.575+7,120,30)
 GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor(-1, 0x7f7f7f)
@@ -640,7 +640,7 @@ GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
 
 _IENavigate($mainmap,"http://localhost:8843/map_test.html")
 
-$crimlst = GUICtrlCreateListView("Crime ID|latitude|Longitude",$ui_w*.01, $ui_h*.14, $ui_w*.28, $ui_h*.38)
+$crimlst = GUICtrlCreateListView("Crime ID|latitude|Longitude|Title",$ui_w*.01, $ui_h*.14, $ui_w*.28, $ui_h*.38)
 
 #EndRegion
 
@@ -705,7 +705,7 @@ _IENavigate($grph_hndl, "http://localhost:8843")
 ConsoleWrite("Passed all functions")
 _updatelistnodeclass()
 _loadlatlonglist()
-
+GUICtrlSetBkColor($scene, 0x323232)
 GUISetState(@SW_SHOW)
 GUICtrlSetData($list_nodeedit,"Description goes here..")
 
@@ -825,8 +825,9 @@ While 1
 				_loadlatlonglist()
 			EndIf
 
-
-
+		Case $search_id
+			$iI = _GUICtrlListView_FindInText($crimlst, GUICtrlRead($search_id), -1)
+			_GUICtrlListView_EnsureVisible($crimlst, $iI)
 
 	EndSwitch
 
@@ -866,7 +867,7 @@ _GUICtrlListView_DeleteAllItems($crimlst)
 Local $hQuery,$aRow
 _SQLite_Query(-1, "SELECT * FROM map ;", $hQuery)
 While _SQLite_FetchData($hQuery, $aRow, False, False) = $SQLITE_OK
-	GUICtrlCreateListViewItem($aRow[5]&"|"&$aRow[1]&"|"&$aRow[2],$crimlst)
+	GUICtrlCreateListViewItem($aRow[5]&"|"&$aRow[1]&"|"&$aRow[2]&"|"&$aRow[8],$crimlst)
 WEnd
 _SQLite_QueryFinalize($hQuery)
 EndFunc
@@ -983,26 +984,23 @@ Func _hovermethod($id)
 Switch $id
 	Case $scene,$map,$DB
 		GUICtrlSetBkColor($id, 0x323232)
+		Local $lf[] = [$scene,$map,$DB]
+		_setelse($lf,$id,0x191919)
 
 	Case $file_button,$save_button,$settings_button
 		GUICtrlSetBkColor($id, 0x7f7f7f)
+		Local $lf[] = [$file_button,$save_button,$settings_button]
+		_setelse($lf,$id,0x323232)
 
 EndSwitch
-
-;return the button clicked before this button to its original color
-Switch $lastid
-	Case $scene,$map,$DB
-		GUICtrlSetBkColor($lastid ,  0x191919)
-
-	Case $file_button,$save_button,$settings_button
-		GUICtrlSetBkColor($lastid,0x323232)
-
-
-EndSwitch
-$lastid = $id
 
 EndFunc
 
+Func _setelse($ary,$selec,$corl)
+For $i = 0 To UBound($ary)-1
+	If $ary[$i] <> $selec Then GUICtrlSetBkColor($ary[$i],$corl)
+Next
+EndFunc
 
 Func WM_COMMAND($hWnd, $iMsg, $wParam, $lParam)
 	Local $nNotifyCode = _WinAPI_HiWord($wParam)
