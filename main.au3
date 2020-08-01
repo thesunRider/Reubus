@@ -4,6 +4,7 @@
 #include <ColorConstants.au3>
 #include <Process.au3>
 #include "MetroGUI-UDF\MetroGUI_UDF.au3"
+#include <Math.au3>
 #include "MetroGUI-UDF\_GUIDisable.au3" ; For dim effects when msgbox is displayed
 #include <GUIConstants.au3>
 #include <GuiListView.au3>
@@ -353,10 +354,15 @@ GUICtrlCreateLabel("",$ui_w*.71, $ui_h*.12, $ui_w*.28, $ui_h*.51, $WS_BORDER)
 
 $search_id = GUICtrlCreateInput("", $ui_w*.061, $ui_h*.105, 200, 22) ; search id input box
 
-$OPEN_FIR = GUICtrlCreateButton(" O O O ",$ui_w*.01+70, $ui_h*.595+7,40,15)
+$LINK_FIR = GUICtrlCreateButton(" O O O ",$ui_w*.01+110, $ui_h*.595+7,40,15)
 GUICtrlSetFont(-1, 6, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
-GUICtrlSetBkColor($OPEN_FIR,0xbcbcbc)
+GUICtrlSetBkColor(-1,0xbcbcbc)
+
+$Delete_currentloc = GUICtrlCreateButton("Delete Current",$ui_w*.01+230, $ui_h*.575+7,120,30)
+GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor(-1, 0x7f7f7f)
 
 GUICtrlCreateLabel("SEARCH ID:", $ui_w*.01, $ui_h*.10, 80, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
@@ -382,7 +388,7 @@ $longvar = GUICtrlCreateLabel("0.0", $ui_w*.055, $ui_h*.57, 140, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
-GUICtrlCreateLabel("OPEN FIR:", $ui_w*.01, $ui_h*.595, 140, 28, 0x0200)
+GUICtrlCreateLabel("LINK TO FIR DB:", $ui_w*.01, $ui_h*.595, 200, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
@@ -391,6 +397,10 @@ GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
 GUICtrlCreateLabel("NEAREST CRIME ID:", $ui_w*.15, $ui_h*.545, 140, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+$nearid = GUICtrlCreateLabel("<ID>", $ui_w*.23, $ui_h*.545, 140, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
@@ -630,7 +640,7 @@ GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
 
 _IENavigate($mainmap,"http://localhost:8843/map_test.html")
 
-$crimlst = GUICtrlCreateListView("Crime ID|latitude|Longitude",$ui_w*.01, $ui_h*.14, $ui_w*.28, $ui_h*.38)
+$crimlst = GUICtrlCreateListView("Crime ID|latitude|Longitude|Title",$ui_w*.01, $ui_h*.14, $ui_w*.28, $ui_h*.38)
 
 #EndRegion
 
@@ -695,7 +705,7 @@ _IENavigate($grph_hndl, "http://localhost:8843")
 ConsoleWrite("Passed all functions")
 _updatelistnodeclass()
 _loadlatlonglist()
-
+GUICtrlSetBkColor($scene, 0x323232)
 GUISetState(@SW_SHOW)
 GUICtrlSetData($list_nodeedit,"Description goes here..")
 
@@ -808,8 +818,16 @@ While 1
 			_SQLite_GetTable2d(-1,"Select * FROM map;",$arysql,$aryrowsql,$aryclmnsql)
 			_ArrayDisplay($arysql,"Map database")
 
+		Case $Delete_currentloc
+			$seleccrim = _GUICtrlListView_GetItemTextArray($crimlst)
+			If Not @error Then
+				_SQLite_Exec ( -1, "DELETE FROM map WHERE latitude like " &$seleccrim[2]   &" AND longitude like " &$seleccrim[3] &";")
+				_loadlatlonglist()
+			EndIf
 
-
+		Case $search_id
+			$iI = _GUICtrlListView_FindInText($crimlst, GUICtrlRead($search_id), -1)
+			_GUICtrlListView_EnsureVisible($crimlst, $iI)
 
 	EndSwitch
 
@@ -818,6 +836,11 @@ If $curlatln <> '' Then
 	$currentlatln = StringSplit(StringTrimRight(StringTrimLeft($curlatln,1),1),",", $STR_NOCOUNT )
 	GUICtrlSetData($latvar,$currentlatln[0])
 	GUICtrlSetData($longvar,$currentlatln[1])
+	Local $hQuery,$aRow
+	_SQLite_Query(-1, 'SELECT * FROM map ORDER BY ABS(latitude - '&$currentlatln[0]&') + ABS(longitude - ' &$currentlatln[1] &') ASC;', $hQuery)
+	_SQLite_FetchData($hQuery, $aRow, False, False)
+	$crmid_near = $aRow[5]
+	GUICtrlSetData($nearid,$crmid_near)
 EndIf
 
 WEnd
@@ -825,6 +848,14 @@ WEnd
 #EndRegion
 
 #Region Functions
+
+Func distancebtwnlatlongMeters($lat1, $lon1, $lat2, $lon2)
+  $x = _Radian( $lon1 - $lon2 ) * cos( _Radian( ($lat1+$lat2) /2 ) )
+  $y = _Radian( $lat1 - $lat2 )
+  $dist = 6371000.0 * sqrt( $x*$x + $y*$y )
+
+  return $dist
+EndFunc
 
 Func _writetodb($curdrops)
 _SQLite_Exec(-1, "INSERT INTO map (latitude,longitude,radius,color,crimeid,opacity,time,title,type) VALUES ('" &_ArrayToString($curdrops,"','") &"');")
@@ -836,7 +867,7 @@ _GUICtrlListView_DeleteAllItems($crimlst)
 Local $hQuery,$aRow
 _SQLite_Query(-1, "SELECT * FROM map ;", $hQuery)
 While _SQLite_FetchData($hQuery, $aRow, False, False) = $SQLITE_OK
-	GUICtrlCreateListViewItem($aRow[5]&"|"&$aRow[1]&"|"&$aRow[2],$crimlst)
+	GUICtrlCreateListViewItem($aRow[5]&"|"&$aRow[1]&"|"&$aRow[2]&"|"&$aRow[8],$crimlst)
 WEnd
 _SQLite_QueryFinalize($hQuery)
 EndFunc
@@ -953,26 +984,23 @@ Func _hovermethod($id)
 Switch $id
 	Case $scene,$map,$DB
 		GUICtrlSetBkColor($id, 0x323232)
+		Local $lf[] = [$scene,$map,$DB]
+		_setelse($lf,$id,0x191919)
 
 	Case $file_button,$save_button,$settings_button
 		GUICtrlSetBkColor($id, 0x7f7f7f)
+		Local $lf[] = [$file_button,$save_button,$settings_button]
+		_setelse($lf,$id,0x323232)
 
 EndSwitch
-
-;return the button clicked before this button to its original color
-Switch $lastid
-	Case $scene,$map,$DB
-		GUICtrlSetBkColor($lastid ,  0x191919)
-
-	Case $file_button,$save_button,$settings_button
-		GUICtrlSetBkColor($lastid,0x323232)
-
-
-EndSwitch
-$lastid = $id
 
 EndFunc
 
+Func _setelse($ary,$selec,$corl)
+For $i = 0 To UBound($ary)-1
+	If $ary[$i] <> $selec Then GUICtrlSetBkColor($ary[$i],$corl)
+Next
+EndFunc
 
 Func WM_COMMAND($hWnd, $iMsg, $wParam, $lParam)
 	Local $nNotifyCode = _WinAPI_HiWord($wParam)
