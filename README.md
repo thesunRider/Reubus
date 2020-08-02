@@ -93,4 +93,4 @@ See list of contributers: [contributors](https://github.com/HacKP-CyberDome/reub
  ## Acknowledgments 
 
 
-* Hat tip to anyone whose code was used **Inspiration** etc 
+* Hat tip to anyone whose code was used as **Inspiration** etc 
