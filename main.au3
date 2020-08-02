@@ -4,6 +4,7 @@
 #include <ColorConstants.au3>
 #include <Process.au3>
 #include "MetroGUI-UDF\MetroGUI_UDF.au3"
+#include <Math.au3>
 #include "MetroGUI-UDF\_GUIDisable.au3" ; For dim effects when msgbox is displayed
 #include <GUIConstants.au3>
 #include <GuiListView.au3>
@@ -11,7 +12,10 @@
 #include <Xml.au3>
 #include <GDIPlus.au3>
 #include <String.au3>
+#include <Misc.au3>
+#include <DateTimeConstants.au3>
 #include <Json.au3>
+#include <GuiDateTimePicker.au3>
 #include <WindowsConstants.au3>
 #include <SQLite.au3>
 
@@ -40,12 +44,14 @@ RegWrite("HKEY_CURRENT_USER\Software\Microsoft\Internet Explorer\Main\FeatureCon
 RegWrite("HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Internet Explorer\MAIN\FeatureControl\FEATURE_BROWSER_EMULATION", _ProcessGetName(@AutoItPID), "REG_DWORD", $regValue)
 
 ;delete cache
-;$ClearID = "8"
-;RunWait("RunDll32.exe InetCpl.cpl,ClearMyTracksByProcess " & $ClearID)
+$ClearID = "8"
+RunWait("RunDll32.exe InetCpl.cpl,ClearMyTracksByProcess " & $ClearID)
 
 
 Global $mapaddress = "http://localhost:8843/map_test.html"
-Global $lastid = 0
+Global $lastid = 0,$currentlatln
+
+Global $drop_array
 
 #EndRegion
 
@@ -294,13 +300,7 @@ GUICtrlCreateLabel("", $ui_w*.44, $ui_h*.665, $ui_w*.395, $ui_h*.283, $WS_BORDER
 #EndRegion
 
 
-
-
-
-
 GUICtrlCreateTabItem("tab2")
-
-
 #Region Tab2
 
 ;TAB2 DESIGN
@@ -350,18 +350,16 @@ GUICtrlCreateLabel("",$ui_w*.71, $ui_h*.12, $ui_w*.28, $ui_h*.51, $WS_BORDER)
 
 $search_id = GUICtrlCreateInput("", $ui_w*.061, $ui_h*.105, 200, 22) ; search id input box
 
-$OPEN_FIR = GUICtrlCreateButton(" O O O ",$ui_w*.01+70, $ui_h*.595+7,40,15)
-GUICtrlSetFont(-1, 6, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xffffff)
-GUICtrlSetBkColor($OPEN_FIR,0xbcbcbc)
 
-GUICtrlCreateLabel("SEARCH ID:", $ui_w*.01, $ui_h*.10, 80, 28, 0x0200)
+$Delete_currentloc = GUICtrlCreateButton("DELETE CURRENT SELECTION",$ui_w*.01+210, $ui_h*.6,220,30)
+GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor(-1, 0x7f7f7f)
+
+GUICtrlCreateLabel("SEARCH  :", $ui_w*.01, $ui_h*.10, 80, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
-GUICtrlCreateLabel("CRIME ID:", $ui_w*.01, $ui_h*.52, 140, 28, 0x0200)
-GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xffffff)
 
 GUICtrlCreateLabel("LATITUDE:", $ui_w*.01, $ui_h*.545, 140, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
@@ -371,15 +369,28 @@ GUICtrlCreateLabel("LONGITUDE:", $ui_w*.01, $ui_h*.57, 140, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
-GUICtrlCreateLabel("OPEN FIR:", $ui_w*.01, $ui_h*.595, 140, 28, 0x0200)
+$latvar = GUICtrlCreateLabel("0.0", $ui_w*.055, $ui_h*.545, 140, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
-GUICtrlCreateLabel("TIME:", $ui_w*.15, $ui_h*.52, 140, 28, 0x0200)
+$longvar = GUICtrlCreateLabel("0.0", $ui_w*.055, $ui_h*.57, 140, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+$goto_selection = GUICtrlCreateButton("GOTO SELECTION", $ui_w*.01, $ui_h*.6, 200, 28)
+GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor(-1, 0x7f7f7f)
+
+GUICtrlCreateLabel("TIME:", $ui_w*.15, $ui_h*.57, 140, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
 GUICtrlCreateLabel("NEAREST CRIME ID:", $ui_w*.15, $ui_h*.545, 140, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+$nearid = GUICtrlCreateLabel("<ID>", $ui_w*.23, $ui_h*.545, 140, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
@@ -508,29 +519,21 @@ GUICtrlSetColor(-1, 0xffffff)
 
 ;LABELS AND BUTTON IN 3RD STATUS BAR
 
-GUICtrlCreateLabel("LOAD PATTERN BASED ON:", $ui_w*0.45+20, $ui_h*.67, 160, 28, 0x0200)
+GUICtrlCreateLabel("LOAD MAP PATTERN BASED ON SQL QUERY:", $ui_w*0.45+20, $ui_h*.67, 250, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, $GUI_FONTUNDER, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xd5d5d5)
 
-GUICtrlCreateLabel("TIME RANGE:", $ui_w*0.45+25, $ui_h*.73, 160, 28, 0x0200)
-GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xffffff)
+$sql_filterquery = GUICtrlCreateEdit("SELECT * FROM map", $ui_w*0.45+25, $ui_h*.71, 280, 140)
 
-GUICtrlCreateLabel("LAT/LONG RANGE:", $ui_w*0.45+25, $ui_h*.76, 160, 28, 0x0200)
-GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+$exec_query = GUICtrlCreateButton("Execute query", $ui_w*0.45+40, $ui_h*.90, 120, 30)
+GUICtrlSetFont(-1, 11, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor(-1, 0x7f7f7f)
 
-GUICtrlCreateLabel("CONVICT ID:", $ui_w*0.45+25, $ui_h*.79, 160, 28, 0x0200)
-GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+$view_mapdb = GUICtrlCreateButton("View map db", $ui_w*0.45+170, $ui_h*.90, 120, 30)
+GUICtrlSetFont(-1, 11, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
-
-GUICtrlCreateLabel("CONVICT PARAM:", $ui_w*0.45+25, $ui_h*.82, 160, 28, 0x0200)
-GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xffffff)
-
-GUICtrlCreateLabel("CRIME TYPE:", $ui_w*0.45+25, $ui_h*.85, 160, 28, 0x0200)
-GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor(-1, 0x7f7f7f)
 
 ;LABELS AND BUTTON IN 4TH STATUS BAR
 
@@ -545,6 +548,19 @@ $LONG_IN = GUICtrlCreateInput("", $ui_w*.87+40, $ui_h*.675+3, 145, 22) ; LAT inp
 
 $ADDRESS_IN = GUICtrlCreateInput("", $ui_w*.74+70, $ui_h*.725+3, 180, 22) ; LAT input box
 
+$rangcirc = GUICtrlCreateInput("10", $ui_w*.80, $ui_h*.835,100,25)
+$opacirc = GUICtrlCreateInput("0.5", $ui_w*.95, $ui_h*.835,50,25)
+$titlcirc = GUICtrlCreateInput("",$ui_w*.80, $ui_h*.880,270)
+
+$crimidcirc = GUICtrlCreateInput("",$ui_w*.91, $ui_h*.80,70,25)
+GUICtrlCreateUpdown(-1)
+
+$crmtyp = GUICtrlCreateCombo("Unknown",$ui_w*.68, $ui_h*.92, 120,95)
+GUICtrlSetData(-1,"Theft|Accident|Rape|Murder","Unknown")
+
+$timecirc =  GUICtrlCreateDate("",$ui_w*.83, $ui_h*.92 ,190,20)
+GUICtrlSendMsg(-1, $DTM_SETFORMATW, 0, "yyyy/MM/dd HH:mm:ss")
+
 $DROP_CIRCLE = GUICtrlCreateButton("DROP CIRCLE", $ui_w*.68, $ui_h*.81, 120,45)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
@@ -554,6 +570,26 @@ $browse_COLOUR = GUICtrlCreateButton(" O O O ",$ui_w*.77+53, $ui_h*.802,40,16)
 GUICtrlSetFont(-1, 6, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor($browse_COLOUR,0xbcbcbc)
+
+$color_selected = GUICtrlCreateLabel("0xFF0000",$ui_w*.80+53,$ui_h*.802,100,16)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xFF0000)
+
+GUICtrlCreateLabel("Theft type:",$ui_w*.68, $ui_h*.89, 120,95)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("Meter",$ui_w*.87, $ui_h*.835,100,25)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("CRMID:",$ui_w*.875, $ui_h*.80,100)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("Select Time:",$ui_w*.765, $ui_h*.92,100)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
 
 GUICtrlCreateLabel("LAT:", $ui_w*.74, $ui_h*.675, 30, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
@@ -575,20 +611,26 @@ GUICtrlCreateLabel("RANGE:", $ui_w*.77, $ui_h*.835, 160, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
-GUICtrlCreateLabel("OPACITY:", $ui_w*.89, $ui_h*.835, 160, 28, 0x0200)
+GUICtrlCreateLabel("Title:", $ui_w*.77, $ui_h*.880, 160, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("OPACITY:", $ui_w*.91, $ui_h*.835, 160, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+
 
 GUICtrlCreateLabel("CIRCLE", $ui_w*.961, $ui_h*.79, 160, 28, 0x0200)
 GUICtrlSetFont(-1, 11, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
-GUICtrlCreateObj($mainmap,$ui_w*.3, $ui_h*.1, $ui_w*.4, $ui_h*.55)
+$map_hndl = GUICtrlCreateObj($mainmap,$ui_w*.3, $ui_h*.1, $ui_w*.4, $ui_h*.55)
 GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
 
 _IENavigate($mainmap,"http://localhost:8843/map_test.html")
 
-$crimlst = GUICtrlCreateListView("Crime ID|latitude|Longitude",$ui_w*.01, $ui_h*.14, $ui_w*.28, $ui_h*.38)
+$crimlst = GUICtrlCreateListView("Crime ID|latitude|Longitude|Title",$ui_w*.01, $ui_h*.14, $ui_w*.28, $ui_h*.38)
 
 #EndRegion
 
@@ -640,9 +682,9 @@ GUICtrlSetBkColor($DB, 0x191919)
 
 #EndRegion
 
-;Do
-;Sleep(50)
-;Until $mainmap.document.getElementById("debug").value == "1256"
+Do
+Sleep(50)
+Until $mainmap.document.getElementById("debug").value == "1256"
 
 GUIRegisterMsg($WM_COMMAND, "WM_COMMAND")
 
@@ -650,13 +692,13 @@ GUIRegisterMsg($WM_COMMAND, "WM_COMMAND")
 Global $grph = GUICtrlCreateObj($grph_hndl, 0, $ui_h*.1, $ui_w*.65, $ui_h*.55)
 GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
 _IENavigate($grph_hndl, "http://localhost:8843")
-
 ConsoleWrite("Passed all functions")
 _updatelistnodeclass()
 _loadlatlonglist()
+GUICtrlSetBkColor($scene, 0x323232)
 GUISetState(@SW_SHOW)
 GUICtrlSetData($list_nodeedit,"Description goes here..")
-
+_redrawmap()
 
 While 1
 	$nMsg = GUIGetMsg()
@@ -671,27 +713,30 @@ While 1
 		Case $GUI_MINIMIZE_BUTTON
 			GUISetState(@SW_MINIMIZE, $gui)
 
+		;GUI Response for tabs
+
 		Case $map
 			ConsoleWrite("clicked map "&@CRLF)
 			GUICtrlSetState($grph,$GUI_HIDE)
 			_GUICtrlTab_ActivateTab($maintab,1)
+
+		Case $scene
+			ConsoleWrite("clicked scne "&@CRLF)
+			GUICtrlSetState($grph,$GUI_SHOW)
+			_GUICtrlTab_ActivateTab($maintab,0)
+
+		;GUI Response for Scene
 
 		Case $add_node
 			_nodeaddnode()
 			_GUICtrlListView_DeleteAllItems($list_nodeclass)
 			_updatelistnodeclass()
 
-		;GUI Response for Scene
-
 		Case $export_node_connection
 			$nodeserial = _execjavascript($grph_hndl,"JSON.stringify(graph.serialize(),null,2);")
 			$path = FileSaveDialog("Save Json As",@ScriptDir &"\Json\","Jsons (*.json)",$FD_PATHMUSTEXIST)
 			FileWrite($path,$nodeserial)
 
-		Case $scene
-			ConsoleWrite("clicked scne "&@CRLF)
-			GUICtrlSetState($grph,$GUI_SHOW)
-			_GUICtrlTab_ActivateTab($maintab,0)
 
 		Case $clear_nodes
 			_IEAction($grph_hndl,"refresh")
@@ -748,16 +793,100 @@ While 1
 				If IsArray($mapkom) Then _zoomtoaddress($mapkom[2],$mapkom[3])
 			EndIf
 
+		Case $browse_COLOUR
+			$chosn = _ChooseColor(2,$COLOR_RED,2)
+			GUICtrlSetData($color_selected,$chosn)
+			GUICtrlSetColor($color_selected,$chosn)
+
+		Case $DROP_CIRCLE
+			Local $curdrop[] = [$currentlatln[0],$currentlatln[1],GUICtrlRead($rangcirc),GUICtrlRead($color_selected),GUICtrlRead($crimidcirc),GUICtrlRead($opacirc),GUICtrlRead($timecirc),GUICtrlRead($titlcirc),GUICtrlRead($crmtyp)]
+			_ArrayAdd($drop_array,$curdrop)
+			_drawcircle($curdrop[7]&":"&$curdrop[4],$curdrop[0],$curdrop[1],$curdrop[2],$curdrop[3],$curdrop[5])
+			_writetodb($curdrop)
+
+		Case $view_mapdb
+			Local $arysql,$aryrowsql,$aryclmnsql
+			_SQLite_GetTable2d(-1,"Select * FROM map;",$arysql,$aryrowsql,$aryclmnsql)
+			_ArrayDisplay($arysql,"Map database")
+
+		Case $Delete_currentloc
+			$seleccrim = _GUICtrlListView_GetItemTextArray($crimlst)
+			If Not @error Then
+				_SQLite_Exec ( -1, "DELETE FROM map WHERE latitude like " &$seleccrim[2]   &" AND longitude like " &$seleccrim[3] &";")
+				_loadlatlonglist()
+			EndIf
+
+		Case $search_id
+			$iI = _GUICtrlListView_FindInText($crimlst, GUICtrlRead($search_id), -1)
+			_GUICtrlListView_EnsureVisible($crimlst, $iI)
+
+		Case $REDRAW_MAP
+			_redrawmap()
+
+		Case $goto_selection
+			$seleccrim = _GUICtrlListView_GetItemTextArray($crimlst)
+			_zoomtoaddress($seleccrim[2],$seleccrim[3])
+
+		Case $exec_query
+			_redrawbasedonquery(GUICtrlRead($sql_filterquery))
+
+		Case $CLEAR_MAP
+			_IENavigate($mainmap,"refresh")
+
 
 	EndSwitch
+
+$curlatln = _getcurlatln()
+If $curlatln <> '' Then
+	$currentlatln = StringSplit(StringTrimRight(StringTrimLeft($curlatln,1),1),",", $STR_NOCOUNT )
+	GUICtrlSetData($latvar,$currentlatln[0])
+	GUICtrlSetData($longvar,$currentlatln[1])
+	Local $hQuery,$aRow
+	_SQLite_Query(-1, 'SELECT * FROM map ORDER BY ABS(latitude - '&$currentlatln[0]&') + ABS(longitude - ' &$currentlatln[1] &') ASC;', $hQuery)
+	_SQLite_FetchData($hQuery, $aRow, False, False)
+	$crmid_near = $aRow[5]
+	GUICtrlSetData($nearid,$crmid_near)
+EndIf
+
 WEnd
 
 #EndRegion
 
 #Region Functions
 
-Func _writetodb($lat,$lon,$rad,$clr,$crimid,$opac,$time,$title)
+Func _redrawbasedonquery($querypass)
+Local $arysql,$aryrowsql,$aryclmnsql
+$ret = _SQLite_GetTable2d(-1,$querypass,$arysql,$aryrowsql,$aryclmnsql)
+If Not @error Then
+_IEAction($mainmap,"refresh")
+For $i = 1 to UBound($arysql)-1
+	_drawcircle($arysql[$i][8]&":"&$arysql[$i][5],$arysql[$i][1],$arysql[$i][2],$arysql[$i][3],$arysql[$i][4],$arysql[$i][6])
+Next
+Else
+MsgBox($MB_ICONERROR,"Error Query","Error in sql query " &@CRLF &_SQLite_ErrMsg() &@CRLF &"Please validate your query")
+EndIf
+EndFunc
 
+Func _redrawmap()
+Local $arysql,$aryrowsql,$aryclmnsql
+_SQLite_GetTable2d(-1,"Select * FROM map;",$arysql,$aryrowsql,$aryclmnsql)
+_IEAction($mainmap,"refresh")
+For $i = 1 to UBound($arysql)-1
+	_drawcircle($arysql[$i][8]&":"&$arysql[$i][5],$arysql[$i][1],$arysql[$i][2],$arysql[$i][3],$arysql[$i][4],$arysql[$i][6])
+Next
+EndFunc
+
+Func distancebtwnlatlongMeters($lat1, $lon1, $lat2, $lon2)
+  $x = _Radian( $lon1 - $lon2 ) * cos( _Radian( ($lat1+$lat2) /2 ) )
+  $y = _Radian( $lat1 - $lat2 )
+  $dist = 6371000.0 * sqrt( $x*$x + $y*$y )
+
+  return $dist
+EndFunc
+
+Func _writetodb($curdrops)
+_SQLite_Exec(-1, "INSERT INTO map (latitude,longitude,radius,color,crimeid,opacity,time,title,type) VALUES ('" &_ArrayToString($curdrops,"','") &"');")
+_loadlatlonglist()
 EndFunc
 
 Func _loadlatlonglist()
@@ -765,7 +894,7 @@ _GUICtrlListView_DeleteAllItems($crimlst)
 Local $hQuery,$aRow
 _SQLite_Query(-1, "SELECT * FROM map ;", $hQuery)
 While _SQLite_FetchData($hQuery, $aRow, False, False) = $SQLITE_OK
-	GUICtrlCreateListViewItem($aRow[5]&"|"&$aRow[1]&"|"&$aRow[2],$crimlst)
+	GUICtrlCreateListViewItem($aRow[5]&"|"&$aRow[1]&"|"&$aRow[2]&"|"&$aRow[8],$crimlst)
 WEnd
 _SQLite_QueryFinalize($hQuery)
 EndFunc
@@ -882,26 +1011,23 @@ Func _hovermethod($id)
 Switch $id
 	Case $scene,$map,$DB
 		GUICtrlSetBkColor($id, 0x323232)
+		Local $lf[] = [$scene,$map,$DB]
+		_setelse($lf,$id,0x191919)
 
 	Case $file_button,$save_button,$settings_button
 		GUICtrlSetBkColor($id, 0x7f7f7f)
+		Local $lf[] = [$file_button,$save_button,$settings_button]
+		_setelse($lf,$id,0x323232)
 
 EndSwitch
-
-;return the button clicked before this button to its original color
-Switch $lastid
-	Case $scene,$map,$DB
-		GUICtrlSetBkColor($lastid ,  0x191919)
-
-	Case $file_button,$save_button,$settings_button
-		GUICtrlSetBkColor($lastid,0x323232)
-
-
-EndSwitch
-$lastid = $id
 
 EndFunc
 
+Func _setelse($ary,$selec,$corl)
+For $i = 0 To UBound($ary)-1
+	If $ary[$i] <> $selec Then GUICtrlSetBkColor($ary[$i],$corl)
+Next
+EndFunc
 
 Func WM_COMMAND($hWnd, $iMsg, $wParam, $lParam)
 	Local $nNotifyCode = _WinAPI_HiWord($wParam)
@@ -939,8 +1065,6 @@ Func _CheckHover($inpgui,$cntrl)
     EndIf
 EndFunc   ;==>_CheckHover
 
-
-
 Func _getcurlatln()
 $curlatlong = $mainmap.document.getElementById("latlong").value
 $mainmap.document.getElementById("latlong").value = ""
@@ -948,7 +1072,7 @@ Return $curlatlong
 EndFunc
 
 Func _drawcircle($title,$lat,$long,$radius,$color,$opac)
-$exec = "drawcircle('" &$title &"'," &$lat &"," &$long &"," &$radius*0.621371 &",'" &$color &"'," &$opac &");"
+$exec = "drawcircle('" &$title &"'," &$lat &"," &$long &"," &$radius*0.621371 &",'#" &StringTrimLeft($color,2) &"'," &$opac &");"
 ConsoleWrite($exec)
 $mainmap.document.parentwindow.eval($exec)
 EndFunc

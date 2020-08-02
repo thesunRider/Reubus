@@ -45,7 +45,7 @@ Launch the main.au3 file to build from source in Scite or reubus.exe to execute 
 goto [http://localhost:8843](http://localhost:8843)
 to check wether the node editor is working.
 
-Open IE and load the maptest.html to rum a check on wether ActiveX is enabled.
+Open IE and load the maptest.html to rum a check on whether ActiveX is enabled.
 
 ### Adding Packages
 
@@ -88,9 +88,9 @@ See list of contributers: [contributors](https://github.com/HacKP-CyberDome/reub
 
  ## License
 
- This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+ This project is licensed under the **MIT License** - see the [LICENSE.md](LICENSE.md) file for details
 
  ## Acknowledgments 
 
 
-* Hat tip to anyone whose code was used * Inspiration * etc 
+* Hat tip to anyone whose code was used as **Inspiration** etc 
