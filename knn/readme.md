@@ -1,1 +1,1 @@
-A simple KNN Model for future reference
+A sample KNN algorithm program for future reference
