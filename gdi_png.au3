@@ -1,63 +1,59 @@
-#include <GUIConstants.au3>
-#include <GuiListView.au3>
-#include <Array.au3>
-#include <File.au3>
-#include <ButtonConstants.au3>
+#include <GUIConstantsEx.au3>
+#include <FileConstants.au3>
 
+Example()
 
-Global $Fill = @ScriptDir & "\sample.ini"
+Func Example()
+    Local $sPDF_path
+    Local $Gui = GUICreate("PDF Viewer", 900, 600)
+    GUISetBkColor(0xa0d0a0)
 
-IniWriteSection(@ScriptDir & "\sample.ini", "ITEM1", "1=2")
-IniWriteSection(@ScriptDir & "\sample.ini", "ITEM2", "1=3")
-IniWriteSection(@ScriptDir & "\sample.ini", "ITEM3", "1=4")
-IniWriteSection(@ScriptDir & "\sample.ini", "ITEM4", "1=5")
-IniWriteSection(@ScriptDir & "\sample.ini", "ITEM5", "1=6")
-IniWriteSection(@ScriptDir & "\sample.ini", "ITEM6", "1=7")
-IniWriteSection(@ScriptDir & "\sample.ini", "ITEM7", "1=8")
-IniWriteSection(@ScriptDir & "\sample.ini", "ITEM8", "1=9")
-IniWriteSection(@ScriptDir & "\sample.ini", "ITEM9", "1=10")
-IniWriteSection(@ScriptDir & "\sample.ini", "ITEM10", "1=11")
-IniWriteSection(@ScriptDir & "\sample.ini", "ITEM11", "1=12")
+    Local $oIE_Obj = ObjCreate("Shell.Explorer.2") ; Instantiate a BrowserControl
+    GUICtrlCreateObj($oIE_Obj, 5, 5, 780, 590); Place the BrowserControl on the GUI
+    $oIE_Obj.navigate('about:blank')
 
-$Gui = GUICreate("Gui", 300, 250)
-$LV = GUICtrlCreateListView("Item|Value", 18, 40, 260, 200)
-_GUICtrlListView_SetExtendedListViewStyle($LV, BitOR($LVS_EX_FULLROWSELECT, $LVS_EX_GRIDLINES))
-GUICtrlSendMsg(-1, 0x101E, 0, 130)
-GUICtrlSendMsg(-1, 0x101E, 1, 125)
-;GUICtrlCreateTabItem("") ; This ends the tab item creation
-$Button2 = GUICtrlCreateButton("Search", 180, 10, 100, 22, 0)
-$Input = GUICtrlCreateInput("Enter Search Term...", 20, 10, 150, 22)
+    Local $hButtonLoad = GUICtrlCreateButton("Load pdf", 795, 5, 100, 295)
+    Local $hButtonExit = GUICtrlCreateButton("Exit", 795, 300, 100, 295)
+    GUISetState()
+    While 1
+        $idMsg = GUIGetMsg()
+        Select
+            Case $idMsg = $GUI_EVENT_CLOSE
+                ExitLoop
+            Case $idMsg = $hButtonLoad
+                ; Display an open dialog to select a pdf document.
+                $sPDF_path = FileOpenDialog("select a pdf document", @ScriptDir & "\", "pdf (*.pdf)", $FD_FILEMUSTEXIST)
+                If Not @error Then
+                    $oIE_Obj.Stop() ; stop loadinh (if any in progress)
+                    $oIE_Obj.document.Write(MakeHTML($sPDF_path)) ; inject lising directly to the HTML document
+                    $oIE_Obj.document.execCommand("Refresh")
+                EndIf
 
-Populate()
-GUISetState(@SW_SHOW)
+            Case $idMsg = $hButtonExit
+                ExitLoop
 
-While 1
-    $nMsg = GUIGetMsg()
-    Switch $nMsg
-        Case $GUI_EVENT_CLOSE
-            FileDelete($Fill)
-            Exit
-        Case $Button2
-            Search()
-    EndSwitch
-WEnd
+        EndSelect
+    WEnd
+    GUIDelete()
+EndFunc   ;==>Example
 
-
-Func Populate()
-    Local $aArray = IniReadSectionNames($Fill)
-    If Not @error Then
-        ; Enumerate through the array displaying the section names.
-        For $i = 1 To $aArray[0]
-        $Value = IniRead($Fill, $aArray[$i], "1", "")
-        GUICtrlCreateListViewItem($aArray[$i] & "|" & $Value, $LV)
-        ;_GUICtrlListView_SimpleSort($ListView1, $Sort, 0, False) ;<<<<<<<<<<<<<< Works but slows down load time.
-        Next
-    EndIf
-EndFunc
-
-
-Func Search()
-    $value = GUICtrlRead($Input)
-    $iI = _GUICtrlListView_FindInText($LV, $value, -1)
-    _GUICtrlListView_EnsureVisible($LV, $iI)
-EndFunc
+Func MakeHTML($sPdfPath = '')
+    Local $sHTML = '<html>' & @CRLF & _
+            '<head>' & @CRLF & _
+            '<meta http-equiv="X-UA-Compatible" content="IE=edge" />' & @CRLF & _
+            '</head>' & @CRLF & _
+            '<body>' & @CRLF & _
+            '<div class="container">' & @CRLF & _
+            '  <div class="pdf">' & @CRLF & _
+            '   <object data="' & $sPdfPath & '" type="application/pdf" width="100%" height="100%">' & @CRLF & _
+            '    <iframe src="' & $sPdfPath & '" width="100%"    height="100%" style="border: none;">' & @CRLF & _
+            '     This browser does not support PDFs. Please download the PDF to view it: ' & @CRLF & _
+            '     <a href="' & $sPdfPath & '">Download PDF</a>' & @CRLF & _
+            '    </iframe>' & @CRLF & _
+            '   </object>' & @CRLF & _
+            '  </div>' & @CRLF & _
+            '</div>' & @CRLF & _
+            '</body>' & @CRLF & _
+            '</html>'
+    Return $sHTML
+EndFunc   ;==>MakeHTML
