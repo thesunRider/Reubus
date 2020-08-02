@@ -88,7 +88,7 @@ See list of contributers: [contributors](https://github.com/HacKP-CyberDome/reub
 
  ## License
 
- This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+ This project is licensed under the **MIT License** - see the [LICENSE.md](LICENSE.md) file for details
 
  ## Acknowledgments 
 
