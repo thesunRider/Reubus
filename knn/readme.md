@@ -1,1 +1,1 @@
-A simple KNN Model
+A simple KNN Model for future reference
