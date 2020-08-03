@@ -1,11 +1,9 @@
 # A Machine Learning program to predict the possible kind of crime depending on the location of the crime.
 
-The KNN algorithm has been used in this program.
+This is a basic program just to know and figure out which algorithm works best for such datasets.
 
-The prediction is roughly accurate.
+The dataset had 5.6 lakh entries/rows.
 
-The dataset consisted of 5.6L entries of which only 2k were used due to CPU Limitations and easier computing.
+The KNN model was used and after a certain number of epochs an accuracy of 96% was achieved.
 
-One particular "crime" outnumbered the rest due to which mostly the output is that particular crime.
-
-A better dataset would have given a better prediction.
+This program will be the basic skeleton for the backend ML model

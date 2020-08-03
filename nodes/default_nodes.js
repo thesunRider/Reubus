@@ -1,54 +1,77 @@
+function end_path()
+{
+	this.addInput("Input1");
+}
+
+end_path.title = "End Path";
+LiteGraph.registerNodeType("Crime/End Path",end_path)
+
+function Crime_Base()
+{
+  this.addInput("Evidence Box");
+  this.addInput("Link CrimeID");
+  this.addOutput("Start");
+  this.properties = { precision: 1 };
+}
+
+//name to show
+Crime_Base.title = "Crime Base";
+
+//register in the system
+LiteGraph.registerNodeType("Crime/Crime Base", Crime_Base );
+
+
 function node0()
 {
  return 0;
 }
 
-function node1(a)
+function node1(Input1)
 {
-return a;
+return Input1;
 }
 
-function node2(a,b)
+function node2(Input1,Input2)
 {
-return a;
+return Input1;
 }
 
-function node3(a,b,c)
+function node3(Input1,Input2,Input3)
 {
-return a;
+return Input1;
 }
 
-function node4(a,b,c,d)
+function node4(Input1,Input2,Input3,Input4)
 {
-return a;
+return Input1;
 }
 
-function node5(a,b,c,d,e)
+function node5(Input1,Input2,Input3,Input4,Input5)
 {
-return a;
+return Input1;
 }
 
-function node6(a,b,c,d,e,f)
+function node6(Input1,Input2,Input3,Input4,Input5,Input6)
 {
-return a;
+return Input1;
 }
 
-function node7(a,b,c,d,e,f,g)
+function node7(Input1,Input2,Input3,Input4,Input5,Input6,Input7)
 {
-return a;
+return Input1;
 }
 
-function node8(a,b,c,d,e,f,g,h)
+function node8(Input1,Input2,Input3,Input4,Input5,Input6,Input7,Input8)
 {
-return a;
+return Input1;
 }
 
-function node9(a,b,c,d,e,f,g,h,i)
+function node9(Input1,Input2,Input3,Input4,Input5,Input6,Input7,Input8,Input9)
 {
-return a;
+return Input1;
 }
 
-function node10(a,b,c,d,e,f,g,h,i,j)
+function node10(Input1,Input2,Input3,Input4,Input5,Input6,Input7,Input8,Input9,Input10)
 {
-return a;
+return Input1;
 }

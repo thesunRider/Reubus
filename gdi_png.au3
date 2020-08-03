@@ -1,45 +1,59 @@
-; Trap COM errors so that 'Back' and 'Forward'
-; outside of history bounds does not abort script
-; (expect COM errors to be sent to the console)
-
 #include <GUIConstantsEx.au3>
-#include <IE.au3>
-#include <WindowsConstants.au3>
-#include "MetroGUI-UDF\MetroGUI_UDF.au3"
-#include "MetroGUI-UDF\_GUIDisable.au3"
+#include <FileConstants.au3>
 
-Local $oIE = _IECreateEmbedded()
-Local $oIE2 = _IECreateEmbedded()
-;Enable high DPI support: Detects the users DPI settings and resizes GUI and all controls to look perfectly sharp.
-_Metro_EnableHighDPIScaling() ; Note: Requries "#AutoIt3Wrapper_Res_HiDpi=y" for compiling. To see visible changes without compiling, you have to disable dpi scaling in compatibility settings of Autoit3.exe
+Example()
 
-;Set Theme
-_SetTheme("DarkTeal") ;See MetroThemes.au3 for selectable themes or to add more
+Func Example()
+    Local $sPDF_path
+    Local $Gui = GUICreate("PDF Viewer", 900, 600)
+    GUISetBkColor(0xa0d0a0)
 
-;Create resizable Metro GUI
-$Form1 = _Metro_CreateGUI("Example", 1700, 600, -1, -1, True)
+    Local $oIE_Obj = ObjCreate("Shell.Explorer.2") ; Instantiate a BrowserControl
+    GUICtrlCreateObj($oIE_Obj, 5, 5, 780, 590); Place the BrowserControl on the GUI
+    $oIE_Obj.navigate('about:blank')
 
-;Add/create control buttons to the GUI
-$Control_Buttons = _Metro_AddControlButtons(True, True, True, True, True)
+    Local $hButtonLoad = GUICtrlCreateButton("Load pdf", 795, 5, 100, 295)
+    Local $hButtonExit = GUICtrlCreateButton("Exit", 795, 300, 100, 295)
+    GUISetState()
+    While 1
+        $idMsg = GUIGetMsg()
+        Select
+            Case $idMsg = $GUI_EVENT_CLOSE
+                ExitLoop
+            Case $idMsg = $hButtonLoad
+                ; Display an open dialog to select a pdf document.
+                $sPDF_path = FileOpenDialog("select a pdf document", @ScriptDir & "\", "pdf (*.pdf)", $FD_FILEMUSTEXIST)
+                If Not @error Then
+                    $oIE_Obj.Stop() ; stop loadinh (if any in progress)
+                    $oIE_Obj.document.Write(MakeHTML($sPDF_path)) ; inject lising directly to the HTML document
+                    $oIE_Obj.document.execCommand("Refresh")
+                EndIf
 
-GUICtrlCreateObj($oIE, 0, 40, 600, 460)
-GUICtrlCreateObj($oIE2, 700, 40, 600, 460)
-GUISetState(@SW_SHOW) ;Show GUI
+            Case $idMsg = $hButtonExit
+                ExitLoop
 
-_IENavigate($oIE, "http://localhost:8843")
-Sleep(4000)
-_IENavigate($oIE2, "http://localhost:8843")
-; Waiting for user to close the window
-While 1
-    Local $iMsg = GUIGetMsg()
-    Select
-        Case $iMsg = $GUI_EVENT_CLOSE
-            ExitLoop
+        EndSelect
+    WEnd
+    GUIDelete()
+EndFunc   ;==>Example
 
-    EndSelect
-WEnd
-
-GUIDelete()
-
-Exit
-
+Func MakeHTML($sPdfPath = '')
+    Local $sHTML = '<html>' & @CRLF & _
+            '<head>' & @CRLF & _
+            '<meta http-equiv="X-UA-Compatible" content="IE=edge" />' & @CRLF & _
+            '</head>' & @CRLF & _
+            '<body>' & @CRLF & _
+            '<div class="container">' & @CRLF & _
+            '  <div class="pdf">' & @CRLF & _
+            '   <object data="' & $sPdfPath & '" type="application/pdf" width="100%" height="100%">' & @CRLF & _
+            '    <iframe src="' & $sPdfPath & '" width="100%"    height="100%" style="border: none;">' & @CRLF & _
+            '     This browser does not support PDFs. Please download the PDF to view it: ' & @CRLF & _
+            '     <a href="' & $sPdfPath & '">Download PDF</a>' & @CRLF & _
+            '    </iframe>' & @CRLF & _
+            '   </object>' & @CRLF & _
+            '  </div>' & @CRLF & _
+            '</div>' & @CRLF & _
+            '</body>' & @CRLF & _
+            '</html>'
+    Return $sHTML
+EndFunc   ;==>MakeHTML
