@@ -129,7 +129,7 @@ GUICtrlCreateTabItem("tab1")
 ;GUI BACKGROUND
 Global $grph_hndl = _IECreateEmbedded()
 
-$list_nodeedit = GUICtrlCreateEdit("Description",$ui_w*0.74,$ui_h*.68,$ui_w*.09, $ui_h*.25,$ES_READONLY)
+$list_nodeedit = GUICtrlCreateEdit("Description",$ui_w*0.74,$ui_h*.68,$ui_w*.09, $ui_h*.20,$ES_READONLY)
 $list_nodeclass = GUICtrlCreateListView("Folder|Node|Number of Inputs",$ui_w*0.55, $ui_h*.68, $ui_w*.18, $ui_h*.25)
 
 GUICtrlCreateLabel("", 0, $ui_h*.65, $ui_w, $ui_h*.31) ;statusbar
@@ -228,7 +228,7 @@ GUICtrlCreateLabel("Use model set:", $ui_w*0.21+20, $ui_h*.68, 100, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xd5d5d5)
 
-GUICtrlCreateLabel("Train model set using current Scene", $ui_w*0.21+20,  $ui_h*.73, 250, 28, 0x0200)
+$trn_scene = GUICtrlCreateLabel("Train model set using current Scene", $ui_w*0.21+20,  $ui_h*.73, 250, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, $GUI_FONTUNDER , "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xd5d5d5)
 
@@ -284,7 +284,12 @@ GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor(-1, 0x7f7f7f)
 
-$get_nodes_description = GUICtrlCreateButton("GET NODE DESCRIPTION", $ui_w*0.43+25, $ui_h*.82, 140, 25)
+$get_nodes_description = GUICtrlCreateButton("GET NODE DESCP", $ui_w*0.74, $ui_h*.90, 130, 25)
+GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor(-1, 0x7f7f7f)
+
+$load_node_connection = GUICtrlCreateButton("LOAD JSON GRAPH", $ui_w*0.43+25, $ui_h*.82, 140, 25)
 GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor(-1, 0x7f7f7f)
@@ -293,6 +298,11 @@ $export_node_connection = GUICtrlCreateButton("EXPORT JSON GRAPH", $ui_w*0.43+25
 GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor(-1, 0x7f7f7f)
+
+Local $pdf_view = ObjCreate("Shell.Explorer.2") ; Instantiate a BrowserControl
+GUICtrlCreateObj($pdf_view,  $ui_w*.65+35, $ui_h*.15, 470, 405); Place the BrowserControl on the GUI
+$pdf_view.navigate('about:blank')
+
 
 GUICtrlCreateLabel("", $ui_w*.44, $ui_h*.665, $ui_w*.395, $ui_h*.283, $WS_BORDER) ; border to node section
 
@@ -726,6 +736,8 @@ While 1
 			_GUICtrlTab_ActivateTab($maintab,0)
 
 		;GUI Response for Scene
+		;Case $trn_scene
+
 
 		Case $add_node
 			_nodeaddnode()
@@ -779,6 +791,20 @@ While 1
 						ExitLoop
 					EndIf
 				Next
+
+		Case $show_fir
+			$pdf_path = FileOpenDialog("Open FIR pdf",@ScriptDir,"pdf (*.pdf)")
+			If Not @error Then
+                    $pdf_view.Stop() ; stop loadinh (if any in progress)
+                    $pdf_view.document.Write(MakeHTML($pdf_path)) ; inject lising directly to the HTML document
+                    $pdf_view.document.execCommand("Refresh")
+			EndIf
+
+		Case $load_node_connection
+			$jsonpath = FileOpenDialog("Select Graph to import",@ScriptDir,"Json (*.json)")
+			$jsread = "graph.configure(JSON.parse('" &StringReplace(FileRead($jsonpath),@LF,"") &"'));"
+			$grph_hndl.document.parentwindow.eval($jsread)
+
 
 
 		;Gui response for map
@@ -853,6 +879,27 @@ WEnd
 #EndRegion
 
 #Region Functions
+
+Func MakeHTML($sPdfPath = '')
+    Local $sHTML = '<html>' & @CRLF & _
+            '<head>' & @CRLF & _
+            '<meta http-equiv="X-UA-Compatible" content="IE=edge" />' & @CRLF & _
+            '</head>' & @CRLF & _
+            '<body>' & @CRLF & _
+            '<div class="container">' & @CRLF & _
+            '  <div class="pdf">' & @CRLF & _
+            '   <object data="' & $sPdfPath & '" type="application/pdf" width="100%" height="100%">' & @CRLF & _
+            '    <iframe src="' & $sPdfPath & '" width="100%"    height="100%" style="border: none;">' & @CRLF & _
+            '     This browser does not support PDFs. Please download the PDF to view it: ' & @CRLF & _
+            '     <a href="' & $sPdfPath & '">Download PDF</a>' & @CRLF & _
+            '    </iframe>' & @CRLF & _
+            '   </object>' & @CRLF & _
+            '  </div>' & @CRLF & _
+            '</div>' & @CRLF & _
+            '</body>' & @CRLF & _
+            '</html>'
+    Return $sHTML
+EndFunc   ;==>MakeHTML
 
 Func _redrawbasedonquery($querypass)
 Local $arysql,$aryrowsql,$aryclmnsql
@@ -985,6 +1032,7 @@ $nMsg = GUIGetMsg()
 				_GUIDisable($nodeadd)
 				If $yno == 'Yes' Then
 					For $i = 0 To _GUICtrlListView_GetItemCount($listadd) - 1
+						;MsgBox(Default,Default,_GUICtrlListView_GetItemTextArray($listadd, $i))
 						_addnodetodb(_GUICtrlListView_GetItemTextArray($listadd, $i))
 					Next
 					_GUICtrlListView_DeleteAllItems ($listadd)
@@ -1003,7 +1051,10 @@ $inp = StringTrimRight(_StringRepeat('"' &$node[2] &'",',$node[4]),1)
 ;'Node Title|Node Type input|Node Type output|Node Outputs|Node Inputs'
 $fnc = 'LiteGraph.wrapFunctionAsNode("' &$node[1] &'",node' &$node[4] &',"['&$inp&']","'&$node[3]&'");//Description:'&StringReplace($node[5],@CRLF,"\n") &@CRLF
 FileWriteLine(@ScriptDir &"\nodes\customnode_ref.js",$fnc)
+$nodeserial = _execjavascript($grph_hndl,"JSON.stringify(graph.serialize(),null,2);")
 _IEAction($grph_hndl, "refresh")
+$jsread = "graph.configure(JSON.parse('" &StringReplace($nodeserial,@LF,"") &"'));"
+$grph_hndl.document.parentwindow.eval($jsread)
 EndFunc
 
 Func _hovermethod($id)
