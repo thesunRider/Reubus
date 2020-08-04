@@ -1,0 +1,205 @@
+{
+  "last_node_id": 6,
+  "last_link_id": 6,
+  "nodes": [
+    {
+      "id": 3,
+      "type": "Crime/Crime Base",
+      "pos": [
+        137,
+        177
+      ],
+      "size": {
+        "0": 152.8000030517578,
+        "1": 46
+      },
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "Evidence Box",
+          "type": 0,
+          "link": null
+        },
+        {
+          "name": "Link CrimeID",
+          "type": 0,
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Start",
+          "links": [
+            1
+          ]
+        }
+      ],
+      "properties": {
+        "precision": 1
+      }
+    },
+    {
+      "id": 1,
+      "type": "Crime/Start Path",
+      "pos": [
+        306,
+        288
+      ],
+      "size": {
+        "0": 140,
+        "1": 26
+      },
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "Input1",
+          "type": 0,
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Output",
+          "type": "*",
+          "links": [
+            4
+          ]
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": 5,
+      "type": "Mood/Alcoholic",
+      "pos": [
+        488,
+        230
+      ],
+      "size": {
+        "0": 140,
+        "1": 26
+      },
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "Input1",
+          "type": 0,
+          "link": 4
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Output",
+          "type": "*",
+          "links": [
+            5
+          ]
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": 2,
+      "type": "Crime/End Path",
+      "pos": [
+        901,
+        197
+      ],
+      "size": {
+        "0": 140,
+        "1": 26
+      },
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "Input1",
+          "type": 0,
+          "link": 6
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": 6,
+      "type": "Activity/Driving",
+      "pos": [
+        694,
+        185
+      ],
+      "size": {
+        "0": 140,
+        "1": 46
+      },
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "Input1",
+          "type": 0,
+          "link": 5
+        },
+        {
+          "name": "Input2",
+          "type": 0,
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Output",
+          "type": "*",
+          "links": [
+            6
+          ]
+        }
+      ],
+      "properties": {}
+    }
+  ],
+  "links": [
+    [
+      1,
+      3,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      4,
+      1,
+      0,
+      5,
+      0,
+      0
+    ],
+    [
+      5,
+      5,
+      0,
+      6,
+      0,
+      0
+    ],
+    [
+      6,
+      6,
+      0,
+      2,
+      0,
+      0
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "version": 0.4
+}
