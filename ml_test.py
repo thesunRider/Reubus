@@ -21,10 +21,5 @@ svclassifier = SVC(kernel='poly')
 svclassifier.fit(X,y)
 
 y_pred = svclassifier.predict(X_input)
-print(y_pred)
-print(svclassifier.decision_function(X_input))
-
-
-#from sklearn.metrics import classification_report, confusion_matrix
-#print(confusion_matrix(y_test,y_pred))
-#print(classification_report(y_test,y_pred))
+print(y_pred[0])
+print(svclassifier.decision_function(X_input)[0][0])

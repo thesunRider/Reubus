@@ -36,12 +36,8 @@ $ark[1][0] = $strbtwn_crimid
 $ark[1][1] = $strbtwn_name
 $ark[1][2] = $strbtwn_nonodes
 $ark[1][3] = $strbtwn_nolinks
-;_ArrayDisplay($ark)
-;_ArrayDisplay($strbtwn_nodes)
-;_ArrayDisplay($getary)
 
 For $i = 4 To UBound($getary,2)-1
-	;ConsoleWrite($getary[0][$i])
 	For $j = 1 To $strbtwn_nodes[0]
 		If $getary[0][$i] == $strbtwn_nodes[$j] Then $ark[1][$i] = 1
 		If StringIsSpace($ark[1][$i]) Then $ark[1][$i] = 0
