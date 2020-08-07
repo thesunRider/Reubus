@@ -68,11 +68,10 @@ for x in range(0,nolinks):
 			connected = data['nodes'][y]['type']
 
 	nodesconnected.append(origin)
-	nodesconnected.append(connected )
+	nodesconnected.append(connected)
 	if shownodes : print('[' +str(origin)+','+str(connected)+']['+str(data['links'][x][2])+','+str(data['links'][x][4])+']')
 
 
-crmout = {1:crmid,2:name,5:nodesconnected,3:nonodes,4:nolinks}
-with open(datadir + str(crmid), 'wb') as fh:
-   pickle.dump(crmout, fh)
+crmout = {'crmid':crmid,'name':name,'nodesall':nodesconnected,'nonodes':nonodes,'nolinks':nolinks}
+print(crmout)
 

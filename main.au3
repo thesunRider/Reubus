@@ -35,7 +35,8 @@
 _Metro_EnableHighDPIScaling()
 _SetTheme("DarkTeal")
 _SQLite_Startup()
-_SQLite_Open("store.db")
+$store_db = _SQLite_Open("store.db")
+$node_db = _SQLite_Open(@ScriptDir &"\nodes\node_data\node_reg.db")
 _GDIPlus_Startup()
 
 ;enable activeX
@@ -228,7 +229,7 @@ GUICtrlCreateLabel("Use model set:", $ui_w*0.21+20, $ui_h*.68, 100, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xd5d5d5)
 
-$trn_scene = GUICtrlCreateLabel("Train model set using current Scene", $ui_w*0.21+20,  $ui_h*.73, 250, 28, 0x0200)
+$trn_scene = GUICtrlCreateButton("Train model set using current Scene", $ui_w*0.21+20,  $ui_h*.73, 250, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, $GUI_FONTUNDER , "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xd5d5d5)
 
@@ -736,7 +737,9 @@ While 1
 			_GUICtrlTab_ActivateTab($maintab,0)
 
 		;GUI Response for Scene
-		;Case $trn_scene
+		Case $trn_scene
+			$redval = _readcmd('python json_parser.py -m sukubro -f %cd%\json\main3.json -i 22')
+			MsgBox(Default,Default,$redval)
 
 
 		Case $add_node
@@ -832,13 +835,13 @@ While 1
 
 		Case $view_mapdb
 			Local $arysql,$aryrowsql,$aryclmnsql
-			_SQLite_GetTable2d(-1,"Select * FROM map;",$arysql,$aryrowsql,$aryclmnsql)
+			_SQLite_GetTable2d($store_db,"Select * FROM map;",$arysql,$aryrowsql,$aryclmnsql)
 			_ArrayDisplay($arysql,"Map database")
 
 		Case $Delete_currentloc
 			$seleccrim = _GUICtrlListView_GetItemTextArray($crimlst)
 			If Not @error Then
-				_SQLite_Exec ( -1, "DELETE FROM map WHERE latitude like " &$seleccrim[2]   &" AND longitude like " &$seleccrim[3] &";")
+				_SQLite_Exec ( $store_db, "DELETE FROM map WHERE latitude like " &$seleccrim[2]   &" AND longitude like " &$seleccrim[3] &";")
 				_loadlatlonglist()
 			EndIf
 
@@ -868,7 +871,7 @@ If $curlatln <> '' Then
 	GUICtrlSetData($latvar,$currentlatln[0])
 	GUICtrlSetData($longvar,$currentlatln[1])
 	Local $hQuery,$aRow
-	_SQLite_Query(-1, 'SELECT * FROM map ORDER BY ABS(latitude - '&$currentlatln[0]&') + ABS(longitude - ' &$currentlatln[1] &') ASC;', $hQuery)
+	_SQLite_Query($store_db, 'SELECT * FROM map ORDER BY ABS(latitude - '&$currentlatln[0]&') + ABS(longitude - ' &$currentlatln[1] &') ASC;', $hQuery)
 	_SQLite_FetchData($hQuery, $aRow, False, False)
 	$crmid_near = $aRow[5]
 	GUICtrlSetData($nearid,$crmid_near)
@@ -879,6 +882,20 @@ WEnd
 #EndRegion
 
 #Region Functions
+
+
+
+Func _readcmd($cmd)
+Local $iPID = Run(@ComSpec & " /c "&$cmd, @ScriptDir, @SW_HIDE, BitOR($STDERR_CHILD, $STDOUT_CHILD))
+$sOutput = ''
+    While 1
+        $sOutput &= StdoutRead($iPID)
+        If @error Then ; Exit the loop if the process closes or StderrRead returns an error.
+            ExitLoop
+        EndIf
+    WEnd
+Return $sOutput
+EndFunc
 
 Func MakeHTML($sPdfPath = '')
     Local $sHTML = '<html>' & @CRLF & _
@@ -903,7 +920,7 @@ EndFunc   ;==>MakeHTML
 
 Func _redrawbasedonquery($querypass)
 Local $arysql,$aryrowsql,$aryclmnsql
-$ret = _SQLite_GetTable2d(-1,$querypass,$arysql,$aryrowsql,$aryclmnsql)
+$ret = _SQLite_GetTable2d($store_db,$querypass,$arysql,$aryrowsql,$aryclmnsql)
 If Not @error Then
 _IEAction($mainmap,"refresh")
 For $i = 1 to UBound($arysql)-1
@@ -916,7 +933,7 @@ EndFunc
 
 Func _redrawmap()
 Local $arysql,$aryrowsql,$aryclmnsql
-_SQLite_GetTable2d(-1,"Select * FROM map;",$arysql,$aryrowsql,$aryclmnsql)
+_SQLite_GetTable2d($store_db,"Select * FROM map;",$arysql,$aryrowsql,$aryclmnsql)
 _IEAction($mainmap,"refresh")
 For $i = 1 to UBound($arysql)-1
 	_drawcircle($arysql[$i][8]&":"&$arysql[$i][5],$arysql[$i][1],$arysql[$i][2],$arysql[$i][3],$arysql[$i][4],$arysql[$i][6])
