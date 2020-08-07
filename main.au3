@@ -54,6 +54,18 @@ Global $lastid = 0,$currentlatln
 
 Global $drop_array
 
+Global $loader_gui
+Global Const $hDwmApiDll = DllOpen("dwmapi.dll")
+Global $sChkAero = DllStructCreate("int;")
+DllCall($hDwmApiDll, "int", "DwmIsCompositionEnabled", "ptr", DllStructGetPtr($sChkAero))
+Global $bAero = DllStructGetData($sChkAero, 1)
+Global $fStep = 0.02
+If Not $bAero Then $fStep = 1.25
+GUIRegisterMsg($WM_TIMER, "PlayAnim")
+Global $hHBmp_BG, $hB, $iSleep = 20
+Global $iW = 400, $iH = 210,$iPerc
+
+
 #EndRegion
 
 #Region Welcome screen
@@ -95,6 +107,7 @@ While 1
 		Case $start_home
 			ConsoleWrite("starting main app")
 			_Metro_GUIDelete($welcomegui)
+			$loader_gui = _loadscreen()
 			ExitLoop
 
 	EndSwitch
@@ -707,6 +720,7 @@ ConsoleWrite("Passed all functions")
 _updatelistnodeclass()
 _loadlatlonglist()
 GUICtrlSetBkColor($scene, 0x323232)
+_closeloader($loader_gui)
 GUISetState(@SW_SHOW)
 GUICtrlSetData($list_nodeedit,"Description goes here..")
 _redrawmap()
@@ -738,6 +752,19 @@ While 1
 
 		;GUI Response for Scene
 		Case $trn_scene
+			$nodeserial = _execjavascript($grph_hndl,"JSON.stringify(graph.serialize(),null,2);")
+			$path = _TempFile()
+			FileWrite($path,$nodeserial)
+			$redval = _readcmd('python json_parser.py -m sukubro -f "' &$path &'" -i 10212')
+			if Not _checkid($redval) Then
+				_parseaddheader($redval)
+				_writedata($redval)
+			Else
+				MsgBox($IDABORT,"ID ERROR","Error the CrimeID already exists, Please specify another ID!")
+			EndIf
+			FileDelete($path)
+
+		Case $generate_match
 			$nodeserial = _execjavascript($grph_hndl,"JSON.stringify(graph.serialize(),null,2);")
 			$path = _TempFile()
 			FileWrite($path,$nodeserial)
@@ -911,7 +938,7 @@ GUICtrlSetColor(-1, 0xd5d5d5)
 GUICtrlCreateLabel("123", 128, 56, 22, 17)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xd5d5d5)
-$lst_pred = GUICtrlCreateListView("CrimeID|Name|Prediction confidence",20,90,350,110)
+$lst_pred = GUICtrlCreateListView("Predicted CrimeID|Convict|Confidence",20,90,350,110)
 GUICtrlCreateListViewItem($crimid&"|"&$name_pr&"|"&$pred_conf,$lst_pred)
 $clsbutn = GUICtrlCreateButton("Close", 100, 224, 209, 25)
 GUISetState(@SW_SHOW,$creatped)
@@ -1308,6 +1335,119 @@ WEnd
 _Metro_GUIDelete($whergui)
 Return $ret
 EndFunc
+
+
+Func _loadscreen()
+$hGUI = GUICreate("Loading", $iW, $iH, -1, -1, $WS_POPUPWINDOW, $WS_EX_TOPMOST)
+GUISetBkColor(0)
+Global Const $iPic = GUICtrlCreatePic("", 0, 0, $iW, $iH)
+GUICtrlSetState(-1, $GUI_DISABLE)
+GUISetState()
+DllCall("user32.dll", "int", "SetTimer", "hwnd", $hGUI, "int", 0, "int", $iSleep, "int", 0)
+Return $hGUI
+EndFunc
+
+Func _closeloader($guihndl)
+GUIRegisterMsg($WM_TIMER, "")
+GUIDelete($guihndl)
+_WinAPI_DeleteObject($hHBmp_BG)
+EndFunc
+
+Func PlayAnim()
+	$hHBmp_BG = _GDIPlus_RotatingBokeh($iW, $iH, "Patience Watson .." & StringFormat("%2.0f %", $iPerc))
+	$hB = GUICtrlSendMsg($iPic, $STM_SETIMAGE, $IMAGE_BITMAP, $hHBmp_BG)
+	If $hB Then _WinAPI_DeleteObject($hB)
+	_WinAPI_DeleteObject($hHBmp_BG)
+	$iPerc += 0.1
+	If $iPerc > 99.9 Then $iPerc = 0
+EndFunc   ;==>PlayAnim
+
+Func _GDIPlus_RotatingBokeh($iW, $iH, $sString = "Please wait...", $bHBitmap = True)
+	Local Const $hBrushBall1 = _GDIPlus_BrushCreateSolid(0xE004AC6B)
+	Local Const $hBrushBall2 = _GDIPlus_BrushCreateSolid(0xC0E0AB27)
+	Local Const $hBrushBall3 = _GDIPlus_BrushCreateSolid(0xD081B702)
+	Local Const $hBrushBall4 = _GDIPlus_BrushCreateSolid(0xB0E70339)
+	Local Const $hPen = _GDIPlus_PenCreate(0xFF303030)
+	_GDIPlus_PenSetLineJoin($hPen, 2)
+	Local $hBitmap = _GDIPlus_BitmapCreateFromScan0($iW, $iH)
+
+	Local Const $hCtxt = _GDIPlus_ImageGetGraphicsContext($hBitmap)
+	_GDIPlus_GraphicsSetPixelOffsetMode($hCtxt, $GDIP_PIXELOFFSETMODE_HIGHQUALITY)
+	_GDIPlus_GraphicsSetSmoothingMode($hCtxt, 2)
+
+
+
+	Local Const $hBmp_BG = _GDIPlus_BitmapCreateFromMemory(_Background())
+	Local $hBrushTexture = _GDIPlus_TextureCreate($hBmp_BG)
+	_GDIPlus_BitmapDispose($hBmp_BG)
+	_GDIPlus_GraphicsFillRect($hCtxt, 0, 0, $iW, $iH, $hBrushTexture)
+
+
+	Local Const $fDeg = ACos(-1) / 180, $iRadius = 40, $iBallSize = $iRadius / 1.77, $iCircleSize = $iBallSize + 2 * $iRadius, $iBallSize2 = $iBallSize / 2, _
+				$iCircleSize2 = $iCircleSize / 2, $fFontSize = 11, $iW2 = -1 + $iW / 2, $iH2 = -1 + $iH / 2
+	Local Static $iAngle = 0
+	_GDIPlus_GraphicsDrawEllipse($hCtxt, $iW2 - $iCircleSize2, $iH2 - $iCircleSize2, $iCircleSize, $iCircleSize, $hPen)
+	_GDIPlus_GraphicsFillEllipse($hCtxt, -$iBallSize2 + $iW2 + Cos(2.25 * $iAngle * $fDeg) * $iRadius, -$iBallSize2 + $iH2 + Sin(2.25 * $iAngle * $fDeg) * $iRadius, $iBallSize, $iBallSize, $hBrushBall1)
+	_GDIPlus_GraphicsFillEllipse($hCtxt, -$iBallSize2 + $iW2 + Cos(1.75 * $iAngle * $fDeg) * $iRadius, -$iBallSize2 + $iH2 + Sin(1.75 * $iAngle * $fDeg) * $iRadius, $iBallSize, $iBallSize, $hBrushBall2)
+	_GDIPlus_GraphicsFillEllipse($hCtxt, -$iBallSize2 + $iW2 + Cos(1.66 * $iAngle * $fDeg) * $iRadius, -$iBallSize2 + $iH2 + Sin(1.66 * $iAngle * $fDeg) * $iRadius, $iBallSize, $iBallSize, $hBrushBall3)
+	_GDIPlus_GraphicsFillEllipse($hCtxt, -$iBallSize2 + $iW2 + Cos(1.33 * $iAngle * $fDeg) * $iRadius, -$iBallSize2 + $iH2 + Sin(1.33 * $iAngle * $fDeg) * $iRadius, $iBallSize, $iBallSize, $hBrushBall4)
+	$iAngle += 2.5
+
+	Local Const $hFormat = _GDIPlus_StringFormatCreate()
+	Local Const $hFamily = _GDIPlus_FontFamilyCreate("Consolas")
+	Local Const $hFont = _GDIPlus_FontCreate($hFamily, $fFontSize)
+	Local Const $hBrushTxt = _GDIPlus_BrushCreateSolid(0xFFFFFFFF)
+	Local Const $tLayout = _GDIPlus_RectFCreate(0, 0, 0, 0)
+	Local Const $aInfo = _GDIPlus_GraphicsMeasureString($hCtxt, $sString, $hFont, $tLayout, $hFormat)
+	DllStructSetData($tLayout, "X", ($iW - DllStructGetData($aInfo[0], "Width")) / 2)
+	DllStructSetData($tLayout, "Y", $iH / 2 + $iRadius + $iBallSize)
+	_GDIPlus_GraphicsSetInterpolationMode ( $hCtxt,6)
+	_GDIPlus_GraphicsDrawStringEx($hCtxt, $sString, $hFont, $tLayout, $hFormat, $hBrushTxt)
+
+	_GDIPlus_FontDispose($hFont)
+	_GDIPlus_FontFamilyDispose($hFamily)
+	_GDIPlus_StringFormatDispose($hFormat)
+	_GDIPlus_BrushDispose($hBrushTxt)
+	_GDIPlus_BrushDispose($hBrushTexture)
+
+	_GDIPlus_GraphicsDispose($hCtxt)
+	_GDIPlus_BrushDispose($hBrushBall1)
+	_GDIPlus_BrushDispose($hBrushBall2)
+	_GDIPlus_BrushDispose($hBrushBall3)
+	_GDIPlus_BrushDispose($hBrushBall4)
+	_GDIPlus_PenDispose($hPen)
+
+	If $bHBitmap Then
+		Local $hHBITMAP = _GDIPlus_BitmapCreateHBITMAPFromBitmap($hBitmap)
+		_GDIPlus_BitmapDispose($hBitmap)
+		Return $hHBITMAP
+	EndIf
+	Return $hBitmap
+EndFunc   ;==>_GDIPlus_RotatingBokeh
+
+Func _Background($bSaveBinary = False, $sSavePath = @ScriptDir)
+	Local $Background
+	$Background &= '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'
+	$Background &= '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'
+	$Background &= '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'
+	$Background &= 'G86ltb46g01fM7u5dOL3KyYID01ELYyLM/zxBP8AyK3J9TSQWgrTuIGSWEUZ/wAnLjmDtQ5lA60QIVliWNeEtaPPUwRY+05CNRZpG425V32EKzhnL0Jnh+o6ZjaOY4QY+DjEsUy/ca764gW7N9RO+2Axg+PMKsxxMFtcfmdD9LKF13+ILFH2SgTWXsluGSXMKyO4WlXOwzqGWeUotv5nLaAfCCwUGjcxXIZiq8kzYntF+ZioljC9js6jeqa6iILcbEzG1EbeWI7t0xKT0gMa4gVqtzsSFHiGBnp17xNlqKToK+2W4y8/iWhhfiXhbz1NmoZcQN5rfcbQtPmG8pfrDWjfc//Z'
+	Local $bString = Binary(_Base64Decode($Background))
+	If $bSaveBinary Then
+		Local $hFile = FileOpen($sSavePath & "\stressed_linen.jpg", 18)
+		FileWrite($hFile, $bString)
+		FileClose($hFile)
+	EndIf
+	Return $bString
+EndFunc   ;==>_Background
+
+Func _Base64Decode($sB64String)
+	Local $a_Call = DllCall("Crypt32.dll", "bool", "CryptStringToBinaryA", "str", $sB64String, "dword", 0, "dword", 1, "ptr", 0, "dword*", 0, "ptr", 0, "ptr", 0)
+	If @error Or Not $a_Call[0] Then Return SetError(1, 0, "")
+	Local $a = DllStructCreate("byte[" & $a_Call[5] & "]")
+	$a_Call = DllCall("Crypt32.dll", "bool", "CryptStringToBinaryA", "str", $sB64String, "dword", 0, "dword", 1, "struct*", $a, "dword*", $a_Call[5], "ptr", 0, "ptr", 0)
+	If @error Or Not $a_Call[0] Then Return SetError(2, 0, "")
+	Return DllStructGetData($a, 1)
+EndFunc   ;==>_Base64Decode
 
 Func _getlatlongquery($query,$Listbar)
 $urlqur = "https://nominatim.openstreetmap.org/search?q="&$query&"&format=xml"
