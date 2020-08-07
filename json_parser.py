@@ -6,6 +6,14 @@ from os import listdir
 from os.path import isfile, join
 import random
 
+def checkinexclusion(nodename):
+	with open('./nodes/exclusion.nodes','r') as nodelines:
+		for x in nodelines.readlines():
+			#print(nodename)
+			if x.strip() == nodename:
+				return
+	return nodename
+
 datadir = './nodes/node_data/'
 crimfiles = [f for f in listdir(datadir) if isfile(join(datadir, f))]
 
@@ -18,7 +26,7 @@ while True:
 
 argv = sys.argv[1:]
 try:
-    opts, args = getopt.getopt(argv, 'hnf:oi:m:', ['help','nonodes', 'inputjson=','printoutput','crimeid=','personname='])
+    opts, args = getopt.getopt(argv, 'hnf:om:', ['help','nonodes', 'inputjson=','printoutput','crimeid=','personname='])
 
 except getopt.GetoptError:
     print('Something went wrong!')
@@ -35,12 +43,10 @@ for k, v in opts:
 		infile = v
 	if k == '-o':
 		shownodes = True
-	if k == '-i':
-		crmid = int(v)
 	if k == '-m':
 		name = v
 	if k == '-h':
-		print('please specify -m <person name> -f <location file> -i <crimeid> these are the most compulsory and important params')
+		print('please specify -f <location file> -m <name of guys> these are the most compulsory and important params')
 		sys.exit()
 
 with open(infile) as f:
@@ -53,6 +59,10 @@ if disp_node:
 	print(nonodes)
 	print(nolinks)
 
+for x in range(0,nonodes):
+	if data['nodes'][x]['type'] == "Crime/CrimeID":
+		crmid = data['nodes'][x]['properties']['value']
+
 origin = ''
 connected = ''
 nodesconnected = list()
@@ -61,17 +71,15 @@ for x in range(0,nolinks):
 	idtarg = data['links'][x][3]
 	for y in range(0,nonodes):
 		if data['nodes'][y]['id'] == idcur :
-			#print("origin:",data['nodes'][y]['type'])
-			origin = data['nodes'][y]['type']
+			origin = checkinexclusion(data['nodes'][y]['type'])
 		if data['nodes'][y]['id'] == idtarg :
-			#print("target:",data['nodes'][y]['type'])
-			connected = data['nodes'][y]['type']
+			connected = checkinexclusion(data['nodes'][y]['type'])
 
 	nodesconnected.append(origin)
 	nodesconnected.append(connected)
-	if shownodes : print('[' +str(origin)+','+str(connected)+']['+str(data['links'][x][2])+','+str(data['links'][x][4])+']')
+	#if shownodes : print('[' +str(origin)+','+str(connected)+']['+str(data['links'][x][2])+','+str(data['links'][x][4])+']')
 
-
-crmout = {'crmid':crmid,'name':name,'nodesall':nodesconnected,'nonodes':nonodes,'nolinks':nolinks}
+nodesconnected = list(set(list(filter(None, nodesconnected))))
+crmout = {'crmid':crmid,'name':name,'nodesall':nodesconnected,'nonodes':len(nodesconnected),'nolinks':nolinks}
 print(crmout)
 

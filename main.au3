@@ -51,6 +51,7 @@ RunWait("RunDll32.exe InetCpl.cpl,ClearMyTracksByProcess " & $ClearID)
 
 Global $mapaddress = "http://localhost:8843/map_test.html"
 Global $lastid = 0,$currentlatln
+Global $exclusion_nodes =  FileReadToArray(@ScriptDir &"\nodes\exclusions.nodes")
 
 Global $drop_array
 
@@ -755,20 +756,27 @@ While 1
 			$nodeserial = _execjavascript($grph_hndl,"JSON.stringify(graph.serialize(),null,2);")
 			$path = _TempFile()
 			FileWrite($path,$nodeserial)
-			$redval = _readcmd('python json_parser.py -m sukubro -f "' &$path &'" -i 10212')
+			$redval = _readcmd('python json_parser.py -m sukubro -f "' &$path &'"')
+			If StringStripWS(_StringBetween($redval,"'nonodes':",",")[0],8) <> 0 Then
 			if Not _checkid($redval) Then
 				_parseaddheader($redval)
 				_writedata($redval)
+				MsgBox($MB_ICONINFORMATION,"Added Scene","Your Database has been updated with current Scene details")
 			Else
-				MsgBox($IDABORT,"ID ERROR","Error the CrimeID already exists, Please specify another ID!")
+				MsgBox($MB_ICONERROR,"ID ERROR","Error the CrimeID already exists, Please specify another ID!")
 			EndIf
 			FileDelete($path)
+			Else
+			MsgBox($MB_ICONERROR,"Data Error","Please provide the FIR Data")
+			EndIf
 
 		Case $generate_match
 			$nodeserial = _execjavascript($grph_hndl,"JSON.stringify(graph.serialize(),null,2);")
 			$path = _TempFile()
 			FileWrite($path,$nodeserial)
-			$out_val = _prepareformlnode(_readcmd('python json_parser.py -m sukubro -f "' &$path &'" -i 10212'))
+			$cls = _readcmd('python json_parser.py -m sukubro -f "' &$path &'"')
+			If StringStripWS(_StringBetween($cls,"'nonodes':",",")[0],8) <> 0 Then
+			$out_val = _prepareformlnode($cls)
 			$spts = _StringExplode(_readcmd('python ml_test.py "' &_ArrayToString($out_val,";",-1,-1,"|") &'"'),@CRLF)
 			FileDelete($path)
 			$gls = _returntable()
@@ -778,6 +786,9 @@ While 1
 					_createpredictdata($spts[0],$gls[$i][1],$spts[1])
 				EndIf
 			Next
+			Else
+			MsgBox($MB_ICONERROR,"Data Error","Please provide the FIR Data")
+			EndIf
 
 
 
@@ -1002,6 +1013,10 @@ Next
 _SQLite_Exec($node_db,'UPDATE nodes SET "nonodes" = '&$strbtwn_nonodes&' WHERE crimeid = '&$strbtwn_crimid &';')
 _SQLite_Exec($node_db,'UPDATE nodes SET "nolinks" = '&$strbtwn_nolinks&' WHERE crimeid = '&$strbtwn_crimid &';')
 _SQLite_Exec($node_db,'UPDATE nodes SET name = "'&$strbtwn_name&'" WHERE crimeid = '&$strbtwn_crimid &';')
+$strbtwn_nodes = _ArrayUnique(_StringExplode(StringStripWS(StringReplace(_StringBetween($redval,"[","]")[0],"'",""),8),","))
+For $i = 1 To $strbtwn_nodes[0]
+	_checkcolumnexists($strbtwn_nodes[$i])
+Next
 EndFunc
 
 Func _parseaddheader($redval)
