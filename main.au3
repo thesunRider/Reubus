@@ -35,7 +35,8 @@
 _Metro_EnableHighDPIScaling()
 _SetTheme("DarkTeal")
 _SQLite_Startup()
-_SQLite_Open("store.db")
+$store_db = _SQLite_Open(@ScriptDir &"\store.db")
+$node_db = _SQLite_Open(@ScriptDir &"\nodes\node_data\node_reg.db")
 _GDIPlus_Startup()
 
 ;enable activeX
@@ -736,7 +737,23 @@ While 1
 			_GUICtrlTab_ActivateTab($maintab,0)
 
 		;GUI Response for Scene
-		;Case $trn_scene
+		Case $trn_scene
+			$nodeserial = _execjavascript($grph_hndl,"JSON.stringify(graph.serialize(),null,2);")
+			$path = _TempFile()
+			FileWrite($path,$nodeserial)
+			$out_val = _prepareformlnode(_readcmd('python json_parser.py -m sukubro -f "' &$path &'" -i 10212'))
+			$spts = _StringExplode(_readcmd('python ml_test.py "' &_ArrayToString($out_val,";",-1,-1,"|") &'"'),@CRLF)
+			FileDelete($path)
+			$gls = _returntable()
+			;_ArrayDisplay($spts)
+			For $i = 1 To UBound($gls) -1
+				If $gls[$i][0] == $spts[0] Then
+					_createpredictdata($spts[0],$gls[$i][1],$spts[1])
+				EndIf
+			Next
+
+
+
 
 
 		Case $add_node
@@ -832,13 +849,13 @@ While 1
 
 		Case $view_mapdb
 			Local $arysql,$aryrowsql,$aryclmnsql
-			_SQLite_GetTable2d(-1,"Select * FROM map;",$arysql,$aryrowsql,$aryclmnsql)
+			_SQLite_GetTable2d($store_db,"Select * FROM map;",$arysql,$aryrowsql,$aryclmnsql)
 			_ArrayDisplay($arysql,"Map database")
 
 		Case $Delete_currentloc
 			$seleccrim = _GUICtrlListView_GetItemTextArray($crimlst)
 			If Not @error Then
-				_SQLite_Exec ( -1, "DELETE FROM map WHERE latitude like " &$seleccrim[2]   &" AND longitude like " &$seleccrim[3] &";")
+				_SQLite_Exec ( $store_db, "DELETE FROM map WHERE latitude like " &$seleccrim[2]   &" AND longitude like " &$seleccrim[3] &";")
 				_loadlatlonglist()
 			EndIf
 
@@ -868,7 +885,7 @@ If $curlatln <> '' Then
 	GUICtrlSetData($latvar,$currentlatln[0])
 	GUICtrlSetData($longvar,$currentlatln[1])
 	Local $hQuery,$aRow
-	_SQLite_Query(-1, 'SELECT * FROM map ORDER BY ABS(latitude - '&$currentlatln[0]&') + ABS(longitude - ' &$currentlatln[1] &') ASC;', $hQuery)
+	_SQLite_Query($store_db, 'SELECT * FROM map ORDER BY ABS(latitude - '&$currentlatln[0]&') + ABS(longitude - ' &$currentlatln[1] &') ASC;', $hQuery)
 	_SQLite_FetchData($hQuery, $aRow, False, False)
 	$crmid_near = $aRow[5]
 	GUICtrlSetData($nearid,$crmid_near)
@@ -879,6 +896,125 @@ WEnd
 #EndRegion
 
 #Region Functions
+
+Func _createpredictdata($crimid,$name_pr,$pred_conf)
+$creatped = _Metro_CreateGUI("Matching Crime Pattern", 380, 271)
+$Control_Buttons2 = _Metro_AddControlButtons(True, False, True, False, False)
+$GUI_CLOSE_BUTTON2 = $Control_Buttons2[0]
+$GUI_MINIMIZE_BUTTON2 = $Control_Buttons2[3]
+GUICtrlCreateLabel("CRIME MATCH FINDER",20,20,100,100)
+GUICtrlSetFont(-1, 7, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+GUICtrlCreateLabel("Current crime id:", 40, 56, 81, 17)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+GUICtrlCreateLabel("123", 128, 56, 22, 17)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+$lst_pred = GUICtrlCreateListView("CrimeID|Name|Prediction confidence",20,90,350,110)
+GUICtrlCreateListViewItem($crimid&"|"&$name_pr&"|"&$pred_conf,$lst_pred)
+$clsbutn = GUICtrlCreateButton("Close", 100, 224, 209, 25)
+GUISetState(@SW_SHOW,$creatped)
+While 1
+	$nMsg = GUIGetMsg()
+	Switch $nMsg
+		Case $GUI_CLOSE_BUTTON2,$GUI_EVENT_CLOSE,$clsbutn
+			_Metro_GUIDelete($creatped)
+			ExitLoop
+	EndSwitch
+WEnd
+EndFunc
+
+Func _prepareformlnode($redval)
+$strbtwn_nodes = _ArrayUnique(_StringExplode(StringStripWS(StringReplace(_StringBetween($redval,"[","]")[0],"'",""),8),","))
+$strbtwn_crimid = StringStripWS(_StringBetween($redval,"'crmid':",",")[0],8)
+$strbtwn_nonodes = StringStripWS(_StringBetween($redval,"'nonodes':",",")[0],8)
+$strbtwn_nolinks = StringStripWS(_StringBetween($redval,"'nolinks':","}")[0],8)
+$strbtwn_name = StringTrimRight(StringTrimLeft(StringStripWS(_StringBetween($redval,"'name':",",")[0],8),1),1)
+$getary = _returntable()
+Local $ark[2][UBound($getary,2)]
+
+For $i = 0 To UBound($ark,2)-1
+$ark[0][$i] = $getary[0][$i]
+Next
+$ark[1][0] = $strbtwn_crimid
+$ark[1][1] = $strbtwn_name
+$ark[1][2] = $strbtwn_nonodes
+$ark[1][3] = $strbtwn_nolinks
+
+For $i = 4 To UBound($getary,2)-1
+	For $j = 1 To $strbtwn_nodes[0]
+		If $getary[0][$i] == $strbtwn_nodes[$j] Then $ark[1][$i] = 1
+		If StringIsSpace($ark[1][$i]) Then $ark[1][$i] = 0
+	Next
+Next
+Return $ark
+EndFunc
+
+Func _checkid($redval)
+$getary = _returntable()
+$strbtwn_crimid = StringStripWS(_StringBetween($redval,"'crmid':",",")[0],8)
+For $i = 0 To UBound($getary)-1
+	If $strbtwn_crimid == $getary[$i][0] Then Return True
+Next
+Return False
+EndFunc
+
+Func _writedata($redval)
+$strbtwn_nodes = _ArrayUnique(_StringExplode(StringStripWS(StringReplace(_StringBetween($redval,"[","]")[0],"'",""),8),","))
+$strbtwn_crimid = StringStripWS(_StringBetween($redval,"'crmid':",",")[0],8)
+$strbtwn_nonodes = StringStripWS(_StringBetween($redval,"'nonodes':",",")[0],8)
+$strbtwn_nolinks = StringStripWS(_StringBetween($redval,"'nolinks':","}")[0],8)
+$strbtwn_name = StringTrimRight(StringTrimLeft(StringStripWS(_StringBetween($redval,"'name':",",")[0],8),1),1)
+$indx_fnd = _returntable()
+_SQLite_Exec($node_db,"INSERT INTO nodes VALUES (" &$strbtwn_crimid &"," &StringTrimRight(_StringRepeat("0,",UBound($indx_fnd,2)-1),1) &");")
+For $i = 1 To $strbtwn_nodes[0]
+	$insert_node = 'UPDATE nodes SET "' &$strbtwn_nodes[$i] &'" = 1 WHERE crimeid = '&$strbtwn_crimid &';'
+	_SQLite_Exec($node_db,$insert_node)
+Next
+_SQLite_Exec($node_db,'UPDATE nodes SET "nonodes" = '&$strbtwn_nonodes&' WHERE crimeid = '&$strbtwn_crimid &';')
+_SQLite_Exec($node_db,'UPDATE nodes SET "nolinks" = '&$strbtwn_nolinks&' WHERE crimeid = '&$strbtwn_crimid &';')
+_SQLite_Exec($node_db,'UPDATE nodes SET name = "'&$strbtwn_name&'" WHERE crimeid = '&$strbtwn_crimid &';')
+EndFunc
+
+Func _parseaddheader($redval)
+$strbtwn_nodes = _ArrayUnique(_StringExplode(StringStripWS(StringReplace(_StringBetween($redval,"[","]")[0],"'",""),8),","))
+For $i = 1 To $strbtwn_nodes[0]
+If Not _checkcolumnexists($strbtwn_nodes[$i]) Then
+	ConsoleWrite(@CRLF &"Adding node to db:" &$strbtwn_nodes[$i])
+	_SQLite_Exec($node_db,'ALTER TABLE nodes ADD "' &$strbtwn_nodes[$i] &'" INTEGER;')
+EndIf
+
+Next
+EndFunc
+
+Func _checkcolumnexists($name_checl)
+$getary = _returntable()
+For $i = 0 To UBound($getary,2) -1
+ _SQLite_Exec($node_db,'UPDATE nodes SET "' &$getary[0][$i] &'" = 0 WHERE "' &$getary[0][$i] &'" IS NULL')
+ If $name_checl == $getary[0][$i] Then Return True
+Next
+Return False
+EndFunc
+
+Func _returntable()
+Local $arysql,$aryrowsql,$aryclmnsql
+_SQLite_GetTable2d($node_db,"Select * FROM nodes;",$arysql,$aryrowsql,$aryclmnsql)
+Return $arysql
+EndFunc
+
+
+Func _readcmd($cmd)
+Local $iPID = Run(@ComSpec & " /c "&$cmd, @ScriptDir, @SW_HIDE, BitOR($STDERR_CHILD, $STDOUT_CHILD))
+$sOutput = ''
+    While 1
+        $sOutput &= StdoutRead($iPID)
+        If @error Then ; Exit the loop if the process closes or StderrRead returns an error.
+            ExitLoop
+        EndIf
+    WEnd
+Return $sOutput
+EndFunc
 
 Func MakeHTML($sPdfPath = '')
     Local $sHTML = '<html>' & @CRLF & _
@@ -903,7 +1039,7 @@ EndFunc   ;==>MakeHTML
 
 Func _redrawbasedonquery($querypass)
 Local $arysql,$aryrowsql,$aryclmnsql
-$ret = _SQLite_GetTable2d(-1,$querypass,$arysql,$aryrowsql,$aryclmnsql)
+$ret = _SQLite_GetTable2d($store_db,$querypass,$arysql,$aryrowsql,$aryclmnsql)
 If Not @error Then
 _IEAction($mainmap,"refresh")
 For $i = 1 to UBound($arysql)-1
@@ -916,7 +1052,7 @@ EndFunc
 
 Func _redrawmap()
 Local $arysql,$aryrowsql,$aryclmnsql
-_SQLite_GetTable2d(-1,"Select * FROM map;",$arysql,$aryrowsql,$aryclmnsql)
+_SQLite_GetTable2d($store_db,"Select * FROM map;",$arysql,$aryrowsql,$aryclmnsql)
 _IEAction($mainmap,"refresh")
 For $i = 1 to UBound($arysql)-1
 	_drawcircle($arysql[$i][8]&":"&$arysql[$i][5],$arysql[$i][1],$arysql[$i][2],$arysql[$i][3],$arysql[$i][4],$arysql[$i][6])
@@ -939,7 +1075,7 @@ EndFunc
 Func _loadlatlonglist()
 _GUICtrlListView_DeleteAllItems($crimlst)
 Local $hQuery,$aRow
-_SQLite_Query(-1, "SELECT * FROM map ;", $hQuery)
+_SQLite_Query($store_db, "SELECT * FROM map ;", $hQuery)
 While _SQLite_FetchData($hQuery, $aRow, False, False) = $SQLITE_OK
 	GUICtrlCreateListViewItem($aRow[5]&"|"&$aRow[1]&"|"&$aRow[2]&"|"&$aRow[8],$crimlst)
 WEnd
