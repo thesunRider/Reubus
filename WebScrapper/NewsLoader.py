@@ -1,3 +1,13 @@
+#######################################
+# Input Example ::
+# python NewsLoader.py -fd 07/01/2020 -td 07/03/2020 -p Kochi -k theft
+
+# Place name start with capital letter
+# date format MM/DD/YYYY
+
+# Date : use date picker in Autoit
+# Place : use Drop box in Autoit
+
 import argparse
 from datetime import datetime
 import datetime as dt
@@ -16,12 +26,6 @@ parser.add_argument("-k", "--Keyword", help="Input Keywords", default='All')
 args = parser.parse_args()
 
 print("Diplaying Output as:", args.Place)
-
-
-################################################
-# Date : use date picker
-# Place : use Drop box
-#  Output in JSON or txt
 
 # Open the CSV files
 news = pd.read_csv('news_feed.csv')

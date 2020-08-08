@@ -1,6 +1,20 @@
+#######################################
+# Input Example ::
+# python CrimeTypePredict.py -p 9XX TERMINAL AVE
+# places example :::
+# 9XX NICOLA ST
+# 12XX ALBERNI ST
+# 11XX HARO ST
+
 import numpy as np
 import pickle
 import pandas as pd
+import argparse
+parser = argparse.ArgumentParser()
+
+# Adding optional argument
+parser.add_argument("-p", "--Place", help="Input Place", default='9XX TERMINAL AVE')
+args = parser.parse_args()
 
 try:
     knn = pickle.load(open('model.pkl', 'rb'))
@@ -15,7 +29,7 @@ try:
         if row[6] not in places.keys():
             places[row[6]] = list(row[10:12])
 
-    location = input("Enter the location::")
+    location = args.Place
     x = places[location]
     x = np.array(x).reshape(-1, 2)
     x = norm.transform(x)
