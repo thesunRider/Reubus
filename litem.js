@@ -11520,7 +11520,7 @@ if (typeof exports != "undefined") {
     //Constant
     function ConstantNumber() {
         this.addOutput("value", "number");
-        this.addProperty("value", 1.0);
+        this.addProperty("value", 1);
         this.widget = this.addWidget("number","value",1,"value");
         this.widgets_up = true;
         this.size = [180, 30];
@@ -11529,7 +11529,7 @@ if (typeof exports != "undefined") {
     ConstantNumber.title = "Crime ID";
 
     ConstantNumber.prototype.onExecute = function() {
-        this.setOutputData(0, parseFloat(this.properties["value"]));
+        this.setOutputData(0, parseInt(this.properties["value"]));
     };
 
     ConstantNumber.prototype.getTitle = function() {
@@ -11546,7 +11546,7 @@ if (typeof exports != "undefined") {
 
     ConstantNumber.prototype.onDrawBackground = function(ctx) {
         //show the current value
-        this.outputs[0].label = this.properties["value"].toFixed(3);
+        this.outputs[0].label = this.properties["value"];
     };
 
     LiteGraph.registerNodeType("Crime/CrimeID", ConstantNumber);

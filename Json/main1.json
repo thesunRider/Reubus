@@ -1,20 +1,71 @@
 {
   "last_node_id": 6,
-  "last_link_id": 6,
+  "last_link_id": 5,
   "nodes": [
+    {
+      "id": 5,
+      "type": "Crime/CrimeID",
+      "pos": [
+        50,
+        200
+      ],
+      "size": [
+        180,
+        30
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "value",
+          "type": "number",
+          "links": [
+            1
+          ],
+          "label": 1
+        }
+      ],
+      "properties": {
+        "value": 1
+      }
+    },
+    {
+      "id": 2,
+      "type": "Crime/End Path",
+      "pos": [
+        883,
+        103
+      ],
+      "size": {
+        "0": 140,
+        "1": 26
+      },
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "Input1",
+          "type": 0,
+          "link": 4
+        }
+      ],
+      "properties": {}
+    },
     {
       "id": 3,
       "type": "Crime/Crime Base",
       "pos": [
-        137,
-        177
+        266,
+        164
       ],
       "size": {
         "0": 152.8000030517578,
         "1": 46
       },
       "flags": {},
-      "order": 0,
+      "order": 2,
       "mode": 0,
       "inputs": [
         {
@@ -25,14 +76,14 @@
         {
           "name": "Link CrimeID",
           "type": 0,
-          "link": null
+          "link": 1
         }
       ],
       "outputs": [
         {
           "name": "Start",
           "links": [
-            1
+            2
           ]
         }
       ],
@@ -44,21 +95,68 @@
       "id": 1,
       "type": "Crime/Start Path",
       "pos": [
-        306,
-        288
+        444,
+        254
       ],
       "size": {
         "0": 140,
         "1": 26
       },
       "flags": {},
-      "order": 1,
+      "order": 3,
       "mode": 0,
       "inputs": [
         {
           "name": "Input1",
           "type": 0,
-          "link": 1
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Output",
+          "type": "*",
+          "links": [
+            3
+          ]
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": 4,
+      "type": "Connectors/Extender",
+      "pos": [
+        683,
+        202
+      ],
+      "size": {
+        "0": 140,
+        "1": 86
+      },
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "Input1",
+          "type": 0,
+          "link": 3
+        },
+        {
+          "name": "Input2",
+          "type": 0,
+          "link": 5
+        },
+        {
+          "name": "Input3",
+          "type": 0,
+          "link": null
+        },
+        {
+          "name": "Input4",
+          "type": 0,
+          "link": null
         }
       ],
       "outputs": [
@@ -73,24 +171,24 @@
       "properties": {}
     },
     {
-      "id": 5,
+      "id": 6,
       "type": "Mood/Alcoholic",
       "pos": [
-        488,
-        230
+        459,
+        395
       ],
       "size": {
         "0": 140,
         "1": 26
       },
       "flags": {},
-      "order": 2,
+      "order": 1,
       "mode": 0,
       "inputs": [
         {
           "name": "Input1",
           "type": 0,
-          "link": 4
+          "link": null
         }
       ],
       "outputs": [
@@ -103,71 +201,19 @@
         }
       ],
       "properties": {}
-    },
-    {
-      "id": 2,
-      "type": "Crime/End Path",
-      "pos": [
-        901,
-        197
-      ],
-      "size": {
-        "0": 140,
-        "1": 26
-      },
-      "flags": {},
-      "order": 4,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "Input1",
-          "type": 0,
-          "link": 6
-        }
-      ],
-      "properties": {}
-    },
-    {
-      "id": 6,
-      "type": "Activity/Driving",
-      "pos": [
-        694,
-        185
-      ],
-      "size": {
-        "0": 140,
-        "1": 46
-      },
-      "flags": {},
-      "order": 3,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "Input1",
-          "type": 0,
-          "link": 5
-        },
-        {
-          "name": "Input2",
-          "type": 0,
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "name": "Output",
-          "type": "*",
-          "links": [
-            6
-          ]
-        }
-      ],
-      "properties": {}
     }
   ],
   "links": [
     [
       1,
+      5,
+      0,
+      3,
+      1,
+      0
+    ],
+    [
+      2,
       3,
       0,
       1,
@@ -175,27 +221,27 @@
       0
     ],
     [
-      4,
+      3,
       1,
       0,
-      5,
+      4,
       0,
       0
     ],
     [
-      5,
-      5,
-      0,
-      6,
-      0,
-      0
-    ],
-    [
-      6,
-      6,
+      4,
+      4,
       0,
       2,
       0,
+      0
+    ],
+    [
+      5,
+      6,
+      0,
+      4,
+      1,
       0
     ]
   ],
