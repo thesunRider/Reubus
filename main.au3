@@ -252,15 +252,17 @@ GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xd5d5d5)
 
 
-GUICtrlCreateLabel("CURRENT NODE INFO:", $ui_w*0.84+10,$ui_h*.655, 125, 28, 0x0200)
+GUICtrlCreateLabel("CRIMEIDLIST:", $ui_w*0.84+10,$ui_h*.655, 125, 28, 0x0200)
 GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xd5d5d5)
 
-$browse_model = GUICtrlCreateButton(" . . . ",$ui_w*0.21+125,$ui_h*.686,50,18)
+$crdlist = GUICtrlCreateListView("CrimeID|Name|Nodes" ,$ui_w*0.84+20,$ui_h*.69,210,220)
+
+$browse_model_m = GUICtrlCreateButton(" . . . ",$ui_w*0.21+125,$ui_h*.686,50,18)
 
 GUICtrlSetFont(-1, 6, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
-GUICtrlSetBkColor($browse_model,0xbcbcbc)
+GUICtrlSetBkColor($browse_model_m,0xbcbcbc)
 
 $generate_report = GUICtrlCreateButton("GENERATE REPORT", $ui_w*0.21+20, $ui_h*.78, 120, 30)
 GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
@@ -725,6 +727,7 @@ _closeloader($loader_gui)
 GUISetState(@SW_SHOW)
 GUICtrlSetData($list_nodeedit,"Description goes here..")
 _redrawmap()
+_setcrdlist()
 
 While 1
 	$nMsg = GUIGetMsg()
@@ -752,6 +755,14 @@ While 1
 			_GUICtrlTab_ActivateTab($maintab,0)
 
 		;GUI Response for Scene
+		Case $browse_model_m
+			$pth = FileOpenDialog("Select DB model",@ScriptDir,"DB (*.db)")
+			If Not @error Then
+			_SQLite_Close($node_db)
+			$node_db = _SQLite_Open($pth)
+			EndIf
+
+
 		Case $trn_scene
 			$nodeserial = _execjavascript($grph_hndl,"JSON.stringify(graph.serialize(),null,2);")
 			$path = _TempFile()
@@ -769,6 +780,7 @@ While 1
 			Else
 			MsgBox($MB_ICONERROR,"Data Error","Please provide the FIR Data")
 			EndIf
+			_setcrdlist()
 
 		Case $generate_match
 			$nodeserial = _execjavascript($grph_hndl,"JSON.stringify(graph.serialize(),null,2);")
@@ -857,9 +869,10 @@ While 1
 
 		Case $load_node_connection
 			$jsonpath = FileOpenDialog("Select Graph to import",@ScriptDir,"Json (*.json)")
-			$jsread = "graph.configure(JSON.parse('" &StringReplace(FileRead($jsonpath),@LF,"") &"'));"
-			$grph_hndl.document.parentwindow.eval($jsread)
-
+			If Not @error Then
+				$jsread = "graph.configure(JSON.parse('" &StringReplace(FileRead($jsonpath),@LF,"") &"'));"
+				$grph_hndl.document.parentwindow.eval($jsread)
+			EndIf
 
 
 		;Gui response for map
@@ -934,6 +947,14 @@ WEnd
 #EndRegion
 
 #Region Functions
+
+Func _setcrdlist()
+_GUICtrlListView_DeleteAllItems($crdlist)
+$rettab = _returntable()
+_ArrayDelete($rettab,0)
+_GUICtrlListView_AddArray($crdlist, $rettab)
+;GUICtrlCreateListViewItem(,$crdlist)
+EndFunc
 
 Func _createpredictdata($crimid,$name_pr,$pred_conf)
 $creatped = _Metro_CreateGUI("Matching Crime Pattern", 380, 271)
@@ -1369,7 +1390,7 @@ _WinAPI_DeleteObject($hHBmp_BG)
 EndFunc
 
 Func PlayAnim()
-	$hHBmp_BG = _GDIPlus_RotatingBokeh($iW, $iH, "Patience Watson .." & StringFormat("%2.0f %", $iPerc))
+	$hHBmp_BG = _GDIPlus_RotatingBokeh($iW, $iH, "Patience Watson" & _StringRepeat(".",Mod($iPerc,4))  )
 	$hB = GUICtrlSendMsg($iPic, $STM_SETIMAGE, $IMAGE_BITMAP, $hHBmp_BG)
 	If $hB Then _WinAPI_DeleteObject($hB)
 	_WinAPI_DeleteObject($hHBmp_BG)
