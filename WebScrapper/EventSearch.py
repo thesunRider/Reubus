@@ -1,3 +1,8 @@
+#######################################
+# Input Example ::
+# python EventSearch.py gold smuggling
+
+
 import sys
 import json
 import requests

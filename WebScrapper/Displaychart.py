@@ -1,3 +1,7 @@
+#######################################
+# Input Example ::
+# python DisplayChart.py
+
 import pandas as pd
 import numpy as np
 from datetime import datetime
@@ -75,7 +79,5 @@ def monthly_stats(df):
 
 
 kerala_top_keywords_chart(news)
-
 top_crime_reports_place(news)
-
 monthly_stats(news)
