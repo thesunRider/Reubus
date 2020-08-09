@@ -436,6 +436,7 @@ GUICtrlSetData(-1, "|A|B|C","A")
 $GRAPH_DATE = GUICtrlCreateInput("", $ui_w*.725+130, $ui_h*.19, 145, 18)
 
 $SHOW_GRAPH = GUICtrlCreatePic("",$ui_w*.715, $ui_h*.22, 410, 300,BitOR($GUI_SS_DEFAULT_PIC,$WS_BORDER)) ; SHOW GRAPH OUTPUT HERE
+_loadpic($SHOW_GRAPH,@ScriptDir &"\graph.PNG")
 
 GUICtrlCreateLabel("GRAPHS", $ui_w*.715, $ui_h*.12, 140, 28, 0x0200)
 GUICtrlSetFont(-1, 11, Default, $GUI_FONTUNDER, "Consolas", 5); 5 = Clear Type
@@ -897,6 +898,10 @@ GUICtrlCreateLabel("",$ui_w*.5, $ui_h*.1, $ui_w*.5, $ui_h*.8) ;right layout bg
 GUICtrlSetState(-1, 128); $GUI_DISABLE
 GUICtrlSetBkColor(-1, 0x191919)
 
+$event_ie = _IECreateEmbedded()
+GUICtrlCreateObj($event_ie,$ui_w*.52, $ui_h*.13, $ui_w*.45, $ui_h*.4)
+
+
 GUICtrlCreateLabel("", $ui_w*.5+5, $ui_h*.55, $ui_w*.5, 2) ;upper border of status bar
 GUICtrlSetState(-1, 128); $GUI_DISABLE
 GUICtrlSetBkColor(-1, 0x5e5e5e)
@@ -912,6 +917,8 @@ GUICtrlSetFont(-1, 12,  800, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
 GUICtrlCreateGroup("",$ui_w*.015, $ui_h*.12, $ui_w*.47, $ui_h*.6) ;INSERT NEWS INSIDE THIS GROUPBOX
+$nws_ie = _IECreateEmbedded()
+GUICtrlCreateObj($nws_ie,$ui_w*.027, $ui_h*.14, $ui_w*.44, $ui_h*.57)
 
 GUICtrlCreateGroup("",$ui_w*.015, $ui_h*.76, $ui_w*.47, $ui_h*.19)
 
@@ -920,10 +927,10 @@ GUICtrlSetFont(-1, 12,  800, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
 $FROM_DATE =  GUICtrlCreateDate("",$ui_w*.05+50, $ui_h*.815 ,120,22)
-GUICtrlSendMsg(-1, $DTM_SETFORMATW, 0, "yyyy/MM/dd ")
+GUICtrlSendMsg(-1, $DTM_SETFORMATW, 0, "dd/MM/yyyy")
 
 $TO_DATE =  GUICtrlCreateDate("",$ui_w*.05+50, $ui_h*.865 ,120,22)
-GUICtrlSendMsg(-1, $DTM_SETFORMATW, 0, "yyyy/MM/dd ")
+GUICtrlSendMsg(-1, $DTM_SETFORMATW, 0, "dd/MM/yyyy")
 
 $PLACE_INPUT = GUICtrlCreateInput("", $ui_w*.05+330, $ui_h*.815, 120, 22)
 
@@ -1022,6 +1029,8 @@ GUIRegisterMsg($WM_COMMAND, "WM_COMMAND")
 Global $grph = GUICtrlCreateObj($grph_hndl, 0, $ui_h*.1, $ui_w*.65, $ui_h*.55)
 GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
 _IENavigate($grph_hndl, "http://localhost:8843")
+_IENavigate($nws_ie,"http://localhost:8843/WebScrapper/dateplacesummary.html")
+_IENavigate($event_ie,"http://localhost:8843/WebScrapper/newslink.html")
 ConsoleWrite("Passed all functions")
 _updatelistnodeclass()
 _loadlatlonglist()
@@ -1031,6 +1040,7 @@ GUISetState(@SW_SHOW)
 GUICtrlSetData($list_nodeedit,"Description goes here..")
 _redrawmap()
 _setcrdlist()
+
 
 While 1
 	$nMsg = GUIGetMsg()
@@ -1068,6 +1078,30 @@ While 1
 			GUICtrlSetState($grph,$GUI_HIDE)
 			GUICtrlSetState($grph_hndl,$GUI_HIDE)
 			_GUICtrlTab_ActivateTab($maintab,3)
+
+
+		;GUI RESPONSE FOR SCRAPPER
+		Case $SEARCH_NEWS
+			$plc_inpu = GUICtrlRead($PLACE_INPUT)
+			$kywrd_inpu = GUICtrlRead($KEYWORD_INPUT)
+			$frm_inpu = GUICtrlRead( $FROM_DATE)
+			$todate_inpu = GUICtrlRead($TO_DATE)
+			FileDelete(@ScriptDir&"\WebScrapper\result1.json")
+			RunWait("python NewsLoader.py -fd "&$frm_inpu&"  -td "&$todate_inpu &" -p "&$plc_inpu &" -k " &$kywrd_inpu,@ScriptDir &"\WebScrapper\",@SW_HIDE)
+			$r_f = FileRead(@ScriptDir&"\WebScrapper\result1.json")
+			_createhtml($r_f)
+			FileDelete(@ScriptDir &"\WebScrapper\dateplacesummary.html")
+
+		Case $SEARCH_EVENT
+			$evn_inpu = GUICtrlRead($EVENT_INPUT)
+			FileDelete(@ScriptDir&"\WebScrapper\result2.json")
+			RunWait("python EventSearch.py " &$evn_inpu,@ScriptDir &"\WebScrapper\",@SW_HIDE)
+			$r_f = FileRead(@ScriptDir&"\WebScrapper\result2.json")
+			_createhtmlevent($r_f)
+			;FileDelete(@ScriptDir &"\WebScrapper\newslink.html")
+
+
+
 
 		;GUI Response for Scene
 		Case $browse_model_m
@@ -1191,6 +1225,10 @@ While 1
 
 
 		;Gui response for map
+		Case $START_DRAW
+			_createpredictiongui()
+
+
 		Case $GOTO_BUTTON
 			$latn = guictrlread($LAT_IN)
 			$longn = GUICtrlRead($LONG_IN)
@@ -1298,6 +1336,152 @@ While 1
 	EndSwitch
 WEnd
 EndFunc
+
+Func _createpredictiongui()
+$predgui = _Metro_CreateGUI("Prediction", 455, 431, 192, 124)
+$predloc = GUICtrlCreateInput("Input1", 136, 24, 145, 21)
+GUICtrlCreateLabel("Prediction Location:", 24, 32, 98, 17)
+$predradius = GUICtrlCreateInput("Input2", 136, 64, 145, 21)
+GUICtrlCreateUpdown(-1)
+GUICtrlCreateLabel("Radius of Prediction:", 24, 64, 102, 17)
+$List1 = GUICtrlCreateListView("", 24, 104, 393, 305)
+GUISetState(@SW_SHOW)
+#EndRegion ### END Koda GUI section ###
+
+While 1
+	$nMsg = GUIGetMsg()
+	Switch $nMsg
+		Case $GUI_EVENT_CLOSE
+			Exit
+
+	EndSwitch
+WEnd
+
+
+EndFunc
+
+
+Func _createhtml($json)
+$html = '<!DOCTYPE html>' &@CRLF & _
+'<html lang="en">' &@CRLF & _
+'<head>'&@CRLF & _
+'    <meta charset="UTF-8">'&@CRLF & _
+'    <meta name="viewport" content="width=device-width, initial-scale=1.0">'&@CRLF & _
+'    <title>FIR CRIME REPORT</title>'&@CRLF & _
+'	<input type="hidden" id="debug" value="">'&@CRLF & _
+'    <style>'&@CRLF & _
+'        html {'&@CRLF & _
+'            background-color: whitesmoke;'&@CRLF & _
+'        }'&@CRLF & _
+'            .head{'&@CRLF & _
+ '           margin-left: 600px;'&@CRLF & _
+ '           margin-top: 100px;'&@CRLF & _
+'            padding-bottom: 0%;'&@CRLF & _
+'        }'&@CRLF & _
+'        h1{'&@CRLF & _
+'           color: rgb(109, 4, 86);'&@CRLF & _
+  '          font-weight: bolder;'&@CRLF & _
+   '         text-decoration: underline;'&@CRLF & _
+    '        font-size: 50px;'&@CRLF & _
+     '   }'&@CRLF & _
+      '  h2{'&@CRLF & _
+       '     font-size: 50px;'&@CRLF & _
+        '    margin-left: 40px;'&@CRLF & _
+         '   font-weight: bolder;'&@CRLF & _
+'        }'&@CRLF & _
+ '      h3 {'&@CRLF & _
+  '          font-size: 30px;'&@CRLF & _
+   '         margin-left: 80px;'&@CRLF & _
+    '        font-weight: bold;'&@CRLF & _
+ '       }'&@CRLF & _
+  '      </style>'&@CRLF & _
+'</head>'&@CRLF & _
+ '   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>'&@CRLF & _
+'<body>'&@CRLF & _
+ '   <div class="head">'&@CRLF & _
+  '      <h1>CRIME REPORT</h1>'&@CRLF & _
+' </div>'&@CRLF & _
+'<p id="paraid"></p>'&@CRLF & _
+'</body>'&@CRLF & _
+'<script>'&@CRLF & _
+'var json_val = '&$json &';'&@CRLF & _
+'var myObj = json_val;'&@CRLF & _
+'var x= "";'&@CRLF & _
+'var num = 1;'&@CRLF & _
+'for (i in myObj) {'&@CRLF & _
+'            x+= "<h2>" + num + "."+ "</h2>" + "<h3> Date:" + myObj[i].date + "<br>" + "Place:" + myObj[i].place + "<br>" + "Summary:" + myObj[i].summary + "<br>";'&@CRLF & _
+'            num+=1;'&@CRLF & _
+'}'&@CRLF & _
+'document.getElementById("paraid").innerHTML = x;'&@CRLF & _
+'</script>'&@CRLF & _
+'</html>'
+
+FileWrite(@ScriptDir &"\WebScrapper\dateplacesummary.html",$html)
+_IENavigate($nws_ie,"http://localhost:8843/WebScrapper/dateplacesummary.html")
+EndFunc
+
+
+Func _createhtmlevent($r_f)
+
+$html = '	<!DOCTYPE html>' &@CRLF & _
+'<html lang="en">' &@CRLF & _
+'<head>' &@CRLF & _
+    '<meta charset="UTF-8">' &@CRLF & _
+   ' <meta name="viewport" content="width=device-width, initial-scale=1.0">' &@CRLF & _
+  '  <title>FIR NEWS REPORT</title>' &@CRLF & _
+ '   <style>' &@CRLF & _
+       ' html {' &@CRLF & _
+      '      background-color: whitesmoke;' &@CRLF & _
+     '   }' &@CRLF & _
+    '        .head{' &@CRLF & _
+   '         margin-left: 570px;' &@CRLF & _
+  '          margin-top: 100px;' &@CRLF & _
+ '           padding-bottom: 0%;' &@CRLF & _
+ '           font-size: 30px;' &@CRLF & _
+ '       }' &@CRLF & _
+ '       h1{' &@CRLF & _
+ '           color: rgb(109, 4, 86);' &@CRLF & _
+ '           font-weight: bolder;' &@CRLF & _
+ '           text-decoration: underline;' &@CRLF & _
+ '       }' &@CRLF & _
+ '       h2{' &@CRLF & _
+ '           color: black;' &@CRLF & _
+ '           font-size: 30px;' &@CRLF & _
+ '           font-weight: bolder;' &@CRLF & _
+ '       }' &@CRLF & _
+ '       h2:hover{' &@CRLF & _
+ '           color: cornflowerblue;' &@CRLF & _
+'        }' &@CRLF & _
+'        a{' &@CRLF & _
+'            text-decoration: none;' &@CRLF & _
+'        }' &@CRLF & _
+'        a:hover{' &@CRLF & _
+'            text-decoration: underline;' &@CRLF & _
+'            color:rgb(252, 8, 199);' &@CRLF & _
+'        }' &@CRLF & _
+'        </style>' &@CRLF & _
+'</head>' &@CRLF & _
+'    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>' &@CRLF & _
+'<body>' &@CRLF & _
+'    <div class="head">' &@CRLF & _
+'        <h1>NEWS REPORT</h1>' &@CRLF & _
+'    </div>' &@CRLF & _
+'    <h1>List of events</h1>' &@CRLF & _
+'<ul id="ulid"></ul>' &@CRLF & _
+'</body>' &@CRLF & _
+'<script>' &@CRLF & _
+'var myObj = ' &$r_f &';' &@CRLF & _
+'var x= "";' &@CRLF & _
+'for (i in myObj) {' &@CRLF & _
+'            x+= "<li>" + "<a href=" + myObj[i].link + ">" + "<h2>" + myObj[i].news + "</h2>" + "</a> </li> <br/>";' &@CRLF & _
+'}' &@CRLF & _
+'document.getElementById("ulid").innerHTML = x;' &@CRLF & _
+'</script>' &@CRLF & _
+'</html>'
+FileWrite(@ScriptDir &"\WebScrapper\newslink.html",$html)
+_IENavigate($event_ie,"http://localhost:8843/WebScrapper/newslink.html")
+EndFunc
+
 
 Func _prepareformlnode($redval)
 $strbtwn_nodes = _ArrayUnique(_StringExplode(StringStripWS(StringReplace(_StringBetween($redval,"[","]")[0],"'",""),8),","))
