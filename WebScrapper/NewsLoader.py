@@ -54,11 +54,9 @@ if args.Keyword != 'All':
     mask = mask & key_mask
 
 # print(news.loc[mask].values)
-data = {}
-count = 0
+data = []
 for row in news.values:
-    data[count] = [row[0], row[1], row[2], row[3]]
-    count += 1
+    data.append({'date': row[0], 'place': row[1], 'summary': row[2], 'keyword': row[3]})
 
 with open("result1.json", "w") as write_file:
     json.dump(data, write_file)
