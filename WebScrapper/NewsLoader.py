@@ -54,8 +54,14 @@ if args.Keyword != 'All':
     mask = mask & key_mask
 
 # print(news.loc[mask].values)
+data = {}
+count = 0
+for row in news.values:
+    data[count] = [row[0], row[1], row[2], row[3]]
+    count += 1
+
 with open("result1.json", "w") as write_file:
-    json.dump(news.loc[mask].values.tolist(), write_file)
+    json.dump(data, write_file)
 
 with open("result1.json", "r") as read_file:
     decodedArray = json.load(read_file)
