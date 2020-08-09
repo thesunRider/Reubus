@@ -10,7 +10,7 @@ import argparse
 from newspaper import Article
 from bs4 import BeautifulSoup
 
-live_updates = {}
+live_updates = []
 if sys.argv[1:]:
     q_string = ''
     for i in sys.argv[1:]:
@@ -33,7 +33,7 @@ if sys.argv[1:]:
                     article = Article(j.get('href'), 'en')
                     article.download()
                     article.parse()
-                    live_updates[j.get('href')] = article.title
+                    live_updates.append({'link': j.get('href'), 'news': article.title})
                 except Exception as e:
                     pass
 
