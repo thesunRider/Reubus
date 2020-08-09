@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FIR CRIME REPORT</title>
+	<input type="hidden" id="debug" value="">
 
     <style>
         html {
@@ -49,10 +50,8 @@
 
 <script>
     // Change the myList to the output json
-    var myObj = [
-  { "date": "jan", "place": "tvm", "summary": "theft happened", "keyword":"theft" },
-  { "date": "feb", "place": "tvm", "summary": "murder happened", "keyword":"killed"}
-];
+function loadhtml(){
+var myObj = JSON.parse(document.getElementById('debug').value);
 var x= "";
 var num = 1;
 
@@ -61,8 +60,6 @@ for (i in myObj) {
             num+=1;
 }
 document.getElementById("paraid").innerHTML = x;
-
-
-
+}
 </script>
 </html>
