@@ -5,9 +5,10 @@
 _SQLite_Startup()
 $node_db = _SQLite_Open(@ScriptDir &"\nodes\node_data\node_reg.db")
 
-$redval = _readcmd('python json_parser.py -m sukannan -f .\json\main.json -i 12')
-$out = _prepareformlnode($redval)
-ConsoleWrite(_readcmd('python ml_test.py "' &_ArrayToString($out,";",-1,-1,"|") &'"'))
+$redval = _readcmd('python json_parser.py -m sukannan -f .\json\main1.json')
+MsgBox(Default,Default,$redval)
+;$out = _prepareformlnode($redval)
+;ConsoleWrite(_readcmd('python ml_test.py "' &_ArrayToString($out,";",-1,-1,"|") &'"'))
 
 
 ;if Not _checkid($redval) Then
