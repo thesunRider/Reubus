@@ -53,9 +53,9 @@ circle_x = 11.05
 circle_y = 76.1
 rad = 0.2
 
-circle_x = args.Latitude
-circle_y = args.Longitude
-rad = args.Radius
+circle_x = float(args.Latitude)
+circle_y = float(args.Longitude)
+rad = float(args.Radius)
 
 for row in loca.values:
     x = row[4]
