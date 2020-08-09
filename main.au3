@@ -1338,13 +1338,19 @@ WEnd
 EndFunc
 
 Func _createpredictiongui()
-$predgui = _Metro_CreateGUI("Prediction", 455, 431, 192, 124)
+$predgui = GUICreate("Prediction", 455, 431, 192, 124)
 $predloc = GUICtrlCreateInput("Input1", 136, 24, 145, 21)
 GUICtrlCreateLabel("Prediction Location:", 24, 32, 98, 17)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
 $predradius = GUICtrlCreateInput("Input2", 136, 64, 145, 21)
 GUICtrlCreateUpdown(-1)
 GUICtrlCreateLabel("Radius of Prediction:", 24, 64, 102, 17)
-$List1 = GUICtrlCreateListView("", 24, 104, 393, 305)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+$predlist = GUICtrlCreateListView("Area|latitude|Longitude", 24, 104, 393, 305)
+$predict_place = GUICtrlCreateButton("Generate", 304, 24, 113, 65)
+GUISetBkColor($COLOR_BLACK,$predgui)
 GUISetState(@SW_SHOW)
 #EndRegion ### END Koda GUI section ###
 
@@ -1352,7 +1358,11 @@ While 1
 	$nMsg = GUIGetMsg()
 	Switch $nMsg
 		Case $GUI_EVENT_CLOSE
-			Exit
+			GUIDelete($predgui)
+			Return
+
+		Case $predict_place
+			MsgBox(Default,Default,"Will Add feature in the next version ,Sorry ;-)")
 
 	EndSwitch
 WEnd
