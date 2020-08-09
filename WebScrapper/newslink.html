@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FIR NEWS REPORT</title>
+	<input type="hidden" id="debug" value="">
 
     <style>
         html {
@@ -56,18 +57,14 @@
 
 <script>
     // Change the myList to the output json
-    var myObj = [
-  {"link": "https://www.google.com", "news":"Today murder happened" },
-  {"link": "https://www.amazon.com", "news": "Today theft happened"}
-];
+function loadhtml(){
+var myObj = JSON.parse(document.getElementById('debug').value);
 var x= "";
 
-for (i in myObj) { 
+for (i in myObj) {
             x+= "<li>" + "<a href=" + myObj[i].link + ">" + "<h2>" + myObj[i].news + "</h2>" + "</a> </li> <br/>";
-} 
+}
 document.getElementById("ulid").innerHTML = x;
-
-
-
+}
 </script>
 </html>
