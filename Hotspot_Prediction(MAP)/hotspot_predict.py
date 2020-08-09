@@ -62,14 +62,12 @@ for row in loca.values:
     y = row[5]
     if(isInside(circle_x, circle_y, rad, x, y)):
         locations.append(row[0])
-print(len(locations))
-
 # long 77.28 - 74.88
 # lat 12.78 - 8.31
 
 data = {}
 for num in range(1000):
-    i = np.random.randint(0, 85)
+    i = np.random.randint(0, len(locations))
     data[num] = [i, np.mean(loca['Lat'].loc[loca['Name'] == locations[i]]), np.mean(loca['Long'].loc[loca['Name'] == locations[i]])]
 
 df = pd.DataFrame.from_dict(data, orient='index', columns=['place', 'lat', 'lon'])
@@ -83,36 +81,36 @@ long_x = long_scaler.fit_transform(df.iloc[:, 2].values.reshape(-1, 1))
 
 x = np.concatenate((lat_x, long_x), axis=1)
 
-print(x.shape)
+# print(x.shape)
 
 size = 0.80
 train_size = int(len(x) * size)
 test_size = len(x) - train_size
 train, test = x[0:train_size, :], x[train_size:len(x), :]
-print("Number of entries (training set, test set): " + str((len(train), len(test))))
+# print("Number of entries (training set, test set): " + str((len(train), len(test))))
 
 window_size = 5
 train_X, train_Y = create_dataset(train, window_size)
 test_X, test_Y = create_dataset(test, window_size)
-print("Original training data shape:")
-print(train_X.shape)
+# print("Original training data shape:")
+# print(train_X.shape)
 train_X = train_X.transpose(0, 2, 1)
 test_X = test_X.transpose(0, 2, 1)
-print("New training data shape:")
-print(train_X.shape)
+# print("New training data shape:")
+# print(train_X.shape)
 
 ckpt_model = 'model.hdf5'
-checkpoint = ModelCheckpoint(ckpt_model, monitor='loss', verbose=1, save_best_only=True, mode='min')
+checkpoint = ModelCheckpoint(ckpt_model, monitor='loss', verbose=0, save_best_only=True, mode='min')
 callbacks_list = [checkpoint]
 model = create_model()
 model.compile(loss="mean_squared_error", optimizer="adam", metrics=['mean_absolute_error'])
-model.fit(train_X, train_Y, epochs=20, batch_size=1, verbose=2, callbacks=callbacks_list)
+model.fit(train_X, train_Y, epochs=2, batch_size=1, verbose=0, callbacks=callbacks_list)
 
 
 def predict_and_score(X, Y):
     pred = model.predict(X)
-    print(Y.shape)
-    print(pred.shape)
+    # print(Y.shape)
+    # print(pred.shape)
     score = math.sqrt(mean_squared_error(Y, pred))
     return(score, pred)
 
@@ -120,8 +118,8 @@ def predict_and_score(X, Y):
 rmse_train, train_predict = predict_and_score(train_X, train_Y)
 rmse_test, test_predict = predict_and_score(test_X, test_Y)
 
-print("Training data score: %.2f RMSE" % rmse_train)
-print("Test data score: %.2f RMSE" % rmse_test)
+# print("Training data score: %.2f RMSE" % rmse_train)
+# print("Test data score: %.2f RMSE" % rmse_test)
 
 pickle.dump(lat_scaler, open('lat_scaler.pkl', 'wb'))
 pickle.dump(long_scaler, open('long_scaler.pkl', 'wb'))
