@@ -1017,6 +1017,8 @@ GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor($SCRAPPER, 0x191919)
 
+$addtabs = GUICtrlCreateIcon("add_tab.ico",0,605,$ui_h-$ui_h*0.038,27,27)
+
 #EndRegion
 
 Do
@@ -1056,6 +1058,9 @@ While 1
 			GUISetState(@SW_MINIMIZE, $gui)
 
 		;GUI Response for tabs
+
+		Case $addtabs
+			MsgBox($MB_ICONINFORMATION,"Wait for Update","Plugin Architecture on Progress, The compiler is partially working Please wait for the next release ;-)")
 
 		Case $map
 			ConsoleWrite("clicked map "&@CRLF)
@@ -1294,7 +1299,6 @@ If $curlatln <> '' Then
 	$crmid_near = $aRow[5]
 	GUICtrlSetData($nearid,$crmid_near)
 EndIf
-
 WEnd
 
 #EndRegion
@@ -1378,33 +1382,7 @@ $html = '<!DOCTYPE html>' &@CRLF & _
 '    <meta charset="UTF-8">'&@CRLF & _
 '    <meta name="viewport" content="width=device-width, initial-scale=1.0">'&@CRLF & _
 '    <title>FIR CRIME REPORT</title>'&@CRLF & _
-'	<input type="hidden" id="debug" value="">'&@CRLF & _
-'    <style>'&@CRLF & _
-'        html {'&@CRLF & _
-'            background-color: whitesmoke;'&@CRLF & _
-'        }'&@CRLF & _
-'            .head{'&@CRLF & _
- '           margin-left: 600px;'&@CRLF & _
- '           margin-top: 100px;'&@CRLF & _
-'            padding-bottom: 0%;'&@CRLF & _
-'        }'&@CRLF & _
-'        h1{'&@CRLF & _
-'           color: rgb(109, 4, 86);'&@CRLF & _
-  '          font-weight: bolder;'&@CRLF & _
-   '         text-decoration: underline;'&@CRLF & _
-    '        font-size: 50px;'&@CRLF & _
-     '   }'&@CRLF & _
-      '  h2{'&@CRLF & _
-       '     font-size: 50px;'&@CRLF & _
-        '    margin-left: 40px;'&@CRLF & _
-         '   font-weight: bolder;'&@CRLF & _
-'        }'&@CRLF & _
- '      h3 {'&@CRLF & _
-  '          font-size: 30px;'&@CRLF & _
-   '         margin-left: 80px;'&@CRLF & _
-    '        font-weight: bold;'&@CRLF & _
- '       }'&@CRLF & _
-  '      </style>'&@CRLF & _
+'	<link rel="stylesheet" href= "dateplacetheft.css">'&@CRLF & _
 '</head>'&@CRLF & _
  '   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>'&@CRLF & _
 '<body>'&@CRLF & _
@@ -1436,40 +1414,10 @@ Func _createhtmlevent($r_f)
 $html = '	<!DOCTYPE html>' &@CRLF & _
 '<html lang="en">' &@CRLF & _
 '<head>' &@CRLF & _
-    '<meta charset="UTF-8">' &@CRLF & _
-   ' <meta name="viewport" content="width=device-width, initial-scale=1.0">' &@CRLF & _
-  '  <title>FIR NEWS REPORT</title>' &@CRLF & _
- '   <style>' &@CRLF & _
-       ' html {' &@CRLF & _
-      '      background-color: whitesmoke;' &@CRLF & _
-     '   }' &@CRLF & _
-    '        .head{' &@CRLF & _
-   '         margin-left: 570px;' &@CRLF & _
-  '          margin-top: 100px;' &@CRLF & _
- '           padding-bottom: 0%;' &@CRLF & _
- '           font-size: 30px;' &@CRLF & _
- '       }' &@CRLF & _
- '       h1{' &@CRLF & _
- '           color: rgb(109, 4, 86);' &@CRLF & _
- '           font-weight: bolder;' &@CRLF & _
- '           text-decoration: underline;' &@CRLF & _
- '       }' &@CRLF & _
- '       h2{' &@CRLF & _
- '           color: black;' &@CRLF & _
- '           font-size: 30px;' &@CRLF & _
- '           font-weight: bolder;' &@CRLF & _
- '       }' &@CRLF & _
- '       h2:hover{' &@CRLF & _
- '           color: cornflowerblue;' &@CRLF & _
-'        }' &@CRLF & _
-'        a{' &@CRLF & _
-'            text-decoration: none;' &@CRLF & _
-'        }' &@CRLF & _
-'        a:hover{' &@CRLF & _
-'            text-decoration: underline;' &@CRLF & _
-'            color:rgb(252, 8, 199);' &@CRLF & _
-'        }' &@CRLF & _
-'        </style>' &@CRLF & _
+'<meta charset="UTF-8">' &@CRLF & _
+' <meta name="viewport" content="width=device-width, initial-scale=1.0">' &@CRLF & _
+'  <title>FIR NEWS REPORT</title>' &@CRLF & _
+'<link rel="stylesheet" href="newslink.css">' &@CRLF & _
 '</head>' &@CRLF & _
 '    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>' &@CRLF & _
 '<body>' &@CRLF & _
@@ -1777,6 +1725,7 @@ Switch $id
 		GUICtrlSetBkColor($id, 0x7f7f7f)
 		Local $lf[] = [$file_button,$save_button,$settings_button]
 		_setelse($lf,$id,0x323232)
+
 
 EndSwitch
 
