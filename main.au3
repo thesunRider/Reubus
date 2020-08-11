@@ -436,6 +436,7 @@ GUICtrlSetData(-1, "|A|B|C","A")
 $GRAPH_DATE = GUICtrlCreateInput("", $ui_w*.725+130, $ui_h*.19, 145, 18)
 
 $SHOW_GRAPH = GUICtrlCreatePic("",$ui_w*.715, $ui_h*.22, 410, 300,BitOR($GUI_SS_DEFAULT_PIC,$WS_BORDER)) ; SHOW GRAPH OUTPUT HERE
+_loadpic($SHOW_GRAPH,@ScriptDir &"\graph.PNG")
 
 GUICtrlCreateLabel("GRAPHS", $ui_w*.715, $ui_h*.12, 140, 28, 0x0200)
 GUICtrlSetFont(-1, 11, Default, $GUI_FONTUNDER, "Consolas", 5); 5 = Clear Type
@@ -755,101 +756,7 @@ GUICtrlCreateLabel("HEIGHT :", $ui_w*.105+300, $ui_h*.24, 100, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
-;CREATE TO EVIDENCE BOX
-
-GUICtrlCreateLabel("CREATE TO EVIDENCE BOX", $ui_w*.51, $ui_h*.10, 180, 28, 0x0200)
-GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xffffff)
-
-$EVIDENCE_type = GUICtrlCreateCombo("",$ui_w*.8+100, $ui_h*.105, 150, 28, BitOR($CBS_DROPDOWN,$CBS_AUTOHSCROLL))
-GUICtrlSetData(-1, "Person|Organization|Vehicle|Properties","Person")
-
-GUICtrlCreateLabel("TYPE :", $ui_w*.835, $ui_h*.10, 150, 28, 0x0200)
-GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xffffff)
-
-
-
-$SHOW_IMG_IN = GUICtrlCreatePic("",$ui_w*.915, $ui_h*.14, 100, 120,BitOR($GUI_SS_DEFAULT_PIC,$WS_BORDER))
-$ADD_IMG = GUICtrlCreateButton("ADD IMAGE",$ui_w*.915, $ui_h*.14+125, 100, 28)
-GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xffffff)
-GUICtrlSetBkColor(-1, 0x7f7f7f)
-
-GUICtrlCreateGroup("",$ui_w*.52, $ui_h*.125, $ui_w*.47, $ui_h*.5)
-
-$NAME_INPUT = GUICtrlCreateInput("", $ui_w*.53+125, $ui_h*.155, 180, 20)
-$ADDRESS_INPUT = GUICtrlCreateEdit("", $ui_w*.53+125, $ui_h*.195, 180, 90)
-$AADHAAR_INPUT = GUICtrlCreateInput("", $ui_w*.53+125, $ui_h*.315, 180, 20)
-$CRIMENO_INPUT = GUICtrlCreateInput("", $ui_w*.53+125, $ui_h*.355, 180, 20)
-$BIOMETRICS_INPUT = GUICtrlCreateInput("", $ui_w*.53+125, $ui_h*.395, 180, 20)
-$MEDICAL_INPUT = GUICtrlCreateInput("", $ui_w*.53+125, $ui_h*.435, 180, 20)
-$CNUMBER_INPUT = GUICtrlCreateInput("", $ui_w*.53+125, $ui_h*.475, 180, 20)
-$FIRNo_INPUT = GUICtrlCreateInput("", $ui_w*.53+400, $ui_h*.155, 180, 20)
-$SECTION_INPUT = GUICtrlCreateInput("", $ui_w*.53+400, $ui_h*.195, 180, 20)
-$AGE_INPUT = GUICtrlCreateInput("", $ui_w*.53+400, $ui_h*.235, 180, 20)
-$HEIGHT_INPUT = GUICtrlCreateInput("", $ui_w*.53+400, $ui_h*.275, 180, 20)
-$WEIGHT_INPUT = GUICtrlCreateInput("", $ui_w*.53+400, $ui_h*.315, 180, 20)
-$GENDER_INPUT = GUICtrlCreateInput("", $ui_w*.53+400, $ui_h*.355, 180, 20)
-$REMARKS_INPUT = GUICtrlCreateEdit("", $ui_w*.53+400, $ui_h*.395, 280, 90)
-
-GUICtrlCreateLabel("NAME :", $ui_w*.53, $ui_h*.15, 180, 28, 0x0200)
-GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xffffff)
-
-GUICtrlCreateLabel("ADDRESS :", $ui_w*.53, $ui_h*.19, 180, 28, 0x0200)
-GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xffffff)
-
-GUICtrlCreateLabel("AADHAAR :", $ui_w*.53, $ui_h*.31, 180, 28, 0x0200)
-GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xffffff)
-
-GUICtrlCreateLabel("CRIME NO.S :", $ui_w*.53, $ui_h*.35, 180, 28, 0x0200)
-GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xffffff)
-
-GUICtrlCreateLabel("BIOMETRICS :", $ui_w*.53, $ui_h*.39, 180, 28, 0x0200)
-GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xffffff)
-
-GUICtrlCreateLabel("MEDICAL DETAILS :", $ui_w*.53, $ui_h*.43, 180, 28, 0x0200)
-GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xffffff)
-
-GUICtrlCreateLabel("CONTACT NUMBER :", $ui_w*.53, $ui_h*.47, 180, 28, 0x0200)
-GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xffffff)
-
-GUICtrlCreateLabel("FIR No :", $ui_w*.53+330, $ui_h*.15, 180, 28, 0x0200)
-GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xffffff)
-
-GUICtrlCreateLabel("SECTION :", $ui_w*.53+330, $ui_h*.19, 180, 28, 0x0200)
-GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xffffff)
-
-GUICtrlCreateLabel("AGE :", $ui_w*.53+330, $ui_h*.23, 180, 28, 0x0200)
-GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xffffff)
-
-GUICtrlCreateLabel("HEIGHT :", $ui_w*.53+330, $ui_h*.27, 180, 28, 0x0200)
-GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xffffff)
-
-GUICtrlCreateLabel("WEIGHT :", $ui_w*.53+330, $ui_h*.31, 180, 28, 0x0200)
-GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xffffff)
-
-GUICtrlCreateLabel("GENDER :", $ui_w*.53+330, $ui_h*.35, 180, 28, 0x0200)
-GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xffffff)
-
-GUICtrlCreateLabel("REMARKS :", $ui_w*.53+330, $ui_h*.39, 180, 28, 0x0200)
-GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xffffff)
-
-$CREATE_TO_EVIDENCEBOX = _Metro_CreateButtonEx("CREATE TO EVIDENCE BOX", $ui_w*.65, $ui_h*.55, 300, 28)
+;We are creating an external gui and embedding the gui the above function is for creating another gui with a tab
 
 ;3RD DIVISION
 
@@ -897,6 +804,10 @@ GUICtrlCreateLabel("",$ui_w*.5, $ui_h*.1, $ui_w*.5, $ui_h*.8) ;right layout bg
 GUICtrlSetState(-1, 128); $GUI_DISABLE
 GUICtrlSetBkColor(-1, 0x191919)
 
+$event_ie = _IECreateEmbedded()
+GUICtrlCreateObj($event_ie,$ui_w*.52, $ui_h*.13, $ui_w*.45, $ui_h*.4)
+
+
 GUICtrlCreateLabel("", $ui_w*.5+5, $ui_h*.55, $ui_w*.5, 2) ;upper border of status bar
 GUICtrlSetState(-1, 128); $GUI_DISABLE
 GUICtrlSetBkColor(-1, 0x5e5e5e)
@@ -912,6 +823,8 @@ GUICtrlSetFont(-1, 12,  800, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
 GUICtrlCreateGroup("",$ui_w*.015, $ui_h*.12, $ui_w*.47, $ui_h*.6) ;INSERT NEWS INSIDE THIS GROUPBOX
+$nws_ie = _IECreateEmbedded()
+GUICtrlCreateObj($nws_ie,$ui_w*.027, $ui_h*.14, $ui_w*.44, $ui_h*.57)
 
 GUICtrlCreateGroup("",$ui_w*.015, $ui_h*.76, $ui_w*.47, $ui_h*.19)
 
@@ -920,10 +833,10 @@ GUICtrlSetFont(-1, 12,  800, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
 $FROM_DATE =  GUICtrlCreateDate("",$ui_w*.05+50, $ui_h*.815 ,120,22)
-GUICtrlSendMsg(-1, $DTM_SETFORMATW, 0, "yyyy/MM/dd ")
+GUICtrlSendMsg(-1, $DTM_SETFORMATW, 0, "dd/MM/yyyy")
 
 $TO_DATE =  GUICtrlCreateDate("",$ui_w*.05+50, $ui_h*.865 ,120,22)
-GUICtrlSendMsg(-1, $DTM_SETFORMATW, 0, "yyyy/MM/dd ")
+GUICtrlSendMsg(-1, $DTM_SETFORMATW, 0, "dd/MM/yyyy")
 
 $PLACE_INPUT = GUICtrlCreateInput("", $ui_w*.05+330, $ui_h*.815, 120, 22)
 
@@ -1010,6 +923,8 @@ GUICtrlSetFont(-1, 9, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor($SCRAPPER, 0x191919)
 
+$addtabs = GUICtrlCreateIcon("add_tab.ico",0,605,$ui_h-$ui_h*0.038,27,27)
+
 #EndRegion
 
 Do
@@ -1022,6 +937,8 @@ GUIRegisterMsg($WM_COMMAND, "WM_COMMAND")
 Global $grph = GUICtrlCreateObj($grph_hndl, 0, $ui_h*.1, $ui_w*.65, $ui_h*.55)
 GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
 _IENavigate($grph_hndl, "http://localhost:8843")
+_IENavigate($nws_ie,"http://localhost:8843/WebScrapper/dateplacesummary.html")
+_IENavigate($event_ie,"http://localhost:8843/WebScrapper/newslink.html")
 ConsoleWrite("Passed all functions")
 _updatelistnodeclass()
 _loadlatlonglist()
@@ -1031,6 +948,18 @@ GUISetState(@SW_SHOW)
 GUICtrlSetData($list_nodeedit,"Description goes here..")
 _redrawmap()
 _setcrdlist()
+
+$tabembdetails_DB = _createdetails2() ;create a gui with tabs
+GUISetState(@SW_HIDE,$tabembdetails_DB) ;hide the gui
+_embedgui($gui,$tabembdetails_DB,800,100,200,200) ;tell the gui to be embedded
+;first parameter handle of our main gui
+;secon parameter handle return from the function _createembeded2()
+;3rd parameter x position of embeded gui
+;4th param y position of embeded gui
+;5th param width of embed
+;6th param height of embed
+
+AdlibRegister("_repeatfunc1",500)
 
 While 1
 	$nMsg = GUIGetMsg()
@@ -1046,6 +975,15 @@ While 1
 			GUISetState(@SW_MINIMIZE, $gui)
 
 		;GUI Response for tabs
+
+		Case $addtabs
+			$plg = FileOpenDialog("Please Select a Plugin to load",@ScriptDir &"\Modules\","zip (*.zip)")
+			$tmp_dirzip = _TempFile()
+			DirCreate($tmp_dirzip)
+			_ExtractZip($plg,$tmp_dirzip)
+			$pckg_name = IniRead($tmp_dirzip &"\package.ini","package","name","Unspecified")
+			MsgBox($MB_ICONINFORMATION,"Wait for Update","Plugin Architecture on Progress, The compiler is partially working Please wait for the next release ;-)")
+
 
 		Case $map
 			ConsoleWrite("clicked map "&@CRLF)
@@ -1068,6 +1006,30 @@ While 1
 			GUICtrlSetState($grph,$GUI_HIDE)
 			GUICtrlSetState($grph_hndl,$GUI_HIDE)
 			_GUICtrlTab_ActivateTab($maintab,3)
+
+
+		;GUI RESPONSE FOR SCRAPPER
+		Case $SEARCH_NEWS
+			$plc_inpu = GUICtrlRead($PLACE_INPUT)
+			$kywrd_inpu = GUICtrlRead($KEYWORD_INPUT)
+			$frm_inpu = GUICtrlRead( $FROM_DATE)
+			$todate_inpu = GUICtrlRead($TO_DATE)
+			FileDelete(@ScriptDir&"\WebScrapper\result1.json")
+			RunWait("python NewsLoader.py -fd "&$frm_inpu&"  -td "&$todate_inpu &" -p "&$plc_inpu &" -k " &$kywrd_inpu,@ScriptDir &"\WebScrapper\",@SW_HIDE)
+			$r_f = FileRead(@ScriptDir&"\WebScrapper\result1.json")
+			_createhtml($r_f)
+			FileDelete(@ScriptDir &"\WebScrapper\dateplacesummary.html")
+
+		Case $SEARCH_EVENT
+			$evn_inpu = GUICtrlRead($EVENT_INPUT)
+			FileDelete(@ScriptDir&"\WebScrapper\result2.json")
+			RunWait("python EventSearch.py " &$evn_inpu,@ScriptDir &"\WebScrapper\",@SW_HIDE)
+			$r_f = FileRead(@ScriptDir&"\WebScrapper\result2.json")
+			_createhtmlevent($r_f)
+			;FileDelete(@ScriptDir &"\WebScrapper\newslink.html")
+
+
+
 
 		;GUI Response for Scene
 		Case $browse_model_m
@@ -1191,6 +1153,10 @@ While 1
 
 
 		;Gui response for map
+		Case $START_DRAW
+			_createpredictiongui()
+
+
 		Case $GOTO_BUTTON
 			$latn = guictrlread($LAT_IN)
 			$longn = GUICtrlRead($LONG_IN)
@@ -1261,7 +1227,171 @@ WEnd
 
 #EndRegion
 
+
 #Region Functions
+
+Func _repeatfunc1()
+	_WinAPI_RedrawWindow($tabembdetails_DB) ; Redraw embeded gui
+EndFunc
+
+Func _ExtractZip($sZipFile, $sDestinationFolder, $sFolderStructure = "")
+
+    Local $i
+    Do
+        $i += 1
+        $sTempZipFolder = @TempDir & "\Temporary Directory " & $i & " for " & StringRegExpReplace($sZipFile, ".*\\", "")
+    Until Not FileExists($sTempZipFolder) ; this folder will be created during extraction
+
+    Local $oShell = ObjCreate("Shell.Application")
+
+    If Not IsObj($oShell) Then
+        Return SetError(1, 0, 0) ; highly unlikely but could happen
+    EndIf
+
+    Local $oDestinationFolder = $oShell.NameSpace($sDestinationFolder)
+    If Not IsObj($oDestinationFolder) Then
+        DirCreate($sDestinationFolder)
+;~         Return SetError(2, 0, 0) ; unavailable destionation location
+    EndIf
+
+    Local $oOriginFolder = $oShell.NameSpace($sZipFile & "\" & $sFolderStructure) ; FolderStructure is overstatement because of the available depth
+    If Not IsObj($oOriginFolder) Then
+        Return SetError(3, 0, 0) ; unavailable location
+    EndIf
+
+    Local $oOriginFile = $oOriginFolder.Items();get all items
+    If Not IsObj($oOriginFile) Then
+        Return SetError(4, 0, 0) ; no such file in ZIP file
+    EndIf
+
+    ; copy content of origin to destination
+    $oDestinationFolder.CopyHere($oOriginFile, 20) ; 20 means 4 and 16, replaces files if asked
+
+    DirRemove($sTempZipFolder, 1) ; clean temp dir
+
+    Return 1 ; All OK!
+
+EndFunc
+
+Func _createdetails2()
+$retgui = GUICreate("", 100, 200) ;new gui is created all controls needs to be repositioned inside this gui
+
+
+GUICtrlCreateLabel("CREATE TO EVIDENCE BOX", $ui_w*.51, $ui_h*.10, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateTab(10,10)
+$EVIDENCE_type = GUICtrlCreateCombo("",$ui_w*.8+100, $ui_h*.105, 150, 28, BitOR($CBS_DROPDOWN,$CBS_AUTOHSCROLL))
+GUICtrlSetData(-1, "Person|Organization|Vehicle|Properties","Person")
+
+GUICtrlCreateLabel("TYPE :", $ui_w*.835, $ui_h*.10, 150, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+
+GUICtrlCreateTabItem("Person")
+$SHOW_IMG_IN = GUICtrlCreatePic("",$ui_w*.915, $ui_h*.14, 100, 120,BitOR($GUI_SS_DEFAULT_PIC,$WS_BORDER))
+$ADD_IMG = GUICtrlCreateButton("ADD IMAGE",$ui_w*.915, $ui_h*.14+125, 100, 28)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor(-1, 0x7f7f7f)
+
+GUICtrlCreateGroup("",$ui_w*.52, $ui_h*.125, $ui_w*.47, $ui_h*.5)
+
+$NAME_INPUT = GUICtrlCreateInput("", $ui_w*.53+125, $ui_h*.155, 180, 20)
+$ADDRESS_INPUT = GUICtrlCreateEdit("", $ui_w*.53+125, $ui_h*.195, 180, 90)
+$AADHAAR_INPUT = GUICtrlCreateInput("", $ui_w*.53+125, $ui_h*.315, 180, 20)
+$CRIMENO_INPUT = GUICtrlCreateInput("", $ui_w*.53+125, $ui_h*.355, 180, 20)
+$BIOMETRICS_INPUT = GUICtrlCreateInput("", $ui_w*.53+125, $ui_h*.395, 180, 20)
+$MEDICAL_INPUT = GUICtrlCreateInput("", $ui_w*.53+125, $ui_h*.435, 180, 20)
+$CNUMBER_INPUT = GUICtrlCreateInput("", $ui_w*.53+125, $ui_h*.475, 180, 20)
+$FIRNo_INPUT = GUICtrlCreateInput("", $ui_w*.53+400, $ui_h*.155, 180, 20)
+$SECTION_INPUT = GUICtrlCreateInput("", $ui_w*.53+400, $ui_h*.195, 180, 20)
+$AGE_INPUT = GUICtrlCreateInput("", $ui_w*.53+400, $ui_h*.235, 180, 20)
+$HEIGHT_INPUT = GUICtrlCreateInput("", $ui_w*.53+400, $ui_h*.275, 180, 20)
+$WEIGHT_INPUT = GUICtrlCreateInput("", $ui_w*.53+400, $ui_h*.315, 180, 20)
+$GENDER_INPUT = GUICtrlCreateInput("", $ui_w*.53+400, $ui_h*.355, 180, 20)
+$REMARKS_INPUT = GUICtrlCreateEdit("", $ui_w*.53+400, $ui_h*.395, 280, 90)
+
+GUICtrlCreateLabel("NAME :", $ui_w*.53, $ui_h*.15, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("ADDRESS :", $ui_w*.53, $ui_h*.19, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("AADHAAR :", $ui_w*.53, $ui_h*.31, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("CRIME NO.S :", $ui_w*.53, $ui_h*.35, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("BIOMETRICS :", $ui_w*.53, $ui_h*.39, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("MEDICAL DETAILS :", $ui_w*.53, $ui_h*.43, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("CONTACT NUMBER :", $ui_w*.53, $ui_h*.47, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("FIR No :", $ui_w*.53+330, $ui_h*.15, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("SECTION :", $ui_w*.53+330, $ui_h*.19, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("AGE :", $ui_w*.53+330, $ui_h*.23, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("HEIGHT :", $ui_w*.53+330, $ui_h*.27, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("WEIGHT :", $ui_w*.53+330, $ui_h*.31, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("GENDER :", $ui_w*.53+330, $ui_h*.35, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("REMARKS :", $ui_w*.53+330, $ui_h*.39, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+;$CREATE_TO_EVIDENCEBOX = _Metro_CreateButtonEx("Add to Person DB", $ui_w*.65, $ui_h*.55, 300, 28)
+
+GUICtrlCreateTabItem("Adutha sanam")
+
+GUICtrlCreateTabItem("")
+GUISetState()
+
+Return $retgui ;finally return handle of gui
+EndFunc
+
+Func _RunAU3($sFilePath, $sWorkingDir = "", $iShowFlag = @SW_SHOW, $iOptFlag = 0)
+    Return Run('"' & @AutoItExe & '" /AutoIt3ExecuteScript "' & $sFilePath & '"', $sWorkingDir, $iShowFlag, $iOptFlag)
+EndFunc   ;==>_RunAU3
+
+Func _embedgui($hGUI,$hCmd,$x,$y,$xS,$yS)
+Local $hOriParent = _WinAPI_SetParent($hCmd, $hGUI)
+Local $iStyle = BitOR(_WinAPI_GetWindowLong($hCmd, $GWL_STYLE) , BitOR($GUI_SS_DEFAULT_GUI,$WS_SIZEBOX,$WS_MAXIMIZEBOX))
+_WinAPI_SetWindowLong($hCmd, $GWL_STYLE, BitXOR($iStyle, $WS_OVERLAPPEDWINDOW))
+_WinAPI_SetWindowPos($hCmd, 0, $x, $y, $xS, $yS, BitOR($SWP_FRAMECHANGED, $SWP_NOACTIVATE, $SWP_NOZORDER, $SWP_NOSIZE))
+_WinAPI_RedrawWindow($hCmd)
+_WinAPI_RedrawWindow($hGUI)
+EndFunc
 
 Func _setcrdlist()
 _GUICtrlListView_DeleteAllItems($crdlist)
@@ -1298,6 +1428,105 @@ While 1
 	EndSwitch
 WEnd
 EndFunc
+
+Func _createpredictiongui()
+$predgui = GUICreate("Prediction", 455, 431, 192, 124)
+$predloc = GUICtrlCreateInput("Input1", 136, 24, 145, 21)
+GUICtrlCreateLabel("Prediction Location:", 24, 32, 98, 17)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+$predradius = GUICtrlCreateInput("Input2", 136, 64, 145, 21)
+GUICtrlCreateUpdown(-1)
+GUICtrlCreateLabel("Radius of Prediction:", 24, 64, 102, 17)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+$predlist = GUICtrlCreateListView("Area|latitude|Longitude", 24, 104, 393, 305)
+$predict_place = GUICtrlCreateButton("Generate", 304, 24, 113, 65)
+GUISetBkColor($COLOR_BLACK,$predgui)
+GUISetState(@SW_SHOW)
+
+While 1
+	$nMsg = GUIGetMsg()
+	Switch $nMsg
+		Case $GUI_EVENT_CLOSE
+			GUIDelete($predgui)
+			Return
+
+		Case $predict_place
+			MsgBox(Default,Default,"Will Add feature in the next version ,Sorry ;-)")
+
+	EndSwitch
+WEnd
+
+
+EndFunc
+
+
+Func _createhtml($json)
+$html = '<!DOCTYPE html>' &@CRLF & _
+'<html lang="en">' &@CRLF & _
+'<head>'&@CRLF & _
+'    <meta charset="UTF-8">'&@CRLF & _
+'    <meta name="viewport" content="width=device-width, initial-scale=1.0">'&@CRLF & _
+'    <title>FIR CRIME REPORT</title>'&@CRLF & _
+'	<link rel="stylesheet" href= "dateplacetheft.css">'&@CRLF & _
+'</head>'&@CRLF & _
+ '   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>'&@CRLF & _
+'<body>'&@CRLF & _
+ '   <div class="head">'&@CRLF & _
+  '      <h1>CRIME REPORT</h1>'&@CRLF & _
+' </div>'&@CRLF & _
+'<p id="paraid"></p>'&@CRLF & _
+'</body>'&@CRLF & _
+'<script>'&@CRLF & _
+'var json_val = '&$json &';'&@CRLF & _
+'var myObj = json_val;'&@CRLF & _
+'var x= "";'&@CRLF & _
+'var num = 1;'&@CRLF & _
+'for (i in myObj) {'&@CRLF & _
+'            x+= "<h2>" + num + "."+ "</h2>" + "<h3> Date:" + myObj[i].date + "<br>" + "Place:" + myObj[i].place + "<br>" + "Summary:" + myObj[i].summary + "<br>";'&@CRLF & _
+'            num+=1;'&@CRLF & _
+'}'&@CRLF & _
+'document.getElementById("paraid").innerHTML = x;'&@CRLF & _
+'</script>'&@CRLF & _
+'</html>'
+
+FileWrite(@ScriptDir &"\WebScrapper\dateplacesummary.html",$html)
+_IENavigate($nws_ie,"http://localhost:8843/WebScrapper/dateplacesummary.html")
+EndFunc
+
+
+Func _createhtmlevent($r_f)
+
+$html = '	<!DOCTYPE html>' &@CRLF & _
+'<html lang="en">' &@CRLF & _
+'<head>' &@CRLF & _
+'<meta charset="UTF-8">' &@CRLF & _
+' <meta name="viewport" content="width=device-width, initial-scale=1.0">' &@CRLF & _
+'  <title>FIR NEWS REPORT</title>' &@CRLF & _
+'<link rel="stylesheet" href="newslink.css">' &@CRLF & _
+'</head>' &@CRLF & _
+'    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>' &@CRLF & _
+'<body>' &@CRLF & _
+'    <div class="head">' &@CRLF & _
+'        <h1>NEWS REPORT</h1>' &@CRLF & _
+'    </div>' &@CRLF & _
+'    <h1>List of events</h1>' &@CRLF & _
+'<ul id="ulid"></ul>' &@CRLF & _
+'</body>' &@CRLF & _
+'<script>' &@CRLF & _
+'var myObj = ' &$r_f &';' &@CRLF & _
+'var x= "";' &@CRLF & _
+'for (i in myObj) {' &@CRLF & _
+'            x+= "<li>" + "<a href=" + myObj[i].link + ">" + "<h2>" + myObj[i].news + "</h2>" + "</a> </li> <br/>";' &@CRLF & _
+'}' &@CRLF & _
+'document.getElementById("ulid").innerHTML = x;' &@CRLF & _
+'</script>' &@CRLF & _
+'</html>'
+FileWrite(@ScriptDir &"\WebScrapper\newslink.html",$html)
+_IENavigate($event_ie,"http://localhost:8843/WebScrapper/newslink.html")
+EndFunc
+
 
 Func _prepareformlnode($redval)
 $strbtwn_nodes = _ArrayUnique(_StringExplode(StringStripWS(StringReplace(_StringBetween($redval,"[","]")[0],"'",""),8),","))
@@ -1578,14 +1807,28 @@ Switch $id
 		GUICtrlSetBkColor($id, 0x323232)
 		Local $lf[] = [$scene,$map,$DB,$SCRAPPER]
 		_setelse($lf,$id,0x191919)
+		_pressedtab($id,0)
 
 	Case $file_button,$save_button,$settings_button
 		GUICtrlSetBkColor($id, 0x7f7f7f)
 		Local $lf[] = [$file_button,$save_button,$settings_button]
 		_setelse($lf,$id,0x323232)
 
+
 EndSwitch
 
+EndFunc
+
+Func _pressedtab($id,$use)
+
+Switch $id
+	Case $DB
+		GUISetState(@SW_SHOW,$tabembdetails_DB)
+
+	Case Else
+		GUISetState(@SW_HIDE,$tabembdetails_DB)
+
+EndSwitch
 EndFunc
 
 Func _setelse($ary,$selec,$corl)
@@ -1846,4 +2089,5 @@ Func _URIDecode($sData)
     Next
     Return BinaryToString(StringToBinary($aData[1],1),4)
 EndFunc
+
 #EndRegion

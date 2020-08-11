@@ -1,47 +1,62 @@
-#include <GDIPlus.au3>
-#include <GUIConstantsEx.au3>
-#include <MsgBoxConstants.au3>
+DirCreate(@ScriptDir & "\Modules\moku\") ; to extract to
 
-Example()
+_ExtractZip(@ScriptDir & "\Modules\test_module.zip",  @ScriptDir & "\Modules\moku\")
 
-Func Example()
-	; X64 running support
-	Local $sWow64 = ""
-	If @AutoItX64 Then $sWow64 = "\Wow6432Node"
+ConsoleWrite(@error & @CRLF)
 
-	;get AutoIt install dir
-	Local $sRegPath = "HKLM\SOFTWARE" & $sWow64 & "\AutoIt v3\AutoIt"
 
-	Local $sFile = RegRead($sRegPath, "InstallDir") & "\Examples\GUI\logo4.gif"
-	If Not FileExists($sFile) Then
-		MsgBox(BitOR($MB_SYSTEMMODAL, $MB_ICONHAND), "", $sFile & " not found!", 30)
-		Return False
-	EndIf
+; #FUNCTION# ;===============================================================================
+;
+; Name...........: _ExtractZip
+; Description ...: Extracts file/folder from ZIP compressed file
+; Syntax.........: _ExtractZip($sZipFile, $sDestinationFolder)
+; Parameters ....: $sZipFile - full path to the ZIP file to process
+;                  $sDestinationFolder - folder to extract to. Will be created if it does not exsist exist.
+; Return values .: Success - Returns 1
+;                          - Sets @error to 0
+;                  Failure - Returns 0 sets @error:
+;                  |1 - Shell Object creation failure
+;                  |2 - Destination folder is unavailable
+;                  |3 - Structure within ZIP file is wrong
+;                  |4 - Specified file/folder to extract not existing
+; Author ........: trancexx, modifyed by corgano
+;
+;==========================================================================================
+Func _ExtractZip($sZipFile, $sDestinationFolder, $sFolderStructure = "")
 
-	_GDIPlus_Startup()
-	Local $hImage = _GDIPlus_ImageLoadFromFile($sFile) ;create an image object based on a file
-	If @error Then
-		_GDIPlus_Shutdown()
-		MsgBox(BitOR($MB_SYSTEMMODAL, $MB_ICONHAND), "", "An error has occured - unable to load image!", 30)
-		Return False
-	EndIf
+    Local $i
+    Do
+        $i += 1
+        $sTempZipFolder = @TempDir & "\Temporary Directory " & $i & " for " & StringRegExpReplace($sZipFile, ".*\\", "")
+    Until Not FileExists($sTempZipFolder) ; this folder will be created during extraction
 
-	Local $hGUI = GUICreate("GDI+ Example (" & @ScriptName & ")", 320, 200)
-	GUISetState(@SW_SHOW)
+    Local $oShell = ObjCreate("Shell.Application")
 
-	Local $hGraphics = _GDIPlus_GraphicsCreateFromHWND($hGUI) ;create a Graphics object from a window handle
-	_GDIPlus_GraphicsClear($hGraphics, 0xFF404040) ;clear graphic handle with dark grey (background)
-	_GDIPlus_GraphicsSetSmoothingMode($hGraphics, $GDIP_SMOOTHINGMODE_HIGHQUALITY) ;sets the graphics object rendering quality (antialiasing)
-	Local $hTexture = _GDIPlus_TextureCreate2($hImage, 5, 4, 59, 5) ;create texture brush only from a defined rectangle
-	_GDIPlus_GraphicsFillEllipse($hGraphics, 10, 40, 300, 120, $hTexture) ;draw ellipse with texture as a brush
+    If Not IsObj($oShell) Then
+        Return SetError(1, 0, 0) ; highly unlikely but could happen
+    EndIf
 
-	Do
-	Until GUIGetMsg() = $GUI_EVENT_CLOSE
+    Local $oDestinationFolder = $oShell.NameSpace($sDestinationFolder)
+    If Not IsObj($oDestinationFolder) Then
+        DirCreate($sDestinationFolder)
+;~         Return SetError(2, 0, 0) ; unavailable destionation location
+    EndIf
 
-	;cleanup resources
-	_GDIPlus_BrushDispose($hTexture)
-	_GDIPlus_ImageDispose($hImage)
-	_GDIPlus_GraphicsDispose($hGraphics)
-	_GDIPlus_Shutdown()
-	GUIDelete($hGUI)
-EndFunc   ;==>Example
+    Local $oOriginFolder = $oShell.NameSpace($sZipFile & "\" & $sFolderStructure) ; FolderStructure is overstatement because of the available depth
+    If Not IsObj($oOriginFolder) Then
+        Return SetError(3, 0, 0) ; unavailable location
+    EndIf
+
+    Local $oOriginFile = $oOriginFolder.Items();get all items
+    If Not IsObj($oOriginFile) Then
+        Return SetError(4, 0, 0) ; no such file in ZIP file
+    EndIf
+
+    ; copy content of origin to destination
+    $oDestinationFolder.CopyHere($oOriginFile, 20) ; 20 means 4 and 16, replaces files if asked
+
+    DirRemove($sTempZipFolder, 1) ; clean temp dir
+
+    Return 1 ; All OK!
+
+EndFunc
