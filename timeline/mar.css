@@ -107,3 +107,18 @@ html {
     background-color: red;
   }
 }
+a {
+  color:#ffffff;
+  }         /* Unvisited link  */
+a:visited {
+  color:#ffffff;
+  } /* Visited link    */
+a:hover {
+  color:#ff3300;
+  }   /* Mouse over link */
+a:active {
+  color:#ffffff;
+} 
+a {
+  font-size: 20px;
+}
