@@ -15,6 +15,11 @@ import pickle
 import argparse
 parser = argparse.ArgumentParser()
 import tensorflow as tf
+
+physical_devices = tf.config.list_physical_devices('GPU')
+tf.config.experimental.set_memory_growth(physical_devices[0], enable=True)
+
+
 # print(tf.__version__)
 parser.add_argument("-lat", "--Latitude", help="Input Latitude", default=11.05)
 parser.add_argument("-long", "--Longitude", help="Input Longitude", default=76.1)
