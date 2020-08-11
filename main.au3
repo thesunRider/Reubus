@@ -1303,8 +1303,8 @@ WEnd
 
 #EndRegion
 
-#Region Functions
 
+#Region Functions
 Func _setcrdlist()
 _GUICtrlListView_DeleteAllItems($crdlist)
 $rettab = _returntable()
@@ -1356,7 +1356,6 @@ $predlist = GUICtrlCreateListView("Area|latitude|Longitude", 24, 104, 393, 305)
 $predict_place = GUICtrlCreateButton("Generate", 304, 24, 113, 65)
 GUISetBkColor($COLOR_BLACK,$predgui)
 GUISetState(@SW_SHOW)
-#EndRegion ### END Koda GUI section ###
 
 While 1
 	$nMsg = GUIGetMsg()
@@ -1989,4 +1988,5 @@ Func _URIDecode($sData)
     Next
     Return BinaryToString(StringToBinary($aData[1],1),4)
 EndFunc
+
 #EndRegion
