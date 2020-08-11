@@ -1,0 +1,13 @@
+beautifulsoup4==4.7.1
+Keras==2.2.4
+Keras-Applications==1.0.8
+Keras-Preprocessing==1.0.8
+keras-vggface==0.6
+newspaper3k==0.2.8
+nltk==3.4
+numpy==1.19.1
+pandas==1.0.5
+python-dateutil==2.7.3
+requests==2.22.0
+scikit-learn==0.19.2
+sklearn==0.0

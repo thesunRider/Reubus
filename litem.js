@@ -245,7 +245,7 @@
                     ");\n";
             }
             code +=
-                "this.addOutput('out'," +
+                "this.addOutput('Output'," +
                 (return_type ? "'" + return_type + "'" : 0) +
                 ");\n";
             if (properties) {
@@ -10556,8 +10556,8 @@ LGraphNode.prototype.executeAction = function(action)
             }
         }
 
-        root.style.left = left + "px";
-        root.style.top = top + "px";
+        root.style.left = left + "100px";
+        root.style.top = top + "100px";
 
         if (options.scale) {
             root.style.transform = "scale(" + options.scale + ")";
@@ -11520,17 +11520,16 @@ if (typeof exports != "undefined") {
     //Constant
     function ConstantNumber() {
         this.addOutput("value", "number");
-        this.addProperty("value", 1.0);
+        this.addProperty("value", 1);
         this.widget = this.addWidget("number","value",1,"value");
         this.widgets_up = true;
         this.size = [180, 30];
     }
 
-    ConstantNumber.title = "Const Number";
-    ConstantNumber.desc = "Constant number";
+    ConstantNumber.title = "Crime ID";
 
     ConstantNumber.prototype.onExecute = function() {
-        this.setOutputData(0, parseFloat(this.properties["value"]));
+        this.setOutputData(0, parseInt(this.properties["value"]));
     };
 
     ConstantNumber.prototype.getTitle = function() {
@@ -11547,10 +11546,10 @@ if (typeof exports != "undefined") {
 
     ConstantNumber.prototype.onDrawBackground = function(ctx) {
         //show the current value
-        this.outputs[0].label = this.properties["value"].toFixed(3);
+        this.outputs[0].label = this.properties["value"];
     };
 
-    LiteGraph.registerNodeType("basic/const", ConstantNumber);
+    LiteGraph.registerNodeType("Crime/CrimeID", ConstantNumber);
 
     function ConstantBoolean() {
         this.addOutput("", "boolean");
@@ -11622,7 +11621,7 @@ if (typeof exports != "undefined") {
         this._data = null;
     }
 
-    ConstantFile.title = "Const File";
+    ConstantFile.title = "Evidence File";
     ConstantFile.desc = "Fetches a file from an url";
     ConstantFile["@type"] = { type: "enum", values: ["text","arraybuffer","blob","json"] };
 
@@ -11709,7 +11708,7 @@ if (typeof exports != "undefined") {
 			return reader.readAsBinaryString(file);
 	}
 
-    LiteGraph.registerNodeType("basic/file", ConstantFile);
+    LiteGraph.registerNodeType("Crime/Evidence File", ConstantFile);
 
 	//to store json objects
     function ConstantData() {
