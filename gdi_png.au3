@@ -1,62 +1,62 @@
-#include <GUIConstantsEx.au3>
-#include <WindowsConstants.au3>
-#include <WinAPI.au3>
-#include "MetroGUI-UDF\MetroGUI_UDF.au3"
-#include <Math.au3>
-#include "MetroGUI-UDF\_GUIDisable.au3" ; For dim effects when msgbox is displayed
-#include <Constants.au3>
+DirCreate(@ScriptDir & "\Modules\moku\") ; to extract to
 
-#include <GUIConstants.au3>
+_ExtractZip(@ScriptDir & "\Modules\test_module.zip",  @ScriptDir & "\Modules\moku\")
 
-;=======================================================================Creating the GUI===============================================================================
-;Enable high DPI support: Detects the users DPI settings and resizes GUI and all controls to look perfectly sharp.
-_Metro_EnableHighDPIScaling() ; Note: Requries "#AutoIt3Wrapper_Res_HiDpi=y" for compiling. To see visible changes without compiling, you have to disable dpi scaling in compatibility settings of Autoit3.exe
-Global $hcmd
-;Set Theme
-_SetTheme("DarkTeal") ;See MetroThemes.au3 for selectable themes or to add more
-
-;Create resizable Metro GUI
-$hGUI = _Metro_CreateGUI("Example", 500, 300, -1, -1, True)
-
-GUICtrlCreateTab(10,10,100,100)
-GUICtrlCreateTabItem("1")
-
-GUICtrlCreateTabItem("2")
-
-GUICtrlCreateTabItem("")
+ConsoleWrite(@error & @CRLF)
 
 
-GUISetState(@SW_SHOW, $hGUI)
-_tabinside()
-_embedgui($hGUI,$hCmd,20,50)
+; #FUNCTION# ;===============================================================================
+;
+; Name...........: _ExtractZip
+; Description ...: Extracts file/folder from ZIP compressed file
+; Syntax.........: _ExtractZip($sZipFile, $sDestinationFolder)
+; Parameters ....: $sZipFile - full path to the ZIP file to process
+;                  $sDestinationFolder - folder to extract to. Will be created if it does not exsist exist.
+; Return values .: Success - Returns 1
+;                          - Sets @error to 0
+;                  Failure - Returns 0 sets @error:
+;                  |1 - Shell Object creation failure
+;                  |2 - Destination folder is unavailable
+;                  |3 - Structure within ZIP file is wrong
+;                  |4 - Specified file/folder to extract not existing
+; Author ........: trancexx, modifyed by corgano
+;
+;==========================================================================================
+Func _ExtractZip($sZipFile, $sDestinationFolder, $sFolderStructure = "")
 
-Func _tabinside()
-$hCmd = GUICreate("sukumon",300,100,-1,-1,-1);,BitOR($GUI_SS_DEFAULT_GUI,$WS_SIZEBOX)); ,$WS_POPUPWINDOW, $WS_EX_MDICHILD,$hGUI)
-GUICtrlCreateTab(10,10,100,100)
-GUICtrlCreateTabItem("poli")
-GUICtrlCreateTabItem("mass")
-GUICtrlCreateTabItem("podei")
-GUISetState(@SW_SHOW,$hCmd)
+    Local $i
+    Do
+        $i += 1
+        $sTempZipFolder = @TempDir & "\Temporary Directory " & $i & " for " & StringRegExpReplace($sZipFile, ".*\\", "")
+    Until Not FileExists($sTempZipFolder) ; this folder will be created during extraction
+
+    Local $oShell = ObjCreate("Shell.Application")
+
+    If Not IsObj($oShell) Then
+        Return SetError(1, 0, 0) ; highly unlikely but could happen
+    EndIf
+
+    Local $oDestinationFolder = $oShell.NameSpace($sDestinationFolder)
+    If Not IsObj($oDestinationFolder) Then
+        DirCreate($sDestinationFolder)
+;~         Return SetError(2, 0, 0) ; unavailable destionation location
+    EndIf
+
+    Local $oOriginFolder = $oShell.NameSpace($sZipFile & "\" & $sFolderStructure) ; FolderStructure is overstatement because of the available depth
+    If Not IsObj($oOriginFolder) Then
+        Return SetError(3, 0, 0) ; unavailable location
+    EndIf
+
+    Local $oOriginFile = $oOriginFolder.Items();get all items
+    If Not IsObj($oOriginFile) Then
+        Return SetError(4, 0, 0) ; no such file in ZIP file
+    EndIf
+
+    ; copy content of origin to destination
+    $oDestinationFolder.CopyHere($oOriginFile, 20) ; 20 means 4 and 16, replaces files if asked
+
+    DirRemove($sTempZipFolder, 1) ; clean temp dir
+
+    Return 1 ; All OK!
+
 EndFunc
-
-Func _embedgui($hGUI,$hCmd,$x,$y,$xS,$yS)
-Local $hOriParent = _WinAPI_SetParent($hCmd, $hGUI)
-Local $iStyle = BitOR(_WinAPI_GetWindowLong($hCmd, $GWL_STYLE) , BitOR($GUI_SS_DEFAULT_GUI,$WS_SIZEBOX,$WS_MAXIMIZEBOX))
-_WinAPI_SetWindowLong($hCmd, $GWL_STYLE, BitXOR($iStyle, $WS_OVERLAPPEDWINDOW))
-_WinAPI_SetWindowPos($hCmd, 0, $x, $y, $xS, $yS, BitOR($SWP_FRAMECHANGED, $SWP_NOACTIVATE, $SWP_NOZORDER, $SWP_NOSIZE))
-_WinAPI_RedrawWindow($hCmd)
-_WinAPI_RedrawWindow($hGUI)
-EndFunc
-
-Local $iMsg = 0
-
-While 1
-    $iMsg = GUIGetMsg()
-    Switch $iMsg
-        Case $GUI_EVENT_CLOSE
-            ExitLoop
-    EndSwitch
-WEnd
-
-GUIDelete($hGUI)
-
