@@ -1,0 +1,29 @@
+
+				OUERIES
+
+How to select queries
+
+1. Query: Select * from crimedata where crimeID=001
+
+ Ans: Selects all the data from the table crime data with crimeID 001
+
+
+2. Query: Select * from crimedata 
+ Ans: Prints all the data in crime data
+
+3. Query: Select name, place, Vehicle
+          From crimedata c
+	  Inner join Properties p
+	  ON c.crimeID = p.crimeID
+	  Inner join Vehicle v
+          ON p.crimeID = v.crime_id
+
+  Ans: Joining 3 tables.. You can print required data later.
+
+Join crimeid in each table to ger data d=from more than 1 table at a time.
+
+You can also join 2 tables using the third case.
+
+Just play around with these.
+
+The inputting part is easy.. just copy paste the input section of corresponding table and enter their values.

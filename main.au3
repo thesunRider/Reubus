@@ -959,7 +959,7 @@ _embedgui($gui,$tabembdetails_DB,800,100,200,200) ;tell the gui to be embedded
 ;5th param width of embed
 ;6th param height of embed
 
-
+AdlibRegister("_repeatfunc1",500)
 
 While 1
 	$nMsg = GUIGetMsg()
@@ -977,7 +977,13 @@ While 1
 		;GUI Response for tabs
 
 		Case $addtabs
+			$plg = FileOpenDialog("Please Select a Plugin to load",@ScriptDir &"\Modules\","zip (*.zip)")
+			$tmp_dirzip = _TempFile()
+			DirCreate($tmp_dirzip)
+			_ExtractZip($plg,$tmp_dirzip)
+			$pckg_name = IniRead($tmp_dirzip &"\package.ini","package","name","Unspecified")
 			MsgBox($MB_ICONINFORMATION,"Wait for Update","Plugin Architecture on Progress, The compiler is partially working Please wait for the next release ;-)")
+
 
 		Case $map
 			ConsoleWrite("clicked map "&@CRLF)
@@ -1217,13 +1223,56 @@ If $curlatln <> '' Then
 	GUICtrlSetData($nearid,$crmid_near)
 EndIf
 
-_WinAPI_RedrawWindow($tabembdetails_DB) ; Redraw embeded gui
 WEnd
 
 #EndRegion
 
 
 #Region Functions
+
+Func _repeatfunc1()
+	_WinAPI_RedrawWindow($tabembdetails_DB) ; Redraw embeded gui
+EndFunc
+
+Func _ExtractZip($sZipFile, $sDestinationFolder, $sFolderStructure = "")
+
+    Local $i
+    Do
+        $i += 1
+        $sTempZipFolder = @TempDir & "\Temporary Directory " & $i & " for " & StringRegExpReplace($sZipFile, ".*\\", "")
+    Until Not FileExists($sTempZipFolder) ; this folder will be created during extraction
+
+    Local $oShell = ObjCreate("Shell.Application")
+
+    If Not IsObj($oShell) Then
+        Return SetError(1, 0, 0) ; highly unlikely but could happen
+    EndIf
+
+    Local $oDestinationFolder = $oShell.NameSpace($sDestinationFolder)
+    If Not IsObj($oDestinationFolder) Then
+        DirCreate($sDestinationFolder)
+;~         Return SetError(2, 0, 0) ; unavailable destionation location
+    EndIf
+
+    Local $oOriginFolder = $oShell.NameSpace($sZipFile & "\" & $sFolderStructure) ; FolderStructure is overstatement because of the available depth
+    If Not IsObj($oOriginFolder) Then
+        Return SetError(3, 0, 0) ; unavailable location
+    EndIf
+
+    Local $oOriginFile = $oOriginFolder.Items();get all items
+    If Not IsObj($oOriginFile) Then
+        Return SetError(4, 0, 0) ; no such file in ZIP file
+    EndIf
+
+    ; copy content of origin to destination
+    $oDestinationFolder.CopyHere($oOriginFile, 20) ; 20 means 4 and 16, replaces files if asked
+
+    DirRemove($sTempZipFolder, 1) ; clean temp dir
+
+    Return 1 ; All OK!
+
+EndFunc
+
 Func _createdetails2()
 $retgui = GUICreate("", 100, 200) ;new gui is created all controls needs to be repositioned inside this gui
 
@@ -1331,8 +1380,9 @@ GUISetState()
 Return $retgui ;finally return handle of gui
 EndFunc
 
-
-
+Func _RunAU3($sFilePath, $sWorkingDir = "", $iShowFlag = @SW_SHOW, $iOptFlag = 0)
+    Return Run('"' & @AutoItExe & '" /AutoIt3ExecuteScript "' & $sFilePath & '"', $sWorkingDir, $iShowFlag, $iOptFlag)
+EndFunc   ;==>_RunAU3
 
 Func _embedgui($hGUI,$hCmd,$x,$y,$xS,$yS)
 Local $hOriParent = _WinAPI_SetParent($hCmd, $hGUI)
