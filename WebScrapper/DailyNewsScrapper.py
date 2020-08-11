@@ -81,13 +81,10 @@ df = pd.DataFrame.from_dict(data, orient='index',
 for row in df.values:
   if '(' in row[1]:
     row[1] = row[1].split('(')[0]
-    print(row[1])
   if '/' in row[1]:
     row[1] = row[1].split('/')[0]
-    print(row[1])
   if ',' in row[1]:
     row[1] = row[1].split(',')[0]
-    print(row[1])
 df = df.append(news)
 for row in df.values:
   row[0] = pd.to_datetime(row[0])

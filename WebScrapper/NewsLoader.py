@@ -25,37 +25,37 @@ parser.add_argument("-p", "--Place", help="Input Place", default='All')
 parser.add_argument("-k", "--Keyword", help="Input Keywords", default='All')
 args = parser.parse_args()
 
-print("Diplaying Output as:", args.Place)
-
 # Open the CSV files
 news = pd.read_csv('news_feed.csv')
 places = pd.read_csv('locations_Kerala.csv')
 
-mask = True
+mask = [True] * len(news)
 
 from_date = args.FromDate
 to_date = args.ToDate
 if from_date and to_date:
-    from_date = datetime.strptime(from_date, '%m/%d/%Y')
-    print("Diplaying Output as:", str(from_date.date()))
-    to_date = datetime.strptime(to_date, '%m/%d/%Y')
-    print("Diplaying Output as:", str(to_date.date()))
-    mask = mask & (news['Date'] > str(from_date)) & (news['Date'] <= str(to_date + dt.timedelta(days=1)))
+    from_date = datetime.strptime(from_date, '%d/%m/%Y')
+    to_date = datetime.strptime(to_date, '%d/%m/%Y')
+    temp_mask = []
+    n = 0
+    for row in news.values:
+        temp_date = datetime.strptime(row[0], '%d-%m-%Y %H:%M')
+        temp_mask.append((temp_date > from_date) & (temp_date <= to_date + dt.timedelta(days=1)))
+        mask[n] = mask[n] & temp_mask[n]
+        n += 1
 
 if args.Place != 'All':
     mask = mask & (news['Place'] == args.Place)
 
 if args.Keyword != 'All':
-    print("Diplaying Output as:", args.Keyword)
     key_list = args.Keyword.split(',')
     key_mask = False
     for i in key_list:
         key_mask = key_mask | (news['Keywords'].apply(lambda x: i in x))
     mask = mask & key_mask
-
 # print(news.loc[mask].values)
 data = []
-for row in news.values:
+for row in news.loc[mask].values:
     data.append({'date': row[0], 'place': row[1], 'summary': row[2], 'keyword': row[3]})
 
 with open("result1.json", "w") as write_file:
