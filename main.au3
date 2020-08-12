@@ -2239,5 +2239,4 @@ Func _URIDecode($sData)
     Next
     Return BinaryToString(StringToBinary($aData[1],1),4)
 EndFunc
-
 #EndRegion
