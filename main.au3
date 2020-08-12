@@ -548,7 +548,7 @@ GUICtrlCreateLabel("Use model set:", $ui_w*0.21+20, $ui_h*.68, 100, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xd5d5d5)
 
-GUICtrlCreateLabel("Include changes to dataset and redraw", $ui_w*0.21+20,  $ui_h*.73, 260, 28, 0x0200)
+$incredrw = GUICtrlCreateLabel("Include changes to dataset and redraw", $ui_w*0.21+20,  $ui_h*.73, 260, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, $GUI_FONTUNDER , "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xd5d5d5)
 
@@ -1178,7 +1178,7 @@ While 1
 
 		;Gui response for map
 		Case $START_DRAW
-			_createpredictiongui()
+			_createpredictiongui($currentlatln[0],$currentlatln[1])
 
 
 		Case $GOTO_BUTTON
@@ -1203,6 +1203,7 @@ While 1
 			_drawcircle($curdrop[7]&":"&$curdrop[4],$curdrop[0],$curdrop[1],$curdrop[2],$curdrop[3],$curdrop[5])
 			_writetodb($curdrop)
 
+
 		Case $view_mapdb
 			Local $arysql,$aryrowsql,$aryclmnsql
 			_SQLite_GetTable2d($store_db,"Select * FROM map;",$arysql,$aryrowsql,$aryclmnsql)
@@ -1221,6 +1222,7 @@ While 1
 
 		Case $REDRAW_MAP
 			_redrawmap()
+			_zoomtoaddress($currentlatln[0],$currentlatln[1])
 
 		Case $goto_selection
 			$seleccrim = _GUICtrlListView_GetItemTextArray($crimlst)
@@ -1420,7 +1422,6 @@ Func WinHandFromPID($pid, $winTitle="", $timeout=8)
     Until $secs == $timeout
 EndFunc
 
-
 Func _RunAU3($sFilePath, $sWorkingDir = "", $iShowFlag = @SW_SHOW, $iOptFlag = 0)
     Return Run('"' & @AutoItExe & '" /AutoIt3ExecuteScript "' & $sFilePath & '"', $sWorkingDir, $iShowFlag, $iOptFlag)
 EndFunc   ;==>_RunAU3
@@ -1470,7 +1471,7 @@ While 1
 WEnd
 EndFunc
 
-Func _createpredictiongui()
+Func _createpredictiongui($lat,$long)
 $predgui = GUICreate("Prediction", 455, 431, 192, 124)
 $predloc = GUICtrlCreateInput("Input1", 136, 24, 145, 21)
 GUICtrlCreateLabel("Prediction Location:", 24, 32, 98, 17)
@@ -1494,6 +1495,7 @@ While 1
 			Return
 
 		Case $predict_place
+			$cmd_exe = "python hotspot_predict.py -lat 11.05 -long 76.1 -rad 0.2 -hpts 5"
 			MsgBox(Default,Default,"Will Add feature in the next version ,Sorry ;-)")
 
 	EndSwitch
@@ -1701,9 +1703,13 @@ Func _redrawmap()
 Local $arysql,$aryrowsql,$aryclmnsql
 _SQLite_GetTable2d($store_db,"Select * FROM map;",$arysql,$aryrowsql,$aryclmnsql)
 _IEAction($mainmap,"refresh")
+Do
+Sleep(50)
+Until $mainmap.document.getElementById("debug").value == "1256"
 For $i = 1 to UBound($arysql)-1
 	_drawcircle($arysql[$i][8]&":"&$arysql[$i][5],$arysql[$i][1],$arysql[$i][2],$arysql[$i][3],$arysql[$i][4],$arysql[$i][6])
 Next
+
 EndFunc
 
 Func distancebtwnlatlongMeters($lat1, $lon1, $lat2, $lon2)
@@ -1715,7 +1721,8 @@ Func distancebtwnlatlongMeters($lat1, $lon1, $lat2, $lon2)
 EndFunc
 
 Func _writetodb($curdrops)
-_SQLite_Exec(-1, "INSERT INTO map (latitude,longitude,radius,color,crimeid,opacity,time,title,type) VALUES ('" &_ArrayToString($curdrops,"','") &"');")
+_SQLite_Exec($store_db, "INSERT INTO map (latitude,longitude,radius,color,crimeid,opacity,time,title,type) VALUES ('" &_ArrayToString($curdrops,"','") &"');")
+
 _loadlatlonglist()
 EndFunc
 
