@@ -1,0 +1,279 @@
+{
+  "last_node_id": 8,
+  "last_link_id": 8,
+  "nodes": [
+    {
+      "id": 3,
+      "type": "Crime/Crime Base",
+      "pos": [
+        353,
+        156
+      ],
+      "size": {
+        "0": 152.8000030517578,
+        "1": 46
+      },
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "Evidence Box",
+          "type": 0,
+          "link": 5
+        },
+        {
+          "name": "Link CrimeID",
+          "type": 0,
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Start",
+          "links": [
+            2
+          ]
+        }
+      ],
+      "properties": {
+        "precision": 1
+      }
+    },
+    {
+      "id": 6,
+      "type": "Crime/Evidence File",
+      "pos": [
+        75,
+        111
+      ],
+      "size": {
+        "0": 210,
+        "1": 58
+      },
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "url",
+          "type": 0,
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "",
+          "links": [
+            5
+          ]
+        }
+      ],
+      "properties": {
+        "url": "C:\\evdice.zip",
+        "type": "text"
+      }
+    },
+    {
+      "id": 5,
+      "type": "Crime/CrimeID",
+      "pos": [
+        90,
+        259
+      ],
+      "size": [
+        180,
+        30
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "value",
+          "type": "number",
+          "links": [
+            1
+          ],
+          "label": 25
+        }
+      ],
+      "properties": {
+        "value": 25
+      }
+    },
+    {
+      "id": 1,
+      "type": "Crime/Start Path",
+      "pos": [
+        564,
+        201
+      ],
+      "size": {
+        "0": 140,
+        "1": 26
+      },
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "Input1",
+          "type": 0,
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Output",
+          "type": "*",
+          "links": [
+            6
+          ]
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": 7,
+      "type": "Mood/Alcoholic",
+      "pos": [
+        761,
+        238
+      ],
+      "size": {
+        "0": 140,
+        "1": 26
+      },
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "Input1",
+          "type": 0,
+          "link": 6
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Output",
+          "type": "*",
+          "links": [
+            7
+          ]
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": 8,
+      "type": "Activity/Swimming",
+      "pos": [
+        933,
+        227
+      ],
+      "size": {
+        "0": 140,
+        "1": 26
+      },
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "Input1",
+          "type": 0,
+          "link": 7
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Output",
+          "type": "*",
+          "links": [
+            8
+          ]
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": 2,
+      "type": "Crime/End Path",
+      "pos": [
+        1102,
+        249
+      ],
+      "size": {
+        "0": 140,
+        "1": 26
+      },
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "Input1",
+          "type": 0,
+          "link": 8
+        }
+      ],
+      "properties": {}
+    }
+  ],
+  "links": [
+    [
+      1,
+      5,
+      0,
+      3,
+      1,
+      0
+    ],
+    [
+      2,
+      3,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      5,
+      6,
+      0,
+      3,
+      0,
+      0
+    ],
+    [
+      6,
+      1,
+      0,
+      7,
+      0,
+      0
+    ],
+    [
+      7,
+      7,
+      0,
+      8,
+      0,
+      0
+    ],
+    [
+      8,
+      8,
+      0,
+      2,
+      0,
+      0
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "version": 0.4
+}
