@@ -22,7 +22,7 @@ ax.set_title('CRIME NUMBER GRAPH', color='red')
 plt.savefig('barchart.png')
 
 # Pie chart, where the slices will be ordered and plotted counter-clockwise:
-explode = (0) * visual.index
+explode = [0] * len(visual.values)
 fig1, ax1 = plt.subplots()
 ax1.pie(visual.values, explode=explode, labels=visual.index, autopct='%1.1f%%',
         shadow=True, startangle=30)
@@ -84,7 +84,7 @@ knn = KNeighborsClassifier(n_neighbors=3)
 knn.fit(x_train_pca, y_train)
 pred = knn.predict(x_test_pca)
 # print(confusion_matrix(y_test, pred))
-score = cross_val_score(knn, x_train_pca, y_train, cv=5)
+#score = cross_val_score(knn, x_train_pca, y_train)
 
 
 import pickle
