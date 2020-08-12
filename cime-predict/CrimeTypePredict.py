@@ -22,8 +22,8 @@ try:
     norm = pickle.load(open('norm.pkl', 'rb'))
     le = pickle.load(open('le.pkl', 'rb'))
     w = pickle.load(open('weight.pkl', 'rb'))
-    data = pd.read_csv("crime.csv")
-    demo = data.iloc[0:10000]
+    # data = pd.read_csv("crime.csv")
+    # demo = data.iloc[0:10000]
     # places = {}
     # for row in demo.values:
     #     if row[10] not in places.keys():

@@ -51,56 +51,59 @@ for k, v in opts:
     if k == '-h':
         print('please specify -f <location file> -m <name of guys> these are the most compulsory and important params')
         sys.exit()
-
-with open(infile) as f:
-    data = json.load(f)
-
-nonodes = len(data['nodes'])
-nolinks = len(data['links'])
-
-if disp_node:
-    print(nonodes)
-    print(nolinks)
-
-for x in range(0, nonodes):
-    if data['nodes'][x]['type'] == "Crime/CrimeID":
-        crmid = data['nodes'][x]['properties']['value']
-
-origin = ''
-connected = ''
-nodesconnected = list()
-for x in range(0, nolinks):
-    idcur = data['links'][x][1]
-    idtarg = data['links'][x][3]
-    for y in range(0, nonodes):
-        if data['nodes'][y]['id'] == idcur:
-            origin = checkinexclusion(data['nodes'][y]['type'])
-        if data['nodes'][y]['id'] == idtarg:
-            connected = checkinexclusion(data['nodes'][y]['type'])
-
-    nodesconnected.append(origin)
-    nodesconnected.append(connected)
-    #if shownodes : print('[' +str(origin)+','+str(connected)+']['+str(data['links'][x][2])+','+str(data['links'][x][4])+']')
-
-nodesconnected = list(set(list(filter(None, nodesconnected))))
-crmout = {'crmid': crmid, 'name': name, 'nodesall': nodesconnected, 'nonodes': len(nodesconnected), 'nolinks': nolinks}
-print(crmout)
-
-
-###########################################
-nodesconnected = ['Mood/Alcoholic', 'Activity/Driving']
-data = {}
+#############################
+dt = {}
 n = 1
-data['CrimeID'] = n
-for i in nodesconnected:
-    val = i.split("/")
-    if val[0] in data.keys():
-        data[val[0]].append([val[1]])
-    else:
-        data[val[0]] = [val[1]]
-n += 1
-print(data)
-df = pd.DataFrame.from_dict(data, orient='columns')
+while True:
+    try:
+        file = infile + 'main' + str(n) + '.json'
+        with open(file) as f:
+            data = json.load(f)
+        nonodes = len(data['nodes'])
+        nolinks = len(data['links'])
+
+        if disp_node:
+            print(nonodes)
+            print(nolinks)
+
+        for x in range(0, nonodes):
+            if data['nodes'][x]['type'] == "Crime/CrimeID":
+                crmid = data['nodes'][x]['properties']['value']
+
+        origin = ''
+        connected = ''
+        nodesconnected = list()
+        for x in range(0, nolinks):
+            idcur = data['links'][x][1]
+            idtarg = data['links'][x][3]
+            for y in range(0, nonodes):
+                if data['nodes'][y]['id'] == idcur:
+                    origin = checkinexclusion(data['nodes'][y]['type'])
+                if data['nodes'][y]['id'] == idtarg:
+                    connected = checkinexclusion(data['nodes'][y]['type'])
+
+            nodesconnected.append(origin)
+            nodesconnected.append(connected)
+            #if shownodes : print('[' +str(origin)+','+str(connected)+']['+str(data['links'][x][2])+','+str(data['links'][x][4])+']')
+
+        nodesconnected = list(set(list(filter(None, nodesconnected))))
+        crmout = {'crmid': crmid, 'name': name, 'nodesall': nodesconnected, 'nonodes': len(nodesconnected), 'nolinks': nolinks}
+        print(crmout)
+
+        ###########################################
+        nodesconnected = ['Mood/Alcoholic', 'Activity/Driving']
+        data['CrimeID'] = n
+        for i in nodesconnected:
+            val = i.split("/")
+            if val[0] in dt.keys():
+                dt[val[0]].append([val[1]])
+            else:
+                dt[val[0]] = [val[1]]
+        n += 1
+    except:
+        break
+print(dt)
+df = pd.DataFrame.from_dict(dt, orient='columns')
 print(df.head())
-df.to_csv('temp_data.csv', header=True, index=False)
-##########################################
+df.to_csv('Clustering_NodeData/temp_data.csv', header=True, index=False)
+###################################################
