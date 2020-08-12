@@ -54,7 +54,7 @@ Global $mapaddress = "http://localhost:8843/map_test.html"
 Global $lastid = 0,$currentlatln
 Global $exclusion_nodes =  FileReadToArray(@ScriptDir &"\nodes\exclusions.nodes")
 
-Global $drop_array,$plugincontrol_array[0][3]
+Global $drop_array,$plugincontrol_array[1][3]
 
 Global $loader_gui
 Global Const $hDwmApiDll = DllOpen("dwmapi.dll")
@@ -65,7 +65,7 @@ Global $fStep = 0.02
 If Not $bAero Then $fStep = 1.25
 GUIRegisterMsg($WM_TIMER, "PlayAnim")
 Global $hHBmp_BG, $hB, $iSleep = 20
-Global $iW = 400, $iH = 210,$iPerc
+Global $iW = 400, $iH = 210,$iPerc,$hanam
 
 
 
@@ -989,7 +989,7 @@ While 1
 				_ExtractZip($plg,$tmp_dirzip)
 				$pckg_name = IniRead($tmp_dirzip &"\package.ini","package","name","Unspecified")
 				$pckg_tab = IniRead($tmp_dirzip &"\package.ini","package","tab","Plugin")
-				ControlMove($gui,"",$addtabs,605 + 150 *(UBound($plugincontrol_array)+1),$ui_h-$ui_h*0.038,27,27)
+				ControlMove($gui,"",$addtabs,605 + 150 *(UBound($plugincontrol_array)),$ui_h-$ui_h*0.038,27,27)
 				;MsgBox(Default,Default,$pckg_tab &" " & 450 + 150*(UBound($plugincontrol_array)+1))
 				$btnsgui = GUICtrlCreateButton($pckg_tab, 450 + 150, $ui_h-$ui_h*0.04, 150, $ui_h*0.04)
 				GUICtrlSetFont($btnsgui, 9, Default, Default, "Consolas", 5); 5 = Clear Type
@@ -1000,10 +1000,13 @@ While 1
 				$plg_hndl = WinHandFromPID($pau3)
 				WinWait($plg_hndl)
 				_ArrayAdd($plugincontrol_array ,$btnsgui&"|"&$plg_hndl&"|" &$pau3)
+				_GUICtrlTab_ActivateTab($maintab,4)
+				GUICtrlSetState($grph,$GUI_HIDE)
 				_embedgui($gui,$plg_hndl,100,100,640,580)
-				Sleep(4000)
-				WinSetState($plg_hndl,"",@SW_HIDE)
-				ControlClick($gui,"",$scene)
+				_ArrayDisplay($plugincontrol_array)
+				$hanam = $plg_hndl
+				;WinSetState($plg_hndl,"",@SW_HIDE)
+				;ControlClick($gui,"",$scene)
 			EndIf
 
 		Case $map
@@ -1865,7 +1868,7 @@ EndSwitch
 For $i = 0 To UBound($plugincontrol_array)-1
 	If $id == $plugincontrol_array[$i][0] Then
 		_GUICtrlTab_ActivateTab($maintab,4)
-		WinSetState($plugincontrol_array[$i][1],"",@SW_SHOW)
+		WinSetState($hanam,"",@SW_SHOW)
 		ConsoleWrite("showing:" &$plugincontrol_array[$i][1] &@CRLF)
 		_WinAPI_RedrawWindow($plugincontrol_array[$i][1])
 		;MsgBox(Default,Default,"Tab switched")
@@ -1885,11 +1888,14 @@ Switch $id
 
 EndSwitch
 
-
 For $m = 0 To UBound($plugincontrol_array)-1
-		WinSetState($plugincontrol_array[$m][1],"",@SW_HIDE)
+	If Not StringIsSpace($plugincontrol_array[$m][0]) Then
+		$hdm = WinSetState($hanam,"",@SW_HIDE)
+		;MsgBox(Default,Default,@error &"-" &$hdm )
 		ConsoleWrite("hiding plugin gui: " & $plugincontrol_array[$m][1] &@CRLF)
+	EndIf
 Next
+	GUISetState(@SW_SHOW,$gui)
 EndFunc
 
 Func _setelse($ary,$selec,$corl)
