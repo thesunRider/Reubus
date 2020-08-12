@@ -47,13 +47,14 @@ RegWrite("HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Internet Explorer\MAIN\FeatureCo
 ;delete cache
 $ClearID = "8"
 RunWait("RunDll32.exe InetCpl.cpl,ClearMyTracksByProcess " & $ClearID)
+OnAutoItExitRegister("_Closeall")
 
 
 Global $mapaddress = "http://localhost:8843/map_test.html"
 Global $lastid = 0,$currentlatln
 Global $exclusion_nodes =  FileReadToArray(@ScriptDir &"\nodes\exclusions.nodes")
 
-Global $drop_array
+Global $drop_array,$plugincontrol_array[1][3]
 
 Global $loader_gui
 Global Const $hDwmApiDll = DllOpen("dwmapi.dll")
@@ -64,7 +65,8 @@ Global $fStep = 0.02
 If Not $bAero Then $fStep = 1.25
 GUIRegisterMsg($WM_TIMER, "PlayAnim")
 Global $hHBmp_BG, $hB, $iSleep = 20
-Global $iW = 400, $iH = 210,$iPerc
+Global $iW = 400, $iH = 210,$iPerc,$hanam
+
 
 
 #EndRegion
@@ -546,7 +548,7 @@ GUICtrlCreateLabel("Use model set:", $ui_w*0.21+20, $ui_h*.68, 100, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xd5d5d5)
 
-GUICtrlCreateLabel("Include changes to dataset and redraw", $ui_w*0.21+20,  $ui_h*.73, 260, 28, 0x0200)
+$incredrw = GUICtrlCreateLabel("Include changes to dataset and redraw", $ui_w*0.21+20,  $ui_h*.73, 260, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, $GUI_FONTUNDER , "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xd5d5d5)
 
@@ -872,6 +874,9 @@ GUICtrlSetColor(-1, 0xffffff)
 
 #EndRegion
 
+#Region Empty TAB for plugin
+GUICtrlCreateTabItem("tab5")
+
 GUICtrlCreateTabItem("")
 
 
@@ -949,9 +954,9 @@ GUICtrlSetData($list_nodeedit,"Description goes here..")
 _redrawmap()
 _setcrdlist()
 
-$tabembdetails_DB = _createdetails2() ;create a gui with tabs
-GUISetState(@SW_HIDE,$tabembdetails_DB) ;hide the gui
-_embedgui($gui,$tabembdetails_DB,800,100,200,200) ;tell the gui to be embedded
+;$tabembdetails_DB = _createdetails2() ;create a gui with tabs
+;GUISetState(@SW_HIDE,$tabembdetails_DB) ;hide the gui
+;_embedgui($gui,$tabembdetails_DB,800,100,200,200) ;tell the gui to be embedded
 ;first parameter handle of our main gui
 ;secon parameter handle return from the function _createembeded2()
 ;3rd parameter x position of embeded gui
@@ -959,7 +964,7 @@ _embedgui($gui,$tabembdetails_DB,800,100,200,200) ;tell the gui to be embedded
 ;5th param width of embed
 ;6th param height of embed
 
-AdlibRegister("_repeatfunc1",500)
+AdlibRegister("_repeatfunc1",800)
 
 While 1
 	$nMsg = GUIGetMsg()
@@ -978,12 +983,31 @@ While 1
 
 		Case $addtabs
 			$plg = FileOpenDialog("Please Select a Plugin to load",@ScriptDir &"\Modules\","zip (*.zip)")
-			$tmp_dirzip = _TempFile()
-			DirCreate($tmp_dirzip)
-			_ExtractZip($plg,$tmp_dirzip)
-			$pckg_name = IniRead($tmp_dirzip &"\package.ini","package","name","Unspecified")
-			MsgBox($MB_ICONINFORMATION,"Wait for Update","Plugin Architecture on Progress, The compiler is partially working Please wait for the next release ;-)")
-
+			If Not @error Then
+				$tmp_dirzip = _TempFile()
+				DirCreate($tmp_dirzip)
+				_ExtractZip($plg,$tmp_dirzip)
+				$pckg_name = IniRead($tmp_dirzip &"\package.ini","package","name","Unspecified")
+				$pckg_tab = IniRead($tmp_dirzip &"\package.ini","package","tab","Plugin")
+				ControlMove($gui,"",$addtabs,605 + 150 *(UBound($plugincontrol_array)),$ui_h-$ui_h*0.038,27,27)
+				;MsgBox(Default,Default,$pckg_tab &" " & 450 + 150*(UBound($plugincontrol_array)+1))
+				$btnsgui = GUICtrlCreateButton($pckg_tab, 450 + 150, $ui_h-$ui_h*0.04, 150, $ui_h*0.04)
+				GUICtrlSetFont($btnsgui, 9, Default, Default, "Consolas", 5); 5 = Clear Type
+				GUICtrlSetColor($btnsgui, 0xffffff)
+				GUICtrlSetBkColor($btnsgui, 0x191919)
+				 ;This delay is needed for autoit to repaint controls
+				$pau3 = _RunAU3($tmp_dirzip &"\package.au3")
+				$plg_hndl = WinHandFromPID($pau3)
+				WinWait($plg_hndl)
+				_ArrayAdd($plugincontrol_array ,$btnsgui&"|"&$plg_hndl&"|" &$pau3)
+				_GUICtrlTab_ActivateTab($maintab,4)
+				GUICtrlSetState($grph,$GUI_HIDE)
+				_embedgui($gui,$plg_hndl,100,100,640,580)
+				_ArrayDisplay($plugincontrol_array)
+				$hanam = $plg_hndl
+				;WinSetState($plg_hndl,"",@SW_HIDE)
+				;ControlClick($gui,"",$scene)
+			EndIf
 
 		Case $map
 			ConsoleWrite("clicked map "&@CRLF)
@@ -1154,7 +1178,7 @@ While 1
 
 		;Gui response for map
 		Case $START_DRAW
-			_createpredictiongui()
+			_createpredictiongui($currentlatln[0],$currentlatln[1])
 
 
 		Case $GOTO_BUTTON
@@ -1179,6 +1203,7 @@ While 1
 			_drawcircle($curdrop[7]&":"&$curdrop[4],$curdrop[0],$curdrop[1],$curdrop[2],$curdrop[3],$curdrop[5])
 			_writetodb($curdrop)
 
+
 		Case $view_mapdb
 			Local $arysql,$aryrowsql,$aryclmnsql
 			_SQLite_GetTable2d($store_db,"Select * FROM map;",$arysql,$aryrowsql,$aryclmnsql)
@@ -1197,6 +1222,7 @@ While 1
 
 		Case $REDRAW_MAP
 			_redrawmap()
+			_zoomtoaddress($currentlatln[0],$currentlatln[1])
 
 		Case $goto_selection
 			$seleccrim = _GUICtrlListView_GetItemTextArray($crimlst)
@@ -1231,7 +1257,11 @@ WEnd
 #Region Functions
 
 Func _repeatfunc1()
-	_WinAPI_RedrawWindow($tabembdetails_DB) ; Redraw embeded gui
+	;_WinAPI_RedrawWindow($tabembdetails_DB) ; Redraw embeded gui
+	;_WinAPI_RedrawWindow($gui)
+	;For $i = 0 To UBound($plugincontrol_array)-1
+;	_WinAPI_RedrawWindow($plugincontrol_array[$i][1])
+;	Next
 EndFunc
 
 Func _ExtractZip($sZipFile, $sDestinationFolder, $sFolderStructure = "")
@@ -1380,6 +1410,18 @@ GUISetState()
 Return $retgui ;finally return handle of gui
 EndFunc
 
+Func WinHandFromPID($pid, $winTitle="", $timeout=8)
+    Local $secs = 0
+    Do
+        $wins = WinList($winTitle)
+        For $i = 1 To UBound($wins)-1
+            If (WinGetProcess($wins[$i][1]) == $pid) And (BitAND(WinGetState($wins[$i][1]), 2)) Then Return $wins[$i][1]
+        Next
+        Sleep(1000)
+        $secs += 1
+    Until $secs == $timeout
+EndFunc
+
 Func _RunAU3($sFilePath, $sWorkingDir = "", $iShowFlag = @SW_SHOW, $iOptFlag = 0)
     Return Run('"' & @AutoItExe & '" /AutoIt3ExecuteScript "' & $sFilePath & '"', $sWorkingDir, $iShowFlag, $iOptFlag)
 EndFunc   ;==>_RunAU3
@@ -1429,7 +1471,7 @@ While 1
 WEnd
 EndFunc
 
-Func _createpredictiongui()
+Func _createpredictiongui($lat,$long)
 $predgui = GUICreate("Prediction", 455, 431, 192, 124)
 $predloc = GUICtrlCreateInput("Input1", 136, 24, 145, 21)
 GUICtrlCreateLabel("Prediction Location:", 24, 32, 98, 17)
@@ -1453,6 +1495,7 @@ While 1
 			Return
 
 		Case $predict_place
+			$cmd_exe = "python hotspot_predict.py -lat 11.05 -long 76.1 -rad 0.2 -hpts 5"
 			MsgBox(Default,Default,"Will Add feature in the next version ,Sorry ;-)")
 
 	EndSwitch
@@ -1610,7 +1653,6 @@ _SQLite_GetTable2d($node_db,"Select * FROM nodes;",$arysql,$aryrowsql,$aryclmnsq
 Return $arysql
 EndFunc
 
-
 Func _readcmd($cmd)
 Local $iPID = Run(@ComSpec & " /c "&$cmd, @ScriptDir, @SW_HIDE, BitOR($STDERR_CHILD, $STDOUT_CHILD))
 $sOutput = ''
@@ -1661,9 +1703,13 @@ Func _redrawmap()
 Local $arysql,$aryrowsql,$aryclmnsql
 _SQLite_GetTable2d($store_db,"Select * FROM map;",$arysql,$aryrowsql,$aryclmnsql)
 _IEAction($mainmap,"refresh")
+Do
+Sleep(50)
+Until $mainmap.document.getElementById("debug").value == "1256"
 For $i = 1 to UBound($arysql)-1
 	_drawcircle($arysql[$i][8]&":"&$arysql[$i][5],$arysql[$i][1],$arysql[$i][2],$arysql[$i][3],$arysql[$i][4],$arysql[$i][6])
 Next
+
 EndFunc
 
 Func distancebtwnlatlongMeters($lat1, $lon1, $lat2, $lon2)
@@ -1675,7 +1721,8 @@ Func distancebtwnlatlongMeters($lat1, $lon1, $lat2, $lon2)
 EndFunc
 
 Func _writetodb($curdrops)
-_SQLite_Exec(-1, "INSERT INTO map (latitude,longitude,radius,color,crimeid,opacity,time,title,type) VALUES ('" &_ArrayToString($curdrops,"','") &"');")
+_SQLite_Exec($store_db, "INSERT INTO map (latitude,longitude,radius,color,crimeid,opacity,time,title,type) VALUES ('" &_ArrayToString($curdrops,"','") &"');")
+
 _loadlatlonglist()
 EndFunc
 
@@ -1706,6 +1753,14 @@ For $i = 0 To UBound($nodeclasses) - 1
 Next
 
 
+EndFunc
+
+Func _Closeall()
+	For $i = 0 To UBound($plugincontrol_array)-1
+		ConsoleWrite("killing plugins:" &$plugincontrol_array[$i][2] &@CRLF)
+		ProcessClose($plugincontrol_array[$i][2])
+		RunWait (@comspec & " /c TaskKill /PID " & $plugincontrol_array[$i][2] & " /F",@ScriptDir,@SW_HIDE)
+	Next
 EndFunc
 
 Func _nodeaddnode()
@@ -1817,18 +1872,37 @@ Switch $id
 
 EndSwitch
 
+For $i = 0 To UBound($plugincontrol_array)-1
+	If $id == $plugincontrol_array[$i][0] Then
+		_GUICtrlTab_ActivateTab($maintab,4)
+		WinSetState($hanam,"",@SW_SHOW)
+		ConsoleWrite("showing:" &$plugincontrol_array[$i][1] &@CRLF)
+		_WinAPI_RedrawWindow($plugincontrol_array[$i][1])
+		;MsgBox(Default,Default,"Tab switched")
+	EndIf
+Next
+
 EndFunc
 
 Func _pressedtab($id,$use)
 
 Switch $id
 	Case $DB
-		GUISetState(@SW_SHOW,$tabembdetails_DB)
+		;GUISetState(@SW_SHOW,$tabembdetails_DB)
 
 	Case Else
-		GUISetState(@SW_HIDE,$tabembdetails_DB)
+		;GUISetState(@SW_HIDE,$tabembdetails_DB)
 
 EndSwitch
+
+For $m = 0 To UBound($plugincontrol_array)-1
+	If Not StringIsSpace($plugincontrol_array[$m][0]) Then
+		$hdm = WinSetState($hanam,"",@SW_HIDE)
+		;MsgBox(Default,Default,@error &"-" &$hdm )
+		ConsoleWrite("hiding plugin gui: " & $plugincontrol_array[$m][1] &@CRLF)
+	EndIf
+Next
+	GUISetState(@SW_SHOW,$gui)
 EndFunc
 
 Func _setelse($ary,$selec,$corl)
