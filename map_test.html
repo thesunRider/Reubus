@@ -24,6 +24,7 @@
 	<input type="hidden" id="debug" value="">
     <script>
 	var map ;
+	var infoWindow;
 
       function initMap() {
         var myLatlng = {lat: -25.363, lng: 131.044};
@@ -36,7 +37,7 @@
 			document.getElementById("debug").value = 1256;
 		});
 
-        var infoWindow = new google.maps.InfoWindow(
+        infoWindow = new google.maps.InfoWindow(
             {content: 'Click the map to get Lat/Lng info!', position: myLatlng});
         infoWindow.open(map);
 
@@ -58,6 +59,16 @@
 	function zoomtolocation(lats,longs) {
 		map.setCenter(new google.maps.LatLng(lats,longs));
 	}
+
+	function infowindowshow(lats,longs,contentman){
+		infoWindow.close();
+		var infowindowm = new google.maps.InfoWindow({
+			content: contentman
+		});
+		infowindowm.setPosition({lat: lats, lng: longs});
+		infowindowm.open(map);
+		}
+
 
 	function drawcircle(tit,lat,lng,rad,colr,opac){
 

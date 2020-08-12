@@ -5,3 +5,4 @@ LiteGraph.wrapFunctionAsNode("Activity/Dancing",node1,"["*"]","*");//Description
 LiteGraph.wrapFunctionAsNode("Activity/Driving",node2,"["*","*"]","*");//Description:The person was driving a vehicle
 LiteGraph.wrapFunctionAsNode("Mood/Alcoholic",node1,"["*"]","*");//Description:The person was alcholic during the activity
 LiteGraph.wrapFunctionAsNode("Unknown",node1,"["*"]","*");//Description:Replace with this node to get prediction
+LiteGraph.wrapFunctionAsNode("Situation/Fire",node1,"["*"]","*");//Description:The place was on fire
