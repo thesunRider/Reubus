@@ -439,7 +439,7 @@ GUICtrlSetData(-1, "Bar Chart|Pie Chart","Bar Chart")
 $GRAPH_DATE = GUICtrlCreateInput("", $ui_w*.725+130, $ui_h*.19, 145, 18)
 
 $SHOW_GRAPH = GUICtrlCreatePic("",$ui_w*.715, $ui_h*.22, 410, 300,BitOR($GUI_SS_DEFAULT_PIC,$WS_BORDER)) ; SHOW GRAPH OUTPUT HERE
-_loadpic($SHOW_GRAPH,@ScriptDir &"\graph.PNG")
+_loadpic($SHOW_GRAPH,@ScriptDir &"\graph.PNG",410,300)
 
 GUICtrlCreateLabel("GRAPHS", $ui_w*.715, $ui_h*.12, 140, 28, 0x0200)
 GUICtrlSetFont(-1, 11, Default, $GUI_FONTUNDER, "Consolas", 5); 5 = Clear Type
@@ -1034,7 +1034,7 @@ GUICtrlSetState(-1, 128); $GUI_DISABLE
 GUICtrlSetBkColor(-1, 0x191919)
 
 $event_ie = _IECreateEmbedded()
-GUICtrlCreateObj($event_ie,$ui_w*.52, $ui_h*.13, $ui_w*.45, $ui_h*.4)
+GUICtrlCreateObj($event_ie,$ui_w*.505, $ui_h*.10, $ui_w*.5, $ui_h*.5)
 
 
 GUICtrlCreateLabel("", $ui_w*.5+5, $ui_h*.55, $ui_w*.5, 2) ;upper border of status bar
@@ -1076,6 +1076,24 @@ $EVENT_INPUT = GUICtrlCreateInput("", $ui_w*.65+60, $ui_h*.915, 180, 22)
 $SEARCH_NEWS = _Metro_CreateButtonEx("SEARCH", $ui_w*.38, $ui_h*.835, 100, 28)
 
 $SEARCH_EVENT = _Metro_CreateButtonEx("SEARCH", $ui_w*.65+250, $ui_h*.915, 100, 23)
+
+$sft = 50
+$sfy = 20
+$disp_grph = GUICtrlCreateButton("Display", $sfy + 784, 520 + $sft, 153, 41)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor(-1, 0x7f7f7f)
+$update_newsdb = GUICtrlCreateButton("Update DB", $sfy + 784, 580 + $sft, 153, 41)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor(-1, 0x7f7f7f)
+GUICtrlCreateLabel("Graph :", $sfy + 784 - 10, 480 +$sft, 36, 17)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+$selec_disp = GUICtrlCreateCombo("", $sfy + 824, 480 + $sft, 113, 21)
+GUICtrlSetData(-1,"Top Occurence|Top Place|Keywords","Top Occurence")
+$disp_crt = GUICtrlCreatePic("", $sfy + 952, 480 + $sft, 529, 230)
+_loadpic($disp_crt,@ScriptDir &"\WebScrapper\chart1.png",529,230)
 
 
 GUICtrlCreateLabel("FROM :", $ui_w*.05, $ui_h*.81, 180, 28, 0x0200)
@@ -1171,7 +1189,7 @@ Global $grph = GUICtrlCreateObj($grph_hndl, 0, $ui_h*.1, $ui_w*.65, $ui_h*.55)
 GUICtrlSetResizing(-1,$GUI_DOCKAUTO)
 _IENavigate($grph_hndl, "http://localhost:8843")
 _IENavigate($nws_ie,"http://localhost:8843/WebScrapper/dateplacesummary.html")
-_IENavigate($event_ie,"http://localhost:8843/WebScrapper/newslink.html")
+_IENavigate($event_ie,"http://localhost:8843/WebScrapper/eventtimeline.html")
 ConsoleWrite("Passed all functions")
 _updatelistnodeclass()
 _loadlatlonglist()
@@ -1181,6 +1199,7 @@ GUISetState(@SW_SHOW)
 GUICtrlSetData($list_nodeedit,"Description goes here..")
 _redrawmap()
 _setcrdlist()
+
 
 ;$tabembdetails_DB = _createdetails2() ;create a gui with tabs
 ;GUISetState(@SW_HIDE,$tabembdetails_DB) ;hide the gui
@@ -1226,13 +1245,14 @@ While 1
 				 ;This delay is needed for autoit to repaint controls
 				$pau3 = _RunAU3($tmp_dirzip &"\package.au3")
 				$plg_hndl = WinHandFromPID($pau3)
+				WinSetState($plg_hndl,"",@SW_HIDE)
 				WinWait($plg_hndl)
 				_ArrayAdd($plugincontrol_array ,$btnsgui&"|"&$plg_hndl&"|" &$pau3)
 				_GUICtrlTab_ActivateTab($maintab,4)
 				GUICtrlSetState($grph,$GUI_HIDE)
 				_embedgui($gui,$plg_hndl,100,100,640,580)
-				_ArrayDisplay($plugincontrol_array)
 				$hanam = $plg_hndl
+				WinSetState($plg_hndl,"",@SW_SHOW)
 				;WinSetState($plg_hndl,"",@SW_HIDE)
 				;ControlClick($gui,"",$scene)
 			EndIf
@@ -1261,25 +1281,52 @@ While 1
 
 
 		;GUI RESPONSE FOR SCRAPPER
+		Case $disp_grph
+			$cur_selec = GUICtrlRead($selec_disp)
+			Switch $cur_selec
+				Case "Top Occurence"
+					_loadpic($disp_crt,@ScriptDir &"\WebScrapper\chart1.png",529,230)
+
+				Case "Top Place"
+					_loadpic($disp_crt,@ScriptDir &"\WebScrapper\chart2.png",529,230)
+
+				Case "Keywords"
+					_loadpic($disp_crt,@ScriptDir &"\WebScrapper\chart3.png",529,230)
+
+			EndSwitch
+
+
+		Case $update_newsdb
+			$loader_gui = _loadscreen()
+			RunWait(@ComSpec &" /c python " &@ScriptDir &"\WebScrapper\DailyNewsScrapper.py",@ScriptDir &"\WebScrapper\",@SW_HIDE)
+			_closeloader($loader_gui)
+			MsgBox($MB_ICONINFORMATION,"Database Updated","News Database has been updated")
+
 		Case $SEARCH_NEWS
+			$loader_gui = _loadscreen()
 			$plc_inpu = GUICtrlRead($PLACE_INPUT)
 			$kywrd_inpu = GUICtrlRead($KEYWORD_INPUT)
 			$frm_inpu = GUICtrlRead( $FROM_DATE)
 			$todate_inpu = GUICtrlRead($TO_DATE)
 			FileDelete(@ScriptDir&"\WebScrapper\result1.json")
-			RunWait("python NewsLoader.py -fd "&$frm_inpu&"  -td "&$todate_inpu &" -p "&$plc_inpu &" -k " &$kywrd_inpu,@ScriptDir &"\WebScrapper\",@SW_HIDE)
+			$exm = "python " &@ScriptDir &"\WebScrapper\NewsLoader.py -fd "&$frm_inpu&"  -td "&$todate_inpu &" -p "&$plc_inpu &" -k " &$kywrd_inpu
+			RunWait($exm,@ScriptDir &"\WebScrapper\",@SW_HIDE)
 			$r_f = FileRead(@ScriptDir&"\WebScrapper\result1.json")
+
+			_createhtmltimline($r_f)
 			_createhtml($r_f)
-			FileDelete(@ScriptDir &"\WebScrapper\dateplacesummary.html")
+			_closeloader($loader_gui)
+
 
 		Case $SEARCH_EVENT
+			$loader_gui = _loadscreen()
 			$evn_inpu = GUICtrlRead($EVENT_INPUT)
 			FileDelete(@ScriptDir&"\WebScrapper\result2.json")
-			RunWait("python EventSearch.py " &$evn_inpu,@ScriptDir &"\WebScrapper\",@SW_HIDE)
+			RunWait("python " &@ScriptDir &"\WebScrapper\EventSearch.py " &$evn_inpu ,@ScriptDir &"\WebScrapper\",@SW_HIDE)
 			$r_f = FileRead(@ScriptDir&"\WebScrapper\result2.json")
 			_createhtmlevent($r_f)
 			;FileDelete(@ScriptDir &"\WebScrapper\newslink.html")
-
+			_closeloader($loader_gui)
 
 
 
@@ -1417,7 +1464,7 @@ While 1
 				RunWait(@ComSpec &" /c python '" &@ScriptDir &"\crime-predict\CrimeTypePrediction.py'",@ScriptDir &"\crime-predict\",@SW_HIDE)
 				MsgBox($MB_ICONQUESTION,"Error : No Location Specified" ,"Click a Place on the map to get suggestion there")
 			EndIf
-			_loadpic($SHOW_GRAPH,@ScriptDir &"\crime-predict\barchart.png")
+			_loadpic($SHOW_GRAPH,@ScriptDir &"\crime-predict\barchart.png",410,300)
 
 
 		Case $START_DRAW
@@ -1785,7 +1832,6 @@ WEnd
 
 EndFunc
 
-
 Func _createhtml($json)
 $html = '<!DOCTYPE html>' &@CRLF & _
 '<html lang="en">' &@CRLF & _
@@ -1814,14 +1860,12 @@ $html = '<!DOCTYPE html>' &@CRLF & _
 'document.getElementById("paraid").innerHTML = x;'&@CRLF & _
 '</script>'&@CRLF & _
 '</html>'
-
+FileDelete(@ScriptDir &"\WebScrapper\dateplacesummary.html")
 FileWrite(@ScriptDir &"\WebScrapper\dateplacesummary.html",$html)
 _IENavigate($nws_ie,"http://localhost:8843/WebScrapper/dateplacesummary.html")
 EndFunc
 
-
 Func _createhtmlevent($r_f)
-
 $html = '	<!DOCTYPE html>' &@CRLF & _
 '<html lang="en">' &@CRLF & _
 '<head>' &@CRLF & _
@@ -1847,10 +1891,75 @@ $html = '	<!DOCTYPE html>' &@CRLF & _
 'document.getElementById("ulid").innerHTML = x;' &@CRLF & _
 '</script>' &@CRLF & _
 '</html>'
+FileDelete(@ScriptDir &"\WebScrapper\newslink.html")
 FileWrite(@ScriptDir &"\WebScrapper\newslink.html",$html)
-_IENavigate($event_ie,"http://localhost:8843/WebScrapper/newslink.html")
+_IENavigate($nws_ie,"http://localhost:8843/WebScrapper/newslink.html")
 EndFunc
 
+Func _createhtmltimline($tm_j)
+$var = '<!DOCTYPE html>' &@CRLF & _
+'<html lang="en">' &@CRLF & _
+'<head>' &@CRLF & _
+'    <meta charset="UTF-8">' &@CRLF & _
+'    <meta name="viewport" content="width=device-width, initial-scale=1.0">' &@CRLF & _
+'    <title>Event Search</title>' &@CRLF & _
+'    <link rel="stylesheet" href="EventSearch.css">' &@CRLF & _
+'</head>' &@CRLF & _
+'<body>' &@CRLF & _
+'' &@CRLF & _
+'    <div class="container">' &@CRLF & _
+'        <div class="timeline">' &@CRLF & _
+'          <ul id="myList">' &@CRLF & _
+'            ' &@CRLF & _
+'            <!-- <li>' &@CRLF & _
+'              <div class="timeline-content">' &@CRLF & _
+'                <h3 class="date">20th may, 2010</h3>' &@CRLF & _
+'                <h1>Heading 1</h1>' &@CRLF & _
+'                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Consectetur tempora ab laudantium voluptatibus aut eos placeat laborum, quibusdam exercitationem labore.</p>' &@CRLF & _
+'              </div>' &@CRLF & _
+'            </li>' &@CRLF & _
+'            <li>' &@CRLF & _
+'              <div class="timeline-content">' &@CRLF & _
+'                <h3 class="date">20th may, 2010</h3>' &@CRLF & _
+'                <h1>Heading 2</h1>' &@CRLF & _
+'                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Consectetur tempora ab laudantium voluptatibus aut eos placeat laborum, quibusdam exercitationem labore.</p>' &@CRLF & _
+'              </div>' &@CRLF & _
+'            </li>' &@CRLF & _
+'            <li>' &@CRLF & _
+'              <div class="timeline-content">' &@CRLF & _
+'                <h3 class="date">20th may, 2010</h3>' &@CRLF & _
+'                <h1>Heading 3</h1>' &@CRLF & _
+'                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Consectetur tempora ab laudantium voluptatibus aut eos placeat laborum, quibusdam exercitationem labore.</p>' &@CRLF & _
+'              </div>' &@CRLF & _
+'            </li>' &@CRLF & _
+'            <li>' &@CRLF & _
+'              <div class="timeline-content">' &@CRLF & _
+'                <h3 class="date">20th may, 2010</h3>' &@CRLF & _
+'                <h1>Heading 4</h1>' &@CRLF & _
+'                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Consectetur tempora ab laudantium voluptatibus aut eos placeat laborum, quibusdam exercitationem labore.</p>' &@CRLF & _
+'              </div>' &@CRLF & _
+'            </li> -->' &@CRLF & _
+'          </ul>' &@CRLF & _
+'        </div>' &@CRLF & _
+'      </div>' &@CRLF & _
+'    <script>' &@CRLF & _
+'    // Change the myList to the output json' &@CRLF & _
+'    var myObj = ' &$tm_j &';' &@CRLF & _
+'var x= "";' &@CRLF & _
+'' &@CRLF & _
+'for (i in myObj) {' &@CRLF & _
+'        x+= "<li><a href=\""+myObj[i].link+"\"style=\"text-decoration:none;\">"+"<div class=\"timeline-content\">"+"<p>"+myObj[i].news+"</p>"+ "</div></a></li>";' &@CRLF & _
+'} ' &@CRLF & _
+'document.getElementById("myList").innerHTML=x;' &@CRLF & _
+'console.log(x);' &@CRLF & _
+'' &@CRLF & _
+'</script>' &@CRLF & _
+'</body>' &@CRLF & _
+'</html>'
+FileDelete(@ScriptDir &"\WebScrapper\eventtimeline.html")
+FileWrite(@ScriptDir &"\WebScrapper\eventtimeline.html",$var)
+_IENavigate($event_ie,"http://localhost:8843/WebScrapper/eventtimeline.html")
+EndFunc
 
 Func _prepareformlnode($redval)
 $strbtwn_nodes = _ArrayUnique(_StringExplode(StringStripWS(StringReplace(_StringBetween($redval,"[","]")[0],"'",""),8),","))
@@ -2209,9 +2318,9 @@ Func WM_COMMAND($hWnd, $iMsg, $wParam, $lParam)
 
 EndFunc   ;==>WM_COMMAND
 
-Func _loadpic($iPic,$picture)
+Func _loadpic($iPic,$picture,$width,$hight)
 Global $hImage = _GDIPlus_ImageLoadFromFile($picture)
-$hmap = _GDIPlus_ScaleImage2($hImage,410, 300)
+$hmap = _GDIPlus_ScaleImage2($hImage,$width, $hight)
 Global $hHBitmap = _GDIPlus_BitmapCreateHBITMAPFromBitmap($hmap)
 _WinAPI_DeleteObject(GUICtrlSendMsg($iPic, $STM_SETIMAGE, $IMAGE_BITMAP, $hHBitmap))
 EndFunc
