@@ -706,7 +706,7 @@ GUICtrlCreateLabel("",$ui_w*.5, $ui_h*.1, 5, $ui_h*.55) ;status seprator3
 GUICtrlSetState(-1, 128); $GUI_DISABLE
 GUICtrlSetBkColor(-1, 0xcccccc)
 
-GUICtrlCreateLabel("", $ui_w*0.25, $ui_h*.65+2, 5,$ui_h*.31-2 ) ;status seprator1
+;GUICtrlCreateLabel("", $ui_w*0.25, $ui_h*.65+2, 5,$ui_h*.31-2 ) ;status seprator1
 GUICtrlSetState(-1, 128); $GUI_DISABLE
 GUICtrlSetBkColor(-1, 0xcccccc)
 
@@ -715,71 +715,297 @@ GUICtrlSetBkColor(-1, 0xcccccc)
 $search_type = GUICtrlCreateCombo("",$ui_w*.01+100, $ui_h*.105, 150, 28, BitOR($CBS_DROPDOWN,$CBS_AUTOHSCROLL))
 GUICtrlSetData(-1, "Person|Organization|Vehicle|Properties","Person")
 
+GUICtrlCreateGroup("",  $ui_w*.01, $ui_h*.13, $ui_w*.48, 130)
+
+GUICtrlCreateLabel(" FILTERS ", $ui_w*.4, $ui_h*.12, 80, 28, 0x0200)
+GUICtrlSetFont(-1, 12, 800, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor(-1,0x191919)
+
 $search_type_button = GUICtrlCreateButton("SEARCH",$ui_w*.01+260, $ui_h*.100, 80, 28)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor(-1, 0x7f7f7f)
 
-$NAME_FILTER = GUICtrlCreateInput("", $ui_w*.105+80, $ui_h*.175, 180, 20)
-$AGE_FILTER = GUICtrlCreateInput("", $ui_w*.105+380, $ui_h*.175, 100, 20)
-$WEIGHT_FILTER = GUICtrlCreateInput("", $ui_w*.105+80, $ui_h*.245, 100, 20)
-$HEIGHT_FILTER = GUICtrlCreateInput("", $ui_w*.105+380, $ui_h*.245, 100, 20)
-
-$search_filter = GUICtrlCreateButton("FILTER",$ui_w*.018, $ui_h*.18, 80, 28)
+$search_type_button = _Metro_CreateButtonEx("SHOW DETAILS",$ui_w*.21, $ui_h*.6, 160, 30)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor(-1, 0x7f7f7f)
 
-$search_RESULTS_button = GUICtrlCreateButton("SEARCH RESULTS",$ui_w*.22, $ui_h*.32, 150, 30)
+$NAME_FILTER = GUICtrlCreateInput("", $ui_w*.02+70, $ui_h*.155, 140, 20)
+$GENDER_FILTER = GUICtrlCreateInput("", $ui_w*.02+70, $ui_h*.195, 140, 20)
+$AGE_FILTER = GUICtrlCreateInput("", $ui_w*.02+70, $ui_h*.235, 140, 20)
+$CRIMETYP_FILTER = GUICtrlCreateInput("", $ui_w*.165+90, $ui_h*.155, 140, 20)
+$VEHICLEMod_FILTER = GUICtrlCreateInput("", $ui_w*.33+100, $ui_h*.155, 140, 20)
+$VEHICLENum_FILTER = GUICtrlCreateInput("", $ui_w*.33+100, $ui_h*.195, 140, 20)
+
+
+
+$search_RESULTS_button = GUICtrlCreateButton("SHOW RESULTS",$ui_w*.22, $ui_h*.30, 150, 30)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor(-1, 0x7f7f7f)
 
-$results_out = GUICtrlCreateListView("Crime ID|Name|Address|FIR no:|Sections|Height|weight|Age|gender|Biometric|Aadhaar|phone number",$ui_w*.01, $ui_h*.4, $ui_w*.48, $ui_h*.23, BitOR($WS_EX_CLIENTEDGE,$LVS_EX_GRIDLINES))
+$results_out = GUICtrlCreateListView("CRIME ID | FIR No: | NAME | GENDER | AGE | CRIME TYPE | VEHICLE MODEL | VEHICLE COLOUR ",$ui_w*.01, $ui_h*.35, $ui_w*.48, $ui_h*.23, BitOR($WS_EX_CLIENTEDGE,$LVS_EX_GRIDLINES))
 
 GUICtrlCreateLabel("SEARCH TYPE :", $ui_w*.01, $ui_h*.10, 100, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
-GUICtrlCreateGroup("",  $ui_w*.1, $ui_h*.15, 550, 130)
 
-GUICtrlCreateLabel("NAME :", $ui_w*.105, $ui_h*.17, 100, 28, 0x0200)
+
+GUICtrlCreateLabel("NAME :", $ui_w*.02, $ui_h*.15, 100, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
-GUICtrlCreateLabel("AGE :", $ui_w*.105+300, $ui_h*.17, 100, 28, 0x0200)
+GUICtrlCreateLabel("GENDER :", $ui_w*.02, $ui_h*.19, 100, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
-GUICtrlCreateLabel("WEIGHT :", $ui_w*.105, $ui_h*.24, 100, 28, 0x0200)
+GUICtrlCreateLabel("AGE :", $ui_w*.02, $ui_h*.23, 100, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
-GUICtrlCreateLabel("HEIGHT :", $ui_w*.105+300, $ui_h*.24, 100, 28, 0x0200)
+GUICtrlCreateLabel("CRIME TYPE :", $ui_w*.165, $ui_h*.15, 100, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
-;We are creating an external gui and embedding the gui the above function is for creating another gui with a tab
+GUICtrlCreateLabel("VEHICLE MODEL :", $ui_w*.32, $ui_h*.15, 110, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
 
-;3RD DIVISION
+GUICtrlCreateLabel("VEHICLE COLOUR :", $ui_w*.32, $ui_h*.19, 110, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
 
-GUICtrlCreateGroup("IMAGE",$ui_w*.01, $ui_h*.66, 100, 120)
+;CREATE TO EVIDENCE BOX
 
-$SHOW_IMG_OUT = GUICtrlCreatePic("ADD IMAGE HERE",$ui_w*.01, $ui_h*.66, 100, 120)
+GUICtrlCreateLabel("CREATE TO EVIDENCE BOX", $ui_w*.51, $ui_h*.10, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
 
-GUICtrlCreateGroup("BIOMETRICS",$ui_w*.01, $ui_h*.81, 100, 120)
+$EVIDENCE_type = GUICtrlCreateCombo("",$ui_w*.8+100, $ui_h*.105, 150, 28, BitOR($CBS_DROPDOWN,$CBS_AUTOHSCROLL))
+GUICtrlSetData(-1, "Person|Organization|Vehicle|Properties","Person")
 
-$SHOW_IMG_OUT = GUICtrlCreatePic("ADD IMAGE HERE",$ui_w*.01, $ui_h*.81, 100, 120)
+GUICtrlCreateLabel("TYPE :", $ui_w*.835, $ui_h*.10, 150, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
 
-$FIR_out = GUICtrlCreateListView("                 FIR Nos               ",$ui_w*.1, $ui_h*.68, $ui_w*.11, $ui_h*.23, BitOR($WS_EX_CLIENTEDGE,$LVS_EX_GRIDLINES))
-GUICtrlSetBkColor(-1, 0x808080)
+GUICtrlCreateGroup("",$ui_w*.915, $ui_h*.14, 100, 120)
 
-$show_details = GUICtrlCreateButton("SHOW DETAILS",$ui_w*.12, $ui_h*.92, 100, 28)
+$SHOW_IMG_IN = GUICtrlCreatePic("ADD IMAGE HERE",$ui_w*.915, $ui_h*.14, 100, 120)
+$ADD_IMG = GUICtrlCreateButton("ADD IMAGE",$ui_w*.915, $ui_h*.14+125, 100, 28)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor(-1, 0x7f7f7f)
 
+GUICtrlCreateGroup("",$ui_w*.915, $ui_h*.32, 100, 120)
 
+$SHOW_Biomet_IN = GUICtrlCreatePic("ADD BIOMETRICS HERE",$ui_w*.915, $ui_h*.32, 100, 120)
+$ADD_Biomet = GUICtrlCreateButton("ADD BIOMETRICS",$ui_w*.915, $ui_h*.32+125, 110, 28)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor(-1, 0x7f7f7f)
+
+GUICtrlCreateGroup("",$ui_w*.52, $ui_h*.125, $ui_w*.47, $ui_h*.5)
+
+$NAME_INPUT = GUICtrlCreateInput("", $ui_w*.53+125, $ui_h*.155, 180, 20)
+$ADDRESS_INPUT = GUICtrlCreateEdit("", $ui_w*.53+125, $ui_h*.195, 180, 90)
+$AADHAAR_INPUT = GUICtrlCreateInput("", $ui_w*.53+125, $ui_h*.315, 180, 20)
+$CRIMENO_INPUT = GUICtrlCreateInput("", $ui_w*.53+125, $ui_h*.355, 180, 20)
+$FIRNo_INPUT = GUICtrlCreateInput("", $ui_w*.53+125, $ui_h*.395, 180, 20)
+$MEDICAL_INPUT = GUICtrlCreateInput("", $ui_w*.53+125, $ui_h*.435, 180, 20)
+$CoNUM_INPUT = GUICtrlCreateInput("", $ui_w*.53+125, $ui_h*.475, 180, 20)
+$CRIMEID_INPUT = GUICtrlCreateInput("", $ui_w*.53+400, $ui_h*.155, 180, 20)
+$SECTION_INPUT = GUICtrlCreateInput("", $ui_w*.53+400, $ui_h*.195, 180, 20)
+$AGE_INPUT = GUICtrlCreateInput("", $ui_w*.53+400, $ui_h*.235, 180, 20)
+$HEIGHT_INPUT = GUICtrlCreateInput("", $ui_w*.53+400, $ui_h*.275, 180, 20)
+$WEIGHT_INPUT = GUICtrlCreateInput("", $ui_w*.53+400, $ui_h*.315, 180, 20)
+$GENDER_INPUT = GUICtrlCreateInput("", $ui_w*.53+400, $ui_h*.355, 180, 20)
+$REMARKS_INPUT = GUICtrlCreateEdit("", $ui_w*.53+400, $ui_h*.395, 180, 90)
+
+GUICtrlCreateLabel("NAME :", $ui_w*.53, $ui_h*.15, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("ADDRESS :", $ui_w*.53, $ui_h*.19, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("AADHAAR :", $ui_w*.53, $ui_h*.31, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("CRIME NO.S :", $ui_w*.53, $ui_h*.35, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("BIOMETRICS :", $ui_w*.53, $ui_h*.39, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("MEDICAL DETAILS :", $ui_w*.53, $ui_h*.43, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("CONTACT NUMBER :", $ui_w*.53, $ui_h*.47, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("CRIME ID :", $ui_w*.53+330, $ui_h*.15, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("SECTION :", $ui_w*.53+330, $ui_h*.19, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("AGE :", $ui_w*.53+330, $ui_h*.23, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("HEIGHT :", $ui_w*.53+330, $ui_h*.27, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("WEIGHT :", $ui_w*.53+330, $ui_h*.31, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("GENDER :", $ui_w*.53+330, $ui_h*.35, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("REMARKS :", $ui_w*.53+330, $ui_h*.39, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+$CREATE_TO_EVIDENCEBOX = _Metro_CreateButtonEx("ADD TO DATABASE", $ui_w*.65, $ui_h*.55, 300, 28)
+
+;3RD DIVISION show all details after selecting crime id from list
+
+$CRIMEID_DISP = GUICtrlCreateInput("", $ui_w*.01+70, $ui_h*.665, 100, 20)
+
+GUICtrlCreateLabel("CRIME ID:", $ui_w*.01, $ui_h*.66, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+$FIRNo_DISP = GUICtrlCreateInput("", $ui_w*.01+70, $ui_h*.765, 100, 20)
+
+GUICtrlCreateLabel("FIR No :", $ui_w*.01, $ui_h*.76, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+;PERSONA INFO PART
+
+GUICtrlCreateGroup("",$ui_w*.13, $ui_h*.65, 580, 265)
+
+GUICtrlCreateLabel("PERSONAL INFO", $ui_w*.32, $ui_h*.66, 200, 28, 0x0200)
+GUICtrlSetFont(-1, 12, 800, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateGroup("IMAGE",$ui_w*.14, $ui_h*.66, 100, 120)
+
+$SHOW_IMG_OUT = GUICtrlCreatePic("ADD IMAGE HERE",$ui_w*.14, $ui_h*.66, 100, 120)
+
+GUICtrlCreateGroup("BIOMETRIC :",$ui_w*.14, $ui_h*.81, 100, 120)
+
+$SHOW_IMG_OUT = GUICtrlCreatePic("ADD IMAGE HERE",$ui_w*.14, $ui_h*.81, 100, 120)
+
+$NAME_DISP = GUICtrlCreateInput("", $ui_w*.22+70, $ui_h*.705, 100, 20)
+$GENDER_DISP = GUICtrlCreateInput("", $ui_w*.22+70, $ui_h*.755, 100, 20)
+$AGE_DISP = GUICtrlCreateInput("", $ui_w*.22+70, $ui_h*.805, 100, 20)
+$HEIGHT_DISP = GUICtrlCreateInput("", $ui_w*.22+70, $ui_h*.855, 100, 20)
+$WEIGHT_DISP = GUICtrlCreateInput("", $ui_w*.22+70, $ui_h*.905, 100, 20)
+$ADDRESS_DISP = GUICtrlCreateEdit("", $ui_w*.35+70, $ui_h*.705, 160, 110)
+$MOBNum_DISP = GUICtrlCreateInput("", $ui_w*.35+90, $ui_h*.855, 100, 20)
+
+GUICtrlCreateLabel("NAME:", $ui_w*.22, $ui_h*.7, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("GENDER:", $ui_w*.22, $ui_h*.75, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("AGE:", $ui_w*.22, $ui_h*.8, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("HEIGHT:", $ui_w*.22, $ui_h*.85, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("WEIGHT:", $ui_w*.22, $ui_h*.9, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("ADDRESS:", $ui_w*.35, $ui_h*.7, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("MOB NUMBER:", $ui_w*.35, $ui_h*.85, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("VEHICLE INFO", $ui_w*.55, $ui_h*.66, 200, 28, 0x0200)
+GUICtrlSetFont(-1, 12, 800, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateGroup("",$ui_w*.51, $ui_h*.65, 240, 265)
+
+$VehNo_DISP = GUICtrlCreateInput("", $ui_w*.52+110, $ui_h*.705, 100, 20)
+$VehOWNER_DISP = GUICtrlCreateInput("", $ui_w*.52+110, $ui_h*.755, 100, 20)
+$VehMOD_DISP = GUICtrlCreateInput("", $ui_w*.52+110, $ui_h*.805, 100, 20)
+$VehCOLOUR_DISP = GUICtrlCreateInput("", $ui_w*.52+110, $ui_h*.855, 100, 20)
+
+GUICtrlCreateLabel("VEHICLE No:", $ui_w*.52, $ui_h*.7, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("VEHICLE OWNER:", $ui_w*.52, $ui_h*.75, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("VEHICLE MODEL:", $ui_w*.52, $ui_h*.8, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("VEHICLE COLOUR:", $ui_w*.52, $ui_h*.85, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("CRIME INFO", $ui_w*.8, $ui_h*.66, 200, 28, 0x0200)
+GUICtrlSetFont(-1, 12, 800, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateGroup("",$ui_w*.67, $ui_h*.65, 500, 265)
+
+$CRIMETYP_DISP = GUICtrlCreateInput("", $ui_w*.69+110, $ui_h*.705, 100, 20)
+$LOCATION_DISP = GUICtrlCreateInput("", $ui_w*.69+110, $ui_h*.755, 100, 20)
+$WITNESS_DISP = GUICtrlCreateInput("", $ui_w*.69+110, $ui_h*.805, 100, 20)
+$ACTION_DISP = GUICtrlCreateInput("", $ui_w*.69+110, $ui_h*.855, 100, 20)
+$REMARKS_DISP = GUICtrlCreateEdit("", $ui_w*.83+70, $ui_h*.705, 160, 110)
+
+GUICtrlCreateLabel("CRIME TYPE:", $ui_w*.69, $ui_h*.7, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("LOCATION:", $ui_w*.69, $ui_h*.75, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("WITNESS:", $ui_w*.69, $ui_h*.8, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("ACTION TAKEN:", $ui_w*.69, $ui_h*.85, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("REMARKS:", $ui_w*.835, $ui_h*.7, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
 #EndRegion
 
 
