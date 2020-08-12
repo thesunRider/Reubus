@@ -1179,8 +1179,12 @@ While 1
 
 		;Gui response for map
 		Case $generate_MAP
+			;python CrimeTypePredict.py -lat 11.23 -long 76.3
 			RunWait(@ComSpec &" /c python '" &@ScriptDir &"\crime-predict\CrimeTypePrediction.py'",@ScriptDir &"\crime-predict",@SW_HIDE)
-			$return = _readcmd(@ScriptDir &"\crime-predict\python CrimeTypePredict.py",@ScriptDir &"\crime-predict")
+			If IsArray($currentlatln) Then
+				$return = _readcmd(@ScriptDir &"\crime-predict\python CrimeTypePredict.py -lat " &$currentlatln[0] &"-long " &$currentlatln[1],@ScriptDir &"\crime-predict")
+
+			EndIf
 			_loadpic($SHOW_GRAPH,@ScriptDir &"\crime-predict\barchart.png")
 
 
