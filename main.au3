@@ -47,13 +47,14 @@ RegWrite("HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Internet Explorer\MAIN\FeatureCo
 ;delete cache
 $ClearID = "8"
 RunWait("RunDll32.exe InetCpl.cpl,ClearMyTracksByProcess " & $ClearID)
+OnAutoItExitRegister("_Closeall")
 
 
 Global $mapaddress = "http://localhost:8843/map_test.html"
 Global $lastid = 0,$currentlatln
 Global $exclusion_nodes =  FileReadToArray(@ScriptDir &"\nodes\exclusions.nodes")
 
-Global $drop_array
+Global $drop_array,$plugincontrol_array[0][3]
 
 Global $loader_gui
 Global Const $hDwmApiDll = DllOpen("dwmapi.dll")
@@ -65,6 +66,7 @@ If Not $bAero Then $fStep = 1.25
 GUIRegisterMsg($WM_TIMER, "PlayAnim")
 Global $hHBmp_BG, $hB, $iSleep = 20
 Global $iW = 400, $iH = 210,$iPerc
+
 
 
 #EndRegion
@@ -872,6 +874,9 @@ GUICtrlSetColor(-1, 0xffffff)
 
 #EndRegion
 
+#Region Empty TAB for plugin
+GUICtrlCreateTabItem("tab5")
+
 GUICtrlCreateTabItem("")
 
 
@@ -949,9 +954,9 @@ GUICtrlSetData($list_nodeedit,"Description goes here..")
 _redrawmap()
 _setcrdlist()
 
-$tabembdetails_DB = _createdetails2() ;create a gui with tabs
-GUISetState(@SW_HIDE,$tabembdetails_DB) ;hide the gui
-_embedgui($gui,$tabembdetails_DB,800,100,200,200) ;tell the gui to be embedded
+;$tabembdetails_DB = _createdetails2() ;create a gui with tabs
+;GUISetState(@SW_HIDE,$tabembdetails_DB) ;hide the gui
+;_embedgui($gui,$tabembdetails_DB,800,100,200,200) ;tell the gui to be embedded
 ;first parameter handle of our main gui
 ;secon parameter handle return from the function _createembeded2()
 ;3rd parameter x position of embeded gui
@@ -959,7 +964,7 @@ _embedgui($gui,$tabembdetails_DB,800,100,200,200) ;tell the gui to be embedded
 ;5th param width of embed
 ;6th param height of embed
 
-AdlibRegister("_repeatfunc1",500)
+AdlibRegister("_repeatfunc1",800)
 
 While 1
 	$nMsg = GUIGetMsg()
@@ -978,12 +983,28 @@ While 1
 
 		Case $addtabs
 			$plg = FileOpenDialog("Please Select a Plugin to load",@ScriptDir &"\Modules\","zip (*.zip)")
-			$tmp_dirzip = _TempFile()
-			DirCreate($tmp_dirzip)
-			_ExtractZip($plg,$tmp_dirzip)
-			$pckg_name = IniRead($tmp_dirzip &"\package.ini","package","name","Unspecified")
-			MsgBox($MB_ICONINFORMATION,"Wait for Update","Plugin Architecture on Progress, The compiler is partially working Please wait for the next release ;-)")
-
+			If Not @error Then
+				$tmp_dirzip = _TempFile()
+				DirCreate($tmp_dirzip)
+				_ExtractZip($plg,$tmp_dirzip)
+				$pckg_name = IniRead($tmp_dirzip &"\package.ini","package","name","Unspecified")
+				$pckg_tab = IniRead($tmp_dirzip &"\package.ini","package","tab","Plugin")
+				ControlMove($gui,"",$addtabs,605 + 150 *(UBound($plugincontrol_array)+1),$ui_h-$ui_h*0.038,27,27)
+				;MsgBox(Default,Default,$pckg_tab &" " & 450 + 150*(UBound($plugincontrol_array)+1))
+				$btnsgui = GUICtrlCreateButton($pckg_tab, 450 + 150, $ui_h-$ui_h*0.04, 150, $ui_h*0.04)
+				GUICtrlSetFont($btnsgui, 9, Default, Default, "Consolas", 5); 5 = Clear Type
+				GUICtrlSetColor($btnsgui, 0xffffff)
+				GUICtrlSetBkColor($btnsgui, 0x191919)
+				 ;This delay is needed for autoit to repaint controls
+				$pau3 = _RunAU3($tmp_dirzip &"\package.au3")
+				$plg_hndl = WinHandFromPID($pau3)
+				WinWait($plg_hndl)
+				_ArrayAdd($plugincontrol_array ,$btnsgui&"|"&$plg_hndl&"|" &$pau3)
+				_embedgui($gui,$plg_hndl,100,100,640,580)
+				Sleep(4000)
+				WinSetState($plg_hndl,"",@SW_HIDE)
+				ControlClick($gui,"",$scene)
+			EndIf
 
 		Case $map
 			ConsoleWrite("clicked map "&@CRLF)
@@ -1231,7 +1252,11 @@ WEnd
 #Region Functions
 
 Func _repeatfunc1()
-	_WinAPI_RedrawWindow($tabembdetails_DB) ; Redraw embeded gui
+	;_WinAPI_RedrawWindow($tabembdetails_DB) ; Redraw embeded gui
+	;_WinAPI_RedrawWindow($gui)
+	;For $i = 0 To UBound($plugincontrol_array)-1
+;	_WinAPI_RedrawWindow($plugincontrol_array[$i][1])
+;	Next
 EndFunc
 
 Func _ExtractZip($sZipFile, $sDestinationFolder, $sFolderStructure = "")
@@ -1379,6 +1404,19 @@ GUISetState()
 
 Return $retgui ;finally return handle of gui
 EndFunc
+
+Func WinHandFromPID($pid, $winTitle="", $timeout=8)
+    Local $secs = 0
+    Do
+        $wins = WinList($winTitle)
+        For $i = 1 To UBound($wins)-1
+            If (WinGetProcess($wins[$i][1]) == $pid) And (BitAND(WinGetState($wins[$i][1]), 2)) Then Return $wins[$i][1]
+        Next
+        Sleep(1000)
+        $secs += 1
+    Until $secs == $timeout
+EndFunc
+
 
 Func _RunAU3($sFilePath, $sWorkingDir = "", $iShowFlag = @SW_SHOW, $iOptFlag = 0)
     Return Run('"' & @AutoItExe & '" /AutoIt3ExecuteScript "' & $sFilePath & '"', $sWorkingDir, $iShowFlag, $iOptFlag)
@@ -1610,7 +1648,6 @@ _SQLite_GetTable2d($node_db,"Select * FROM nodes;",$arysql,$aryrowsql,$aryclmnsq
 Return $arysql
 EndFunc
 
-
 Func _readcmd($cmd)
 Local $iPID = Run(@ComSpec & " /c "&$cmd, @ScriptDir, @SW_HIDE, BitOR($STDERR_CHILD, $STDOUT_CHILD))
 $sOutput = ''
@@ -1706,6 +1743,14 @@ For $i = 0 To UBound($nodeclasses) - 1
 Next
 
 
+EndFunc
+
+Func _Closeall()
+	For $i = 0 To UBound($plugincontrol_array)-1
+		ConsoleWrite("killing plugins:" &$plugincontrol_array[$i][2] &@CRLF)
+		ProcessClose($plugincontrol_array[$i][2])
+		RunWait (@comspec & " /c TaskKill /PID " & $plugincontrol_array[$i][2] & " /F",@ScriptDir,@SW_HIDE)
+	Next
 EndFunc
 
 Func _nodeaddnode()
@@ -1817,18 +1862,34 @@ Switch $id
 
 EndSwitch
 
+For $i = 0 To UBound($plugincontrol_array)-1
+	If $id == $plugincontrol_array[$i][0] Then
+		_GUICtrlTab_ActivateTab($maintab,4)
+		WinSetState($plugincontrol_array[$i][1],"",@SW_SHOW)
+		ConsoleWrite("showing:" &$plugincontrol_array[$i][1] &@CRLF)
+		_WinAPI_RedrawWindow($plugincontrol_array[$i][1])
+		;MsgBox(Default,Default,"Tab switched")
+	EndIf
+Next
+
 EndFunc
 
 Func _pressedtab($id,$use)
 
 Switch $id
 	Case $DB
-		GUISetState(@SW_SHOW,$tabembdetails_DB)
+		;GUISetState(@SW_SHOW,$tabembdetails_DB)
 
 	Case Else
-		GUISetState(@SW_HIDE,$tabembdetails_DB)
+		;GUISetState(@SW_HIDE,$tabembdetails_DB)
 
 EndSwitch
+
+
+For $m = 0 To UBound($plugincontrol_array)-1
+		WinSetState($plugincontrol_array[$m][1],"",@SW_HIDE)
+		ConsoleWrite("hiding plugin gui: " & $plugincontrol_array[$m][1] &@CRLF)
+Next
 EndFunc
 
 Func _setelse($ary,$selec,$corl)
