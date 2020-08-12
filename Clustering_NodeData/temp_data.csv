@@ -1,5 +1,2 @@
-CrimeID,Mood,Activity,C,D
-1,Alcoholic,Driving,None,None
-2,None,None,None,None
-3,Alcoholic,Driving,None,None
-4,None,None,xyz,None
+Mood,Activity
+Alcoholic,Driving
