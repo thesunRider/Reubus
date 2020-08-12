@@ -29,6 +29,10 @@ args = parser.parse_args()
 
 loca = pd.read_csv('locations_Kerala.csv')
 
+def getdatawithinlat(latin,longin):
+    strexec = 'SELECT * FROM map ORDER BY ABS(latitude - ' +latin  +') + ABS(longitude - ' +longin +') ASC;'
+    pass
+
 
 def isInside(circle_x, circle_y, rad, x, y):
     if ((x - circle_x) * (x - circle_x) + (y - circle_y) * (y - circle_y) <= rad * rad):
