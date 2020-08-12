@@ -2,6 +2,7 @@
 #include <WindowsConstants.au3>
 #include <WinAPI.au3>
 #include "MetroGUI-UDF\MetroGUI_UDF.au3"
+#include <Array.au3>
 #include <Math.au3>
 #include "MetroGUI-UDF\_GUIDisable.au3" ; For dim effects when msgbox is displayed
 #include <Constants.au3>
@@ -16,24 +17,38 @@ Global $hcmd
 _SetTheme("DarkTeal") ;See MetroThemes.au3 for selectable themes or to add more
 
 ;Create resizable Metro GUI
-$hGUI = _Metro_CreateGUI("Example", 500, 300, -1, -1, True)
+$hGUI = _Metro_CreateGUI("Example", 1000, 800, -1, -1, True)
 
-GUICtrlCreateTab(10,10,100,100)
-GUICtrlCreateTabItem("1")
-
-GUICtrlCreateTabItem("2")
-
-GUICtrlCreateTabItem("")
 
 
 GUISetState(@SW_SHOW, $hGUI)
 
-_RunAU3(@ScriptDir &"\Modules\test_module.au3")
-;_embedgui($hGUI,$hCmd,20,50)
+$ary = _RunAU3(@ScriptDir &"\Modules\package.au3")
+_embedgui($hGUI,$ary,0,0,640,580)
+WinWait($ary)
+MsgBox(Default,Default,"appeared")
+WinSetState($ary,"",@SW_HIDE)
+MsgBox(Default,Default,"eitin")
+WinSetState($ary,"",@SW_SHOW)
+
+;_ArrayDisplay(WinList())
 
 Func _RunAU3($sFilePath, $sWorkingDir = "", $iShowFlag = @SW_SHOW, $iOptFlag = 0)
-    Return Run('"' & @AutoItExe & '" /AutoIt3ExecuteScript "' & $sFilePath & '"', $sWorkingDir, $iShowFlag, $iOptFlag)
+	$iPID = Run('"' & @AutoItExe & '" /AutoIt3ExecuteScript "' & $sFilePath & '"', $sWorkingDir, $iShowFlag);, BitOR($STDERR_CHILD, $STDOUT_CHILD))
+    Return WinHandFromPID($iPID)
 EndFunc   ;==>_RunAU3
+
+Func WinHandFromPID($pid, $winTitle="", $timeout=8)
+    Local $secs = 0
+    Do
+        $wins = WinList($winTitle)
+        For $i = 1 To UBound($wins)-1
+            If (WinGetProcess($wins[$i][1]) == $pid) And (BitAND(WinGetState($wins[$i][1]), 2)) Then Return $wins[$i][1]
+        Next
+        Sleep(1000)
+        $secs += 1
+    Until $secs == $timeout
+EndFunc
 
 
 Func _tabinside()

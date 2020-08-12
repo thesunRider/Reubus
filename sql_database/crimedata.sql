@@ -99,38 +99,39 @@ CREATE TABLE Cases (
     witness varchar,
     actiontaken varchar,
     crimetype varchar,
-    fir_no int Primary Key
+    fir_no int,
+    crimeid int primary key
 );
 
-INSERT INTO Cases (witness, actiontaken, crimetype, fir_no)
-VALUES ('none', 'Prison', 'Murder', 100);
+INSERT INTO Cases (witness, actiontaken, crimetype, fir_no,crimeid)
+VALUES ('none', 'Prison', 'Murder', 100,001);
 
-INSERT INTO Cases (witness, actiontaken, crimetype, fir_no)
-VALUES ('Jensen Clay', 'Jail', 'Theft', 200);
+INSERT INTO Cases (witness, actiontaken, crimetype, fir_no,crimeid)
+VALUES ('Jensen Clay', 'Jail', 'Theft', 200,002);
 
-INSERT INTO Cases (witness, actiontaken, crimetype, fir_no)
-VALUES ('Thomas Henry', 'Fined', 'Vehicle collision', 300);
+INSERT INTO Cases (witness, actiontaken, crimetype, fir_no,crimeid)
+VALUES ('Thomas Henry', 'Fined', 'Vehicle collision', 300,003);
 
-INSERT INTO Cases (witness, actiontaken, crimetype, fir_no)
-VALUES ('Harley Thompson', 'Prison', 'Murder', 400);
+INSERT INTO Cases (witness, actiontaken, crimetype, fir_no,crimeid)
+VALUES ('Harley Thompson', 'Prison', 'Murder', 400,004);
 
-INSERT INTO Cases (witness, actiontaken, crimetype, fir_no)
-VALUES ('none', 'Jail', 'Theft', 500);
+INSERT INTO Cases (witness, actiontaken, crimetype, fir_no,crimeid)
+VALUES ('none', 'Jail', 'Theft', 500,005);
 
-INSERT INTO Cases (witness, actiontaken, crimetype, fir_no)
-VALUES ('none', 'Fined', 'Weed', 600);
+INSERT INTO Cases (witness, actiontaken, crimetype, fir_no,crimeid)
+VALUES ('none', 'Fined', 'Weed', 600,006);
 
-INSERT INTO Cases (witness, actiontaken, crimetype, fir_no)
-VALUES ('Jefferey Thomas', 'Fined', 'Drunk driving', 700);
+INSERT INTO Cases (witness, actiontaken, crimetype, fir_no,crimeid)
+VALUES ('Jefferey Thomas', 'Fined', 'Drunk driving', 700,007);
 
-INSERT INTO Cases (witness, actiontaken, crimetype, fir_no)
-VALUES ('David George ', 'Jail', 'Theft', 800);
+INSERT INTO Cases (witness, actiontaken, crimetype, fir_no,crimeid)
+VALUES ('David George ', 'Jail', 'Theft', 800,008);
 
-INSERT INTO Cases (witness, actiontaken, crimetype, fir_no)
-VALUES ('none', 'Fined', 'Behicle collision', 900);
+INSERT INTO Cases (witness, actiontaken, crimetype, fir_no,crimeid)
+VALUES ('none', 'Fined', 'Behicle collision', 900,009);
 
-INSERT INTO Cases (witness, actiontaken, crimetype, fir_no)
-VALUES ('Alice Brunt', 'Prison', 'Murder', 950);
+INSERT INTO Cases (witness, actiontaken, crimetype, fir_no,crimeid)
+VALUES ('Alice Brunt', 'Prison', 'Murder', 950,010);
 
 Select * from Cases where crimetype='Murder';
 
@@ -177,12 +178,6 @@ INSERT INTO Vehicle (vehicle_no, vehicle_owner, owner_address, model,colour, cri
 VALUES ('TRE321', 'Mindy Abraham', 'Rio','Tesla','green', 010);
 
 Select * from Vehicle
-
-
-
-
-
-
 
 
 
