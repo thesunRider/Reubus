@@ -13,14 +13,14 @@ d = defaultdict(LabelEncoder)
 df = df.apply(lambda x: d[x.name].fit_transform(x))
 array = df.values[:, 1:]
 cost = []
-for num_clusters in list(range(1, 4)):
+for num_clusters in list(range(1, len(df))):
     kmode = KModes(n_clusters=num_clusters, init="Cao", n_init=1, verbose=2)
     kmode.fit_predict(array)
     cost.append(kmode.cost_)
-y = np.array([i for i in range(1, 4)])
+y = np.array([i for i in range(1, len(df))])
 plt.plot(y, cost)
-plt.show()
-km_cao = KModes(n_clusters=2, init="Cao", n_init=1, verbose=2)
+# plt.show()
+km_cao = KModes(n_clusters=1, init="Cao", n_init=1, verbose=2)
 clusters = km_cao.fit_predict(array)
 print(km_cao.cluster_centroids_)
 df = df_copy.reset_index()
@@ -29,12 +29,13 @@ clustersDf.columns = ['cluster_predicted']
 combinedDf = pd.concat([df, clustersDf], axis=1).reset_index()
 combinedDf = combinedDf.drop(['index', 'level_0'], axis=1)
 print(combinedDf.head())
-data = {
-    0: [1, 'None', 'None', 'None', 'None']
-}
-test_df = pd.DataFrame.from_dict(data, orient='index', columns=df_copy.columns)
-print(test_df.head())
-test_df = test_df.apply(lambda x: d[x.name].transform(x))
-test_array = test_df.values[:, 1:]
-print(test_array)
-print(km_cao.predict(test_array))
+combinedDf.to_csv('clustered_data.csv', header=True, index=False)
+# data = {
+#     0: [1, 'None', 'None', 'None', 'None']
+# }
+# test_df = pd.DataFrame.from_dict(data, orient='index', columns=df_copy.columns)
+# print(test_df.head())
+# test_df = test_df.apply(lambda x: d[x.name].transform(x))
+# test_array = test_df.values[:, 1:]
+# print(test_array)
+# print(km_cao.predict(test_array))
