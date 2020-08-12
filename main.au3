@@ -1178,8 +1178,11 @@ While 1
 
 		;Gui response for map
 		Case $START_DRAW
+			If IsArray($currentlatln) Then
 			_createpredictiongui($currentlatln[0],$currentlatln[1])
-
+			Else
+			_createpredictiongui(Null,Null)
+			EndIf
 
 		Case $GOTO_BUTTON
 			$latn = guictrlread($LAT_IN)
@@ -1472,19 +1475,54 @@ WEnd
 EndFunc
 
 Func _createpredictiongui($lat,$long)
-$predgui = GUICreate("Prediction", 455, 431, 192, 124)
-$predloc = GUICtrlCreateInput("Input1", 136, 24, 145, 21)
-GUICtrlCreateLabel("Prediction Location:", 24, 32, 98, 17)
-GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+
+
+$predgui = GUICreate("PREDICTOR", 450, 470, 292, 124)
+
+
+
+GUICtrlCreateGroup("",10, 10, 430, 450)
+GUICtrlCreateLabel(" PREDICTOR ", 180, 8, 98, 17)
+GUICtrlSetFont(-1, 12, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xd5d5d5)
-$predradius = GUICtrlCreateInput("Input2", 136, 64, 145, 21)
-GUICtrlCreateUpdown(-1)
-GUICtrlCreateLabel("Radius of Prediction:", 24, 64, 102, 17)
-GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
-GUICtrlSetColor(-1, 0xd5d5d5)
-$predlist = GUICtrlCreateListView("Area|latitude|Longitude", 24, 104, 393, 305)
-$predict_place = GUICtrlCreateButton("Generate", 304, 24, 113, 65)
+
+$predict_place = _Metro_CreateButtonEx("PREDICT", 320, 145, 100, 50)
 GUISetBkColor($COLOR_BLACK,$predgui)
+
+$DRAW_OnMAP = _Metro_CreateButtonEx2("DRAW ON MAP",140, 410, 180, 30)
+GUISetBkColor($COLOR_BLACK,$predgui)
+
+
+$predAt = GUICtrlCreateInput("Input1", 200, 50, 145, 21)
+
+GUICtrlCreateLabel("Predict At :", 100, 50, 90, 17)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+$predLat = GUICtrlCreateInput("Input2", 100, 100, 120, 21)
+$predLong = GUICtrlCreateInput("Input3", 310, 100, 120, 21)
+$predRadi = GUICtrlCreateInput("Input4", 200, 140, 100, 21)
+$predHot = GUICtrlCreateInput("Input5", 200, 180, 100, 21)
+
+GUICtrlCreateLabel("LATITUDE:", 20, 100, 80, 17)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+GUICtrlCreateLabel("LONGITUDE:", 230, 100, 80, 17)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+GUICtrlCreateLabel("RADIUS OF PREDICTION:", 20, 140, 180, 17)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+GUICtrlCreateLabel("NUMBER OF HOTSPOT:", 20, 180, 180, 17)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+$predlist = GUICtrlCreateListView("Area|latitude|Longitude", 25, 220, 400, 180)
+
+
 GUISetState(@SW_SHOW)
 
 While 1
