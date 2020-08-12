@@ -37,7 +37,7 @@ _SetTheme("DarkTeal")
 _SQLite_Startup()
 $store_db = _SQLite_Open(@ScriptDir &"\store.db")
 $node_db = _SQLite_Open(@ScriptDir &"\nodes\node_data\node_reg.db")
-$ghGDIPDll = _GDIPlus_Startup(Default,True)
+_GDIPlus_Startup()
 
 ;enable activeX
 Local $regValue = "0x2AF8"
@@ -102,7 +102,6 @@ While 1
 	Switch $nMsg
 		Case $GUI_EVENT_CLOSE, $GUI_CLOSE_BUTTON
 			_Metro_GUIDelete($welcomegui) ;Delete GUI/release resources, make sure you use this when working with multiple GUIs!
-			_Closeall()
 			Exit
 
 		Case $GUI_MINIMIZE_BUTTON
@@ -431,10 +430,10 @@ GUICtrlSetColor(-1, 0xffffff)
 ;LABELS AND BUTTON IN 3RD DIVISION GRAPHS
 
 $GRAPH_type = GUICtrlCreateCombo("",$ui_w*.725+90, $ui_h*.16, 100, 18, BitOR($CBS_DROPDOWN,$CBS_AUTOHSCROLL))
-GUICtrlSetData(-1, "CrimeData","CrimeData")
+GUICtrlSetData(-1, "|A|B|C","A")
 
 $GRAPH_STYLE = GUICtrlCreateCombo("",$ui_w*.86+90, $ui_h*.16, 100, 18, BitOR($CBS_DROPDOWN,$CBS_AUTOHSCROLL))
-GUICtrlSetData(-1, "Bar Chart|Pie Chart","Bar Chart")
+GUICtrlSetData(-1, "|A|B|C","A")
 
 $GRAPH_DATE = GUICtrlCreateInput("", $ui_w*.725+130, $ui_h*.19, 145, 18)
 
@@ -706,7 +705,7 @@ GUICtrlCreateLabel("",$ui_w*.5, $ui_h*.1, 5, $ui_h*.55) ;status seprator3
 GUICtrlSetState(-1, 128); $GUI_DISABLE
 GUICtrlSetBkColor(-1, 0xcccccc)
 
-GUICtrlCreateLabel("", $ui_w*0.25, $ui_h*.65+2, 5,$ui_h*.31-2 ) ;status seprator1
+;GUICtrlCreateLabel("", $ui_w*0.25, $ui_h*.65+2, 5,$ui_h*.31-2 ) ;status seprator1
 GUICtrlSetState(-1, 128); $GUI_DISABLE
 GUICtrlSetBkColor(-1, 0xcccccc)
 
@@ -715,70 +714,297 @@ GUICtrlSetBkColor(-1, 0xcccccc)
 $search_type = GUICtrlCreateCombo("",$ui_w*.01+100, $ui_h*.105, 150, 28, BitOR($CBS_DROPDOWN,$CBS_AUTOHSCROLL))
 GUICtrlSetData(-1, "Person|Organization|Vehicle|Properties","Person")
 
+GUICtrlCreateGroup("",  $ui_w*.01, $ui_h*.13, $ui_w*.48, 130)
+
+GUICtrlCreateLabel(" FILTERS ", $ui_w*.4, $ui_h*.12, 80, 28, 0x0200)
+GUICtrlSetFont(-1, 12, 800, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor(-1,0x191919)
+
 $search_type_button = GUICtrlCreateButton("SEARCH",$ui_w*.01+260, $ui_h*.100, 80, 28)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor(-1, 0x7f7f7f)
 
-$NAME_FILTER = GUICtrlCreateInput("", $ui_w*.105+80, $ui_h*.175, 180, 20)
-$AGE_FILTER = GUICtrlCreateInput("", $ui_w*.105+380, $ui_h*.175, 100, 20)
-$WEIGHT_FILTER = GUICtrlCreateInput("", $ui_w*.105+80, $ui_h*.245, 100, 20)
-$HEIGHT_FILTER = GUICtrlCreateInput("", $ui_w*.105+380, $ui_h*.245, 100, 20)
-
-$search_filter = GUICtrlCreateButton("FILTER",$ui_w*.018, $ui_h*.18, 80, 28)
+$search_type_button = _Metro_CreateButtonEx("SHOW DETAILS",$ui_w*.21, $ui_h*.6, 160, 30)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor(-1, 0x7f7f7f)
 
-$search_RESULTS_button = GUICtrlCreateButton("SEARCH RESULTS",$ui_w*.22, $ui_h*.32, 150, 30)
+$NAME_FILTER = GUICtrlCreateInput("", $ui_w*.02+70, $ui_h*.155, 140, 20)
+$GENDER_FILTER = GUICtrlCreateInput("", $ui_w*.02+70, $ui_h*.195, 140, 20)
+$AGE_FILTER = GUICtrlCreateInput("", $ui_w*.02+70, $ui_h*.235, 140, 20)
+$CRIMETYP_FILTER = GUICtrlCreateInput("", $ui_w*.165+90, $ui_h*.155, 140, 20)
+$VEHICLEMod_FILTER = GUICtrlCreateInput("", $ui_w*.33+100, $ui_h*.155, 140, 20)
+$VEHICLENum_FILTER = GUICtrlCreateInput("", $ui_w*.33+100, $ui_h*.195, 140, 20)
+
+
+
+$search_RESULTS_button = GUICtrlCreateButton("SHOW RESULTS",$ui_w*.22, $ui_h*.30, 150, 30)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor(-1, 0x7f7f7f)
 
-$results_out = GUICtrlCreateListView("Crime ID|Name|Address|FIR no:|Sections|Height|weight|Age|gender|Biometric|Aadhaar|phone number",$ui_w*.01, $ui_h*.4, $ui_w*.48, $ui_h*.23, BitOR($WS_EX_CLIENTEDGE,$LVS_EX_GRIDLINES))
+$results_out = GUICtrlCreateListView("CRIME ID | FIR No: | NAME | GENDER | AGE | CRIME TYPE | VEHICLE MODEL | VEHICLE COLOUR ",$ui_w*.01, $ui_h*.35, $ui_w*.48, $ui_h*.23, BitOR($WS_EX_CLIENTEDGE,$LVS_EX_GRIDLINES))
 
 GUICtrlCreateLabel("SEARCH TYPE :", $ui_w*.01, $ui_h*.10, 100, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
-GUICtrlCreateGroup("",  $ui_w*.1, $ui_h*.15, 550, 130)
 
-GUICtrlCreateLabel("NAME :", $ui_w*.105, $ui_h*.17, 100, 28, 0x0200)
+
+GUICtrlCreateLabel("NAME :", $ui_w*.02, $ui_h*.15, 100, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
-GUICtrlCreateLabel("AGE :", $ui_w*.105+300, $ui_h*.17, 100, 28, 0x0200)
+GUICtrlCreateLabel("GENDER :", $ui_w*.02, $ui_h*.19, 100, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
-GUICtrlCreateLabel("WEIGHT :", $ui_w*.105, $ui_h*.24, 100, 28, 0x0200)
+GUICtrlCreateLabel("AGE :", $ui_w*.02, $ui_h*.23, 100, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
-GUICtrlCreateLabel("HEIGHT :", $ui_w*.105+300, $ui_h*.24, 100, 28, 0x0200)
+GUICtrlCreateLabel("CRIME TYPE :", $ui_w*.165, $ui_h*.15, 100, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 
-;We are creating an external gui and embedding the gui the above function is for creating another gui with a tab
+GUICtrlCreateLabel("VEHICLE MODEL :", $ui_w*.32, $ui_h*.15, 110, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
 
-;3RD DIVISION
+GUICtrlCreateLabel("VEHICLE COLOUR :", $ui_w*.32, $ui_h*.19, 110, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
 
-GUICtrlCreateGroup("IMAGE",$ui_w*.01, $ui_h*.66, 100, 120)
+;CREATE TO EVIDENCE BOX
 
-$SHOW_IMG_OUT = GUICtrlCreatePic("ADD IMAGE HERE",$ui_w*.01, $ui_h*.66, 100, 120)
+GUICtrlCreateLabel("CREATE TO EVIDENCE BOX", $ui_w*.51, $ui_h*.10, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
 
-GUICtrlCreateGroup("BIOMETRICS",$ui_w*.01, $ui_h*.81, 100, 120)
+$EVIDENCE_type = GUICtrlCreateCombo("",$ui_w*.8+100, $ui_h*.105, 150, 28, BitOR($CBS_DROPDOWN,$CBS_AUTOHSCROLL))
+GUICtrlSetData(-1, "Person|Organization|Vehicle|Properties","Person")
 
-$SHOW_IMG_OUT = GUICtrlCreatePic("ADD IMAGE HERE",$ui_w*.01, $ui_h*.81, 100, 120)
+GUICtrlCreateLabel("TYPE :", $ui_w*.835, $ui_h*.10, 150, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
 
-$FIR_out = GUICtrlCreateListView("                 FIR Nos               ",$ui_w*.1, $ui_h*.68, $ui_w*.11, $ui_h*.23, BitOR($WS_EX_CLIENTEDGE,$LVS_EX_GRIDLINES))
-GUICtrlSetBkColor(-1, 0x808080)
+GUICtrlCreateGroup("",$ui_w*.915, $ui_h*.14, 100, 120)
 
-$show_details = GUICtrlCreateButton("SHOW DETAILS",$ui_w*.12, $ui_h*.92, 100, 28)
+$SHOW_IMG_IN = GUICtrlCreatePic("ADD IMAGE HERE",$ui_w*.915, $ui_h*.14, 100, 120)
+$ADD_IMG = GUICtrlCreateButton("ADD IMAGE",$ui_w*.915, $ui_h*.14+125, 100, 28)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
 GUICtrlSetBkColor(-1, 0x7f7f7f)
 
+GUICtrlCreateGroup("",$ui_w*.915, $ui_h*.32, 100, 120)
+
+$SHOW_Biomet_IN = GUICtrlCreatePic("ADD BIOMETRICS HERE",$ui_w*.915, $ui_h*.32, 100, 120)
+$ADD_Biomet = GUICtrlCreateButton("ADD BIOMETRICS",$ui_w*.915, $ui_h*.32+125, 110, 28)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+GUICtrlSetBkColor(-1, 0x7f7f7f)
+
+GUICtrlCreateGroup("",$ui_w*.52, $ui_h*.125, $ui_w*.47, $ui_h*.5)
+
+$NAME_INPUT = GUICtrlCreateInput("", $ui_w*.53+125, $ui_h*.155, 180, 20)
+$ADDRESS_INPUT = GUICtrlCreateEdit("", $ui_w*.53+125, $ui_h*.195, 180, 90)
+$AADHAAR_INPUT = GUICtrlCreateInput("", $ui_w*.53+125, $ui_h*.315, 180, 20)
+$CRIMENO_INPUT = GUICtrlCreateInput("", $ui_w*.53+125, $ui_h*.355, 180, 20)
+$FIRNo_INPUT = GUICtrlCreateInput("", $ui_w*.53+125, $ui_h*.395, 180, 20)
+$MEDICAL_INPUT = GUICtrlCreateInput("", $ui_w*.53+125, $ui_h*.435, 180, 20)
+$CoNUM_INPUT = GUICtrlCreateInput("", $ui_w*.53+125, $ui_h*.475, 180, 20)
+$CRIMEID_INPUT = GUICtrlCreateInput("", $ui_w*.53+400, $ui_h*.155, 180, 20)
+$SECTION_INPUT = GUICtrlCreateInput("", $ui_w*.53+400, $ui_h*.195, 180, 20)
+$AGE_INPUT = GUICtrlCreateInput("", $ui_w*.53+400, $ui_h*.235, 180, 20)
+$HEIGHT_INPUT = GUICtrlCreateInput("", $ui_w*.53+400, $ui_h*.275, 180, 20)
+$WEIGHT_INPUT = GUICtrlCreateInput("", $ui_w*.53+400, $ui_h*.315, 180, 20)
+$GENDER_INPUT = GUICtrlCreateInput("", $ui_w*.53+400, $ui_h*.355, 180, 20)
+$REMARKS_INPUT = GUICtrlCreateEdit("", $ui_w*.53+400, $ui_h*.395, 180, 90)
+
+GUICtrlCreateLabel("NAME :", $ui_w*.53, $ui_h*.15, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("ADDRESS :", $ui_w*.53, $ui_h*.19, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("AADHAAR :", $ui_w*.53, $ui_h*.31, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("CRIME NO.S :", $ui_w*.53, $ui_h*.35, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("BIOMETRICS :", $ui_w*.53, $ui_h*.39, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("MEDICAL DETAILS :", $ui_w*.53, $ui_h*.43, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("CONTACT NUMBER :", $ui_w*.53, $ui_h*.47, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("CRIME ID :", $ui_w*.53+330, $ui_h*.15, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("SECTION :", $ui_w*.53+330, $ui_h*.19, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("AGE :", $ui_w*.53+330, $ui_h*.23, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("HEIGHT :", $ui_w*.53+330, $ui_h*.27, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("WEIGHT :", $ui_w*.53+330, $ui_h*.31, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("GENDER :", $ui_w*.53+330, $ui_h*.35, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("REMARKS :", $ui_w*.53+330, $ui_h*.39, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+$CREATE_TO_EVIDENCEBOX = _Metro_CreateButtonEx("ADD TO DATABASE", $ui_w*.65, $ui_h*.55, 300, 28)
+
+;3RD DIVISION show all details after selecting crime id from list
+
+$CRIMEID_DISP = GUICtrlCreateInput("", $ui_w*.01+70, $ui_h*.665, 100, 20)
+
+GUICtrlCreateLabel("CRIME ID:", $ui_w*.01, $ui_h*.66, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+$FIRNo_DISP = GUICtrlCreateInput("", $ui_w*.01+70, $ui_h*.765, 100, 20)
+
+GUICtrlCreateLabel("FIR No :", $ui_w*.01, $ui_h*.76, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+;PERSONA INFO PART
+
+GUICtrlCreateGroup("",$ui_w*.13, $ui_h*.65, 580, 265)
+
+GUICtrlCreateLabel("PERSONAL INFO", $ui_w*.32, $ui_h*.66, 200, 28, 0x0200)
+GUICtrlSetFont(-1, 12, 800, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateGroup("IMAGE",$ui_w*.14, $ui_h*.66, 100, 120)
+
+$SHOW_IMG_OUT = GUICtrlCreatePic("ADD IMAGE HERE",$ui_w*.14, $ui_h*.66, 100, 120)
+
+GUICtrlCreateGroup("BIOMETRIC :",$ui_w*.14, $ui_h*.81, 100, 120)
+
+$SHOW_IMG_OUT = GUICtrlCreatePic("ADD IMAGE HERE",$ui_w*.14, $ui_h*.81, 100, 120)
+
+$NAME_DISP = GUICtrlCreateInput("", $ui_w*.22+70, $ui_h*.705, 100, 20)
+$GENDER_DISP = GUICtrlCreateInput("", $ui_w*.22+70, $ui_h*.755, 100, 20)
+$AGE_DISP = GUICtrlCreateInput("", $ui_w*.22+70, $ui_h*.805, 100, 20)
+$HEIGHT_DISP = GUICtrlCreateInput("", $ui_w*.22+70, $ui_h*.855, 100, 20)
+$WEIGHT_DISP = GUICtrlCreateInput("", $ui_w*.22+70, $ui_h*.905, 100, 20)
+$ADDRESS_DISP = GUICtrlCreateEdit("", $ui_w*.35+70, $ui_h*.705, 160, 110)
+$MOBNum_DISP = GUICtrlCreateInput("", $ui_w*.35+90, $ui_h*.855, 100, 20)
+
+GUICtrlCreateLabel("NAME:", $ui_w*.22, $ui_h*.7, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("GENDER:", $ui_w*.22, $ui_h*.75, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("AGE:", $ui_w*.22, $ui_h*.8, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("HEIGHT:", $ui_w*.22, $ui_h*.85, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("WEIGHT:", $ui_w*.22, $ui_h*.9, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("ADDRESS:", $ui_w*.35, $ui_h*.7, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("MOB NUMBER:", $ui_w*.35, $ui_h*.85, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("VEHICLE INFO", $ui_w*.55, $ui_h*.66, 200, 28, 0x0200)
+GUICtrlSetFont(-1, 12, 800, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateGroup("",$ui_w*.51, $ui_h*.65, 240, 265)
+
+$VehNo_DISP = GUICtrlCreateInput("", $ui_w*.52+110, $ui_h*.705, 100, 20)
+$VehOWNER_DISP = GUICtrlCreateInput("", $ui_w*.52+110, $ui_h*.755, 100, 20)
+$VehMOD_DISP = GUICtrlCreateInput("", $ui_w*.52+110, $ui_h*.805, 100, 20)
+$VehCOLOUR_DISP = GUICtrlCreateInput("", $ui_w*.52+110, $ui_h*.855, 100, 20)
+
+GUICtrlCreateLabel("VEHICLE No:", $ui_w*.52, $ui_h*.7, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("VEHICLE OWNER:", $ui_w*.52, $ui_h*.75, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("VEHICLE MODEL:", $ui_w*.52, $ui_h*.8, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("VEHICLE COLOUR:", $ui_w*.52, $ui_h*.85, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("CRIME INFO", $ui_w*.8, $ui_h*.66, 200, 28, 0x0200)
+GUICtrlSetFont(-1, 12, 800, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateGroup("",$ui_w*.67, $ui_h*.65, 500, 265)
+
+$CRIMETYP_DISP = GUICtrlCreateInput("", $ui_w*.69+110, $ui_h*.705, 100, 20)
+$LOCATION_DISP = GUICtrlCreateInput("", $ui_w*.69+110, $ui_h*.755, 100, 20)
+$WITNESS_DISP = GUICtrlCreateInput("", $ui_w*.69+110, $ui_h*.805, 100, 20)
+$ACTION_DISP = GUICtrlCreateInput("", $ui_w*.69+110, $ui_h*.855, 100, 20)
+$REMARKS_DISP = GUICtrlCreateEdit("", $ui_w*.83+70, $ui_h*.705, 160, 110)
+
+GUICtrlCreateLabel("CRIME TYPE:", $ui_w*.69, $ui_h*.7, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("LOCATION:", $ui_w*.69, $ui_h*.75, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("WITNESS:", $ui_w*.69, $ui_h*.8, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("ACTION TAKEN:", $ui_w*.69, $ui_h*.85, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
+
+GUICtrlCreateLabel("REMARKS:", $ui_w*.835, $ui_h*.7, 180, 28, 0x0200)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xffffff)
 
 #EndRegion
 
@@ -879,7 +1105,6 @@ GUICtrlSetColor(-1, 0xffffff)
 GUICtrlCreateTabItem("tab5")
 
 GUICtrlCreateTabItem("")
-#EndRegion
 
 
 ;Stuff that should be always there irrespective of tabs
@@ -1179,21 +1404,6 @@ While 1
 
 
 		;Gui response for map
-		Case $generate_MAP
-			If IsArray($currentlatln) Then
-				$loader_gui = _loadscreen()
-				RunWait(@ComSpec &" /c python '" &@ScriptDir &"\crime-predict\CrimeTypePrediction.py'",@ScriptDir &"\crime-predict\",@SW_HIDE)
-				$return = StringReplace(_readcmd("python " &@ScriptDir &"\crime-predict\CrimeTypePredict.py -lat " &$currentlatln[0] &" -long " &$currentlatln[1],@ScriptDir &"\crime-predict\"),@CRLF,"")
-				$str_jv = "infowindowshow(" &Round($currentlatln[0],3) &"," &Round($currentlatln[1],3) &',"' &$return &'");'
-				$mainmap.document.parentwindow.eval($str_jv)
-				_closeloader($loader_gui)
-			Else
-				RunWait(@ComSpec &" /c python '" &@ScriptDir &"\crime-predict\CrimeTypePrediction.py'",@ScriptDir &"\crime-predict\",@SW_HIDE)
-				MsgBox($MB_ICONQUESTION,"Error : No Location Specified" ,"Click a Place on the map to get suggestion there")
-			EndIf
-			_loadpic($SHOW_GRAPH,@ScriptDir &"\crime-predict\barchart.png")
-
-
 		Case $START_DRAW
 			If IsArray($currentlatln) Then
 			_createpredictiongui($currentlatln[0],$currentlatln[1])
@@ -1242,7 +1452,7 @@ While 1
 
 		Case $REDRAW_MAP
 			_redrawmap()
-			If IsArray($currentlatln) Then _zoomtoaddress($currentlatln[0],$currentlatln[1])
+			_zoomtoaddress($currentlatln[0],$currentlatln[1])
 
 		Case $goto_selection
 			$seleccrim = _GUICtrlListView_GetItemTextArray($crimlst)
@@ -1260,8 +1470,6 @@ While 1
 $curlatln = _getcurlatln()
 If $curlatln <> '' Then
 	$currentlatln = StringSplit(StringTrimRight(StringTrimLeft($curlatln,1),1),",", $STR_NOCOUNT )
-	$currentlatln[0] = StringStripWS($currentlatln[0],8)
-	$currentlatln[1] = StringStripWS($currentlatln[1],8)
 	GUICtrlSetData($latvar,$currentlatln[0])
 	GUICtrlSetData($longvar,$currentlatln[1])
 	Local $hQuery,$aRow
@@ -1483,7 +1691,6 @@ $lst_pred = GUICtrlCreateListView("Predicted CrimeID|Convict|Confidence",20,90,3
 GUICtrlCreateListViewItem($crimid&"|"&$name_pr&"|"&$pred_conf,$lst_pred)
 $clsbutn = GUICtrlCreateButton("Close", 100, 224, 209, 25)
 GUISetState(@SW_SHOW,$creatped)
-
 While 1
 	$nMsg = GUIGetMsg()
 	Switch $nMsg
@@ -1495,10 +1702,11 @@ WEnd
 EndFunc
 
 Func _createpredictiongui($lat,$long)
-$predgui = _Metro_CreateGUI("PREDICTOR", 450, 470, 292, 124)
-$Control_Buttons1 = _Metro_AddControlButtons(True, False, True, False, False)
-$GUI_CLOSE_BUTTON1 = $Control_Buttons1[0]
-$GUI_MINIMIZE_BUTTON1 = $Control_Buttons1[3]
+
+
+$predgui = GUICreate("PREDICTOR", 450, 470, 292, 124)
+
+
 
 GUICtrlCreateGroup("",10, 10, 430, 450)
 GUICtrlCreateLabel(" PREDICTOR ", 180, 8, 98, 17)
@@ -1506,21 +1714,22 @@ GUICtrlSetFont(-1, 12, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xd5d5d5)
 
 $predict_place = _Metro_CreateButtonEx("PREDICT", 320, 145, 100, 50)
+GUISetBkColor($COLOR_BLACK,$predgui)
+
 $DRAW_OnMAP = _Metro_CreateButtonEx2("DRAW ON MAP",140, 410, 180, 30)
-$predAt = GUICtrlCreateInput("", 200, 50, 145, 21)
+GUISetBkColor($COLOR_BLACK,$predgui)
+
+
+$predAt = GUICtrlCreateInput("Input1", 200, 50, 145, 21)
 
 GUICtrlCreateLabel("Predict At :", 100, 50, 90, 17)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xd5d5d5)
 
-$predLat = GUICtrlCreateInput("", 100, 100, 120, 21)
-GUICtrlSetData(-1,$lat)
-$predLong = GUICtrlCreateInput("", 310, 100, 120, 21)
-GUICtrlSetData(-1,$long)
-$predRadi = GUICtrlCreateInput("10", 200, 140, 100, 21)
-GUICtrlCreateUpdown(-1)
-$predHot = GUICtrlCreateInput("3", 200, 180, 100, 21)
-GUICtrlCreateUpdown(-1)
+$predLat = GUICtrlCreateInput("Input2", 100, 100, 120, 21)
+$predLong = GUICtrlCreateInput("Input3", 310, 100, 120, 21)
+$predRadi = GUICtrlCreateInput("Input4", 200, 140, 100, 21)
+$predHot = GUICtrlCreateInput("Input5", 200, 180, 100, 21)
 
 GUICtrlCreateLabel("LATITUDE:", 20, 100, 80, 17)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
@@ -1546,17 +1755,17 @@ GUISetState(@SW_SHOW)
 While 1
 	$nMsg = GUIGetMsg()
 	Switch $nMsg
-		Case $GUI_EVENT_CLOSE,$GUI_CLOSE_BUTTON1
-			_Metro_GUIDelete($predgui)
+		Case $GUI_EVENT_CLOSE
+			GUIDelete($predgui)
 			Return
 
 		Case $predict_place
-			$cmd_exe = "python "&@ScriptDir &"\Hotspot_Prediction(MAP)\hotspot_predict.py -lat " &GUICtrlRead($predLong)  &" -long " &GUICtrlRead($predLat) &" -rad " &GUICtrlRead($predRadi)/10 &" -hpts " &GUICtrlRead($predHot)
-			$rd_cmd = _readcmd($cmd_exe,@ScriptDir&"\Hotspot_Prediction(MAP)\")
-
+			$cmd_exe = "python hotspot_predict.py -lat 11.05 -long 76.1 -rad 0.2 -hpts 5"
+			MsgBox(Default,Default,"Will Add feature in the next version ,Sorry ;-)")
 
 	EndSwitch
 WEnd
+
 
 EndFunc
 
@@ -1709,8 +1918,8 @@ _SQLite_GetTable2d($node_db,"Select * FROM nodes;",$arysql,$aryrowsql,$aryclmnsq
 Return $arysql
 EndFunc
 
-Func _readcmd($cmd,$workloc = @ScriptDir)
-Local $iPID = Run(@ComSpec & " /c "&$cmd, $workloc, @SW_HIDE, BitOR($STDERR_CHILD, $STDOUT_CHILD))
+Func _readcmd($cmd)
+Local $iPID = Run(@ComSpec & " /c "&$cmd, @ScriptDir, @SW_HIDE, BitOR($STDERR_CHILD, $STDOUT_CHILD))
 $sOutput = ''
     While 1
         $sOutput &= StdoutRead($iPID)
@@ -1817,9 +2026,6 @@ Func _Closeall()
 		ProcessClose($plugincontrol_array[$i][2])
 		RunWait (@comspec & " /c TaskKill /PID " & $plugincontrol_array[$i][2] & " /F",@ScriptDir,@SW_HIDE)
 	Next
-	_SQLite_Close()
-	_SQLite_Shutdown()
-	_GDIPlus_Shutdown()
 EndFunc
 
 Func _nodeaddnode()
@@ -1897,7 +2103,7 @@ $nMsg = GUIGetMsg()
 				EndIf
 			EndIf
 
-EndSwitch
+	EndSwitch
 _GUIDisable($gui)
 WEnd
 
@@ -1986,45 +2192,8 @@ EndFunc   ;==>WM_COMMAND
 
 Func _loadpic($iPic,$picture)
 Global $hImage = _GDIPlus_ImageLoadFromFile($picture)
-$hmap = _GDIPlus_ScaleImage2($hImage,410, 300)
-Global $hHBitmap = _GDIPlus_BitmapCreateHBITMAPFromBitmap($hmap)
+Global $hHBitmap = _GDIPlus_BitmapCreateHBITMAPFromBitmap($hImage)
 _WinAPI_DeleteObject(GUICtrlSendMsg($iPic, $STM_SETIMAGE, $IMAGE_BITMAP, $hHBitmap))
-EndFunc
-
-Func _GDIPlus_ScaleImage2($hImage, $iNewWidth, $iNewHeight, $iBGColor = 0xFFF0F0F0, $bBGClear = True, $iInterpolationMode = 7) ;coded by UEZ 2012
-    Local $iWidth = _GDIPlus_ImageGetWidth($hImage)
-    Local $iHeight = _GDIPlus_ImageGetHeight($hImage)
-
-    Local $iW, $iH, $f, $fRatio
-
-    If $iWidth > $iHeight Then
-        $f = $iWidth / $iNewWidth
-    Else
-        $f = $iHeight / $iNewHeight
-    EndIf
-    $iW = Int($iWidth / $f)
-    $iH = Int($iHeight / $f)
-
-    If $iW > $iNewWidth Then
-        $fRatio = $iNewWidth / $iW
-        $iW = Int($iW * $fRatio)
-        $iH = Int($iH * $fRatio)
-    ElseIf $iH > $iNewHeight Then
-        $fRatio = $iNewHeight / $iH
-        $iW = Int($iW * $fRatio)
-        $iH = Int($iH * $fRatio)
-    EndIf
-
-    Local $hBitmap = DllCall($ghGDIPDll, "uint", "GdipCreateBitmapFromScan0", "int", $iW, "int", $iH, "int", 0, "int", 0x0026200A, "ptr", 0, "int*", 0)
-    If @error Then Return SetError(3, 0, 0)
-    $hBitmap = $hBitmap[6]
-    Local $hBmpCtxt = _GDIPlus_ImageGetGraphicsContext($hBitmap)
-    If $bBGClear Then _GDIPlus_GraphicsClear($hBmpCtxt, $iBGColor)
-    DllCall($ghGDIPDll, "uint", "GdipSetInterpolationMode", "handle", $hBmpCtxt, "int", $iInterpolationMode)
-    _GDIPlus_GraphicsDrawImageRect($hBmpCtxt, $hImage, 0, 0, $iW, $iH)
-    _GDIPlus_ImageDispose($hImage)
-    _GDIPlus_GraphicsDispose($hBmpCtxt)
-    Return $hBitmap
 EndFunc
 
 Func _execjavascript($web,$js)
@@ -2104,7 +2273,7 @@ EndFunc
 Func _loadscreen()
 $hGUI = GUICreate("Loading", $iW, $iH, -1, -1, $WS_POPUPWINDOW, $WS_EX_TOPMOST)
 GUISetBkColor(0)
-Global $iPic = GUICtrlCreatePic("", 0, 0, $iW, $iH)
+Global Const $iPic = GUICtrlCreatePic("", 0, 0, $iW, $iH)
 GUICtrlSetState(-1, $GUI_DISABLE)
 GUISetState()
 DllCall("user32.dll", "int", "SetTimer", "hwnd", $hGUI, "int", 0, "int", $iSleep, "int", 0)
@@ -2112,7 +2281,7 @@ Return $hGUI
 EndFunc
 
 Func _closeloader($guihndl)
-;GUIRegisterMsg($WM_TIMER, "")
+GUIRegisterMsg($WM_TIMER, "")
 GUIDelete($guihndl)
 _WinAPI_DeleteObject($hHBmp_BG)
 EndFunc
@@ -2259,4 +2428,5 @@ Func _URIDecode($sData)
     Next
     Return BinaryToString(StringToBinary($aData[1],1),4)
 EndFunc
+
 #EndRegion
