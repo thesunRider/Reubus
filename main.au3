@@ -102,6 +102,7 @@ While 1
 	Switch $nMsg
 		Case $GUI_EVENT_CLOSE, $GUI_CLOSE_BUTTON
 			_Metro_GUIDelete($welcomegui) ;Delete GUI/release resources, make sure you use this when working with multiple GUIs!
+			_Closeall()
 			Exit
 
 		Case $GUI_MINIMIZE_BUTTON
@@ -1179,11 +1180,16 @@ While 1
 
 		;Gui response for map
 		Case $generate_MAP
-			;python CrimeTypePredict.py -lat 11.23 -long 76.3
-			RunWait(@ComSpec &" /c python '" &@ScriptDir &"\crime-predict\CrimeTypePrediction.py'",@ScriptDir &"\crime-predict",@SW_HIDE)
 			If IsArray($currentlatln) Then
-				$return = _readcmd(@ScriptDir &"\crime-predict\python CrimeTypePredict.py -lat " &$currentlatln[0] &"-long " &$currentlatln[1],@ScriptDir &"\crime-predict")
-
+				$loader_gui = _loadscreen()
+				RunWait(@ComSpec &" /c python '" &@ScriptDir &"\crime-predict\CrimeTypePrediction.py'",@ScriptDir &"\crime-predict\",@SW_HIDE)
+				$return = StringReplace(_readcmd("python " &@ScriptDir &"\crime-predict\CrimeTypePredict.py -lat " &$currentlatln[0] &" -long " &$currentlatln[1],@ScriptDir &"\crime-predict\"),@CRLF,"")
+				$str_jv = "infowindowshow(" &Round($currentlatln[0],3) &"," &Round($currentlatln[1],3) &',"' &$return &'");'
+				$mainmap.document.parentwindow.eval($str_jv)
+				_closeloader($loader_gui)
+			Else
+				RunWait(@ComSpec &" /c python '" &@ScriptDir &"\crime-predict\CrimeTypePrediction.py'",@ScriptDir &"\crime-predict\",@SW_HIDE)
+				MsgBox($MB_ICONQUESTION,"Error : No Location Specified" ,"Click a Place on the map to get suggestion there")
 			EndIf
 			_loadpic($SHOW_GRAPH,@ScriptDir &"\crime-predict\barchart.png")
 
@@ -1254,6 +1260,8 @@ While 1
 $curlatln = _getcurlatln()
 If $curlatln <> '' Then
 	$currentlatln = StringSplit(StringTrimRight(StringTrimLeft($curlatln,1),1),",", $STR_NOCOUNT )
+	$currentlatln[0] = StringStripWS($currentlatln[0],8)
+	$currentlatln[1] = StringStripWS($currentlatln[1],8)
 	GUICtrlSetData($latvar,$currentlatln[0])
 	GUICtrlSetData($longvar,$currentlatln[1])
 	Local $hQuery,$aRow
@@ -1499,16 +1507,20 @@ GUICtrlSetColor(-1, 0xd5d5d5)
 
 $predict_place = _Metro_CreateButtonEx("PREDICT", 320, 145, 100, 50)
 $DRAW_OnMAP = _Metro_CreateButtonEx2("DRAW ON MAP",140, 410, 180, 30)
-$predAt = GUICtrlCreateInput("Input1", 200, 50, 145, 21)
+$predAt = GUICtrlCreateInput("", 200, 50, 145, 21)
 
 GUICtrlCreateLabel("Predict At :", 100, 50, 90, 17)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xd5d5d5)
 
-$predLat = GUICtrlCreateInput("Input2", 100, 100, 120, 21)
-$predLong = GUICtrlCreateInput("Input3", 310, 100, 120, 21)
-$predRadi = GUICtrlCreateInput("Input4", 200, 140, 100, 21)
-$predHot = GUICtrlCreateInput("Input5", 200, 180, 100, 21)
+$predLat = GUICtrlCreateInput("", 100, 100, 120, 21)
+GUICtrlSetData(-1,$lat)
+$predLong = GUICtrlCreateInput("", 310, 100, 120, 21)
+GUICtrlSetData(-1,$long)
+$predRadi = GUICtrlCreateInput("10", 200, 140, 100, 21)
+GUICtrlCreateUpdown(-1)
+$predHot = GUICtrlCreateInput("3", 200, 180, 100, 21)
+GUICtrlCreateUpdown(-1)
 
 GUICtrlCreateLabel("LATITUDE:", 20, 100, 80, 17)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
@@ -1539,8 +1551,9 @@ While 1
 			Return
 
 		Case $predict_place
-			$cmd_exe = "python hotspot_predict.py -lat 11.05 -long 76.1 -rad 0.2 -hpts 5"
-			MsgBox(Default,Default,"Will Add feature in the next version ,Sorry ;-)")
+			$cmd_exe = "python "&@ScriptDir &"\Hotspot_Prediction(MAP)\hotspot_predict.py -lat " &GUICtrlRead($predLong)  &" -long " &GUICtrlRead($predLat) &" -rad " &GUICtrlRead($predRadi)/10 &" -hpts " &GUICtrlRead($predHot)
+			$rd_cmd = _readcmd($cmd_exe,@ScriptDir&"\Hotspot_Prediction(MAP)\")
+
 
 	EndSwitch
 WEnd
@@ -1804,6 +1817,9 @@ Func _Closeall()
 		ProcessClose($plugincontrol_array[$i][2])
 		RunWait (@comspec & " /c TaskKill /PID " & $plugincontrol_array[$i][2] & " /F",@ScriptDir,@SW_HIDE)
 	Next
+	_SQLite_Close()
+	_SQLite_Shutdown()
+	_GDIPlus_Shutdown()
 EndFunc
 
 Func _nodeaddnode()
@@ -1881,7 +1897,7 @@ $nMsg = GUIGetMsg()
 				EndIf
 			EndIf
 
-	EndSwitch
+EndSwitch
 _GUIDisable($gui)
 WEnd
 
@@ -2088,7 +2104,7 @@ EndFunc
 Func _loadscreen()
 $hGUI = GUICreate("Loading", $iW, $iH, -1, -1, $WS_POPUPWINDOW, $WS_EX_TOPMOST)
 GUISetBkColor(0)
-Global Const $iPic = GUICtrlCreatePic("", 0, 0, $iW, $iH)
+Global $iPic = GUICtrlCreatePic("", 0, 0, $iW, $iH)
 GUICtrlSetState(-1, $GUI_DISABLE)
 GUISetState()
 DllCall("user32.dll", "int", "SetTimer", "hwnd", $hGUI, "int", 0, "int", $iSleep, "int", 0)
@@ -2096,7 +2112,7 @@ Return $hGUI
 EndFunc
 
 Func _closeloader($guihndl)
-GUIRegisterMsg($WM_TIMER, "")
+;GUIRegisterMsg($WM_TIMER, "")
 GUIDelete($guihndl)
 _WinAPI_DeleteObject($hHBmp_BG)
 EndFunc
