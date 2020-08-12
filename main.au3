@@ -37,7 +37,7 @@ _SetTheme("DarkTeal")
 _SQLite_Startup()
 $store_db = _SQLite_Open(@ScriptDir &"\store.db")
 $node_db = _SQLite_Open(@ScriptDir &"\nodes\node_data\node_reg.db")
-_GDIPlus_Startup()
+$ghGDIPDll = _GDIPlus_Startup(Default,True)
 
 ;enable activeX
 Local $regValue = "0x2AF8"
@@ -430,10 +430,10 @@ GUICtrlSetColor(-1, 0xffffff)
 ;LABELS AND BUTTON IN 3RD DIVISION GRAPHS
 
 $GRAPH_type = GUICtrlCreateCombo("",$ui_w*.725+90, $ui_h*.16, 100, 18, BitOR($CBS_DROPDOWN,$CBS_AUTOHSCROLL))
-GUICtrlSetData(-1, "|A|B|C","A")
+GUICtrlSetData(-1, "CrimeData","CrimeData")
 
 $GRAPH_STYLE = GUICtrlCreateCombo("",$ui_w*.86+90, $ui_h*.16, 100, 18, BitOR($CBS_DROPDOWN,$CBS_AUTOHSCROLL))
-GUICtrlSetData(-1, "|A|B|C","A")
+GUICtrlSetData(-1, "Bar Chart|Pie Chart","Bar Chart")
 
 $GRAPH_DATE = GUICtrlCreateInput("", $ui_w*.725+130, $ui_h*.19, 145, 18)
 
@@ -878,6 +878,7 @@ GUICtrlSetColor(-1, 0xffffff)
 GUICtrlCreateTabItem("tab5")
 
 GUICtrlCreateTabItem("")
+#EndRegion
 
 
 ;Stuff that should be always there irrespective of tabs
@@ -1177,9 +1178,18 @@ While 1
 
 
 		;Gui response for map
-		Case $START_DRAW
-			_createpredictiongui($currentlatln[0],$currentlatln[1])
+		Case $generate_MAP
+			RunWait(@ComSpec &" /c python '" &@ScriptDir &"\crime-predict\CrimeTypePrediction.py'",@ScriptDir &"\crime-predict",@SW_HIDE)
+			$return = _readcmd(@ScriptDir &"\crime-predict\python CrimeTypePredict.py",@ScriptDir &"\crime-predict")
+			_loadpic($SHOW_GRAPH,@ScriptDir &"\crime-predict\barchart.png")
 
+
+		Case $START_DRAW
+			If IsArray($currentlatln) Then
+			_createpredictiongui($currentlatln[0],$currentlatln[1])
+			Else
+			_createpredictiongui(Null,Null)
+			EndIf
 
 		Case $GOTO_BUTTON
 			$latn = guictrlread($LAT_IN)
@@ -1222,7 +1232,7 @@ While 1
 
 		Case $REDRAW_MAP
 			_redrawmap()
-			_zoomtoaddress($currentlatln[0],$currentlatln[1])
+			If IsArray($currentlatln) Then _zoomtoaddress($currentlatln[0],$currentlatln[1])
 
 		Case $goto_selection
 			$seleccrim = _GUICtrlListView_GetItemTextArray($crimlst)
@@ -1461,6 +1471,7 @@ $lst_pred = GUICtrlCreateListView("Predicted CrimeID|Convict|Confidence",20,90,3
 GUICtrlCreateListViewItem($crimid&"|"&$name_pr&"|"&$pred_conf,$lst_pred)
 $clsbutn = GUICtrlCreateButton("Close", 100, 224, 209, 25)
 GUISetState(@SW_SHOW,$creatped)
+
 While 1
 	$nMsg = GUIGetMsg()
 	Switch $nMsg
@@ -1472,26 +1483,55 @@ WEnd
 EndFunc
 
 Func _createpredictiongui($lat,$long)
-$predgui = GUICreate("Prediction", 455, 431, 192, 124)
-$predloc = GUICtrlCreateInput("Input1", 136, 24, 145, 21)
-GUICtrlCreateLabel("Prediction Location:", 24, 32, 98, 17)
+$predgui = _Metro_CreateGUI("PREDICTOR", 450, 470, 292, 124)
+$Control_Buttons1 = _Metro_AddControlButtons(True, False, True, False, False)
+$GUI_CLOSE_BUTTON1 = $Control_Buttons1[0]
+$GUI_MINIMIZE_BUTTON1 = $Control_Buttons1[3]
+
+GUICtrlCreateGroup("",10, 10, 430, 450)
+GUICtrlCreateLabel(" PREDICTOR ", 180, 8, 98, 17)
+GUICtrlSetFont(-1, 12, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+$predict_place = _Metro_CreateButtonEx("PREDICT", 320, 145, 100, 50)
+$DRAW_OnMAP = _Metro_CreateButtonEx2("DRAW ON MAP",140, 410, 180, 30)
+$predAt = GUICtrlCreateInput("Input1", 200, 50, 145, 21)
+
+GUICtrlCreateLabel("Predict At :", 100, 50, 90, 17)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xd5d5d5)
-$predradius = GUICtrlCreateInput("Input2", 136, 64, 145, 21)
-GUICtrlCreateUpdown(-1)
-GUICtrlCreateLabel("Radius of Prediction:", 24, 64, 102, 17)
+
+$predLat = GUICtrlCreateInput("Input2", 100, 100, 120, 21)
+$predLong = GUICtrlCreateInput("Input3", 310, 100, 120, 21)
+$predRadi = GUICtrlCreateInput("Input4", 200, 140, 100, 21)
+$predHot = GUICtrlCreateInput("Input5", 200, 180, 100, 21)
+
+GUICtrlCreateLabel("LATITUDE:", 20, 100, 80, 17)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xd5d5d5)
-$predlist = GUICtrlCreateListView("Area|latitude|Longitude", 24, 104, 393, 305)
-$predict_place = GUICtrlCreateButton("Generate", 304, 24, 113, 65)
-GUISetBkColor($COLOR_BLACK,$predgui)
+
+GUICtrlCreateLabel("LONGITUDE:", 230, 100, 80, 17)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+GUICtrlCreateLabel("RADIUS OF PREDICTION:", 20, 140, 180, 17)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+GUICtrlCreateLabel("NUMBER OF HOTSPOT:", 20, 180, 180, 17)
+GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
+GUICtrlSetColor(-1, 0xd5d5d5)
+
+$predlist = GUICtrlCreateListView("Area|latitude|Longitude", 25, 220, 400, 180)
+
+
 GUISetState(@SW_SHOW)
 
 While 1
 	$nMsg = GUIGetMsg()
 	Switch $nMsg
-		Case $GUI_EVENT_CLOSE
-			GUIDelete($predgui)
+		Case $GUI_EVENT_CLOSE,$GUI_CLOSE_BUTTON1
+			_Metro_GUIDelete($predgui)
 			Return
 
 		Case $predict_place
@@ -1500,7 +1540,6 @@ While 1
 
 	EndSwitch
 WEnd
-
 
 EndFunc
 
@@ -1653,8 +1692,8 @@ _SQLite_GetTable2d($node_db,"Select * FROM nodes;",$arysql,$aryrowsql,$aryclmnsq
 Return $arysql
 EndFunc
 
-Func _readcmd($cmd)
-Local $iPID = Run(@ComSpec & " /c "&$cmd, @ScriptDir, @SW_HIDE, BitOR($STDERR_CHILD, $STDOUT_CHILD))
+Func _readcmd($cmd,$workloc = @ScriptDir)
+Local $iPID = Run(@ComSpec & " /c "&$cmd, $workloc, @SW_HIDE, BitOR($STDERR_CHILD, $STDOUT_CHILD))
 $sOutput = ''
     While 1
         $sOutput &= StdoutRead($iPID)
@@ -1927,8 +1966,45 @@ EndFunc   ;==>WM_COMMAND
 
 Func _loadpic($iPic,$picture)
 Global $hImage = _GDIPlus_ImageLoadFromFile($picture)
-Global $hHBitmap = _GDIPlus_BitmapCreateHBITMAPFromBitmap($hImage)
+$hmap = _GDIPlus_ScaleImage2($hImage,410, 300)
+Global $hHBitmap = _GDIPlus_BitmapCreateHBITMAPFromBitmap($hmap)
 _WinAPI_DeleteObject(GUICtrlSendMsg($iPic, $STM_SETIMAGE, $IMAGE_BITMAP, $hHBitmap))
+EndFunc
+
+Func _GDIPlus_ScaleImage2($hImage, $iNewWidth, $iNewHeight, $iBGColor = 0xFFF0F0F0, $bBGClear = True, $iInterpolationMode = 7) ;coded by UEZ 2012
+    Local $iWidth = _GDIPlus_ImageGetWidth($hImage)
+    Local $iHeight = _GDIPlus_ImageGetHeight($hImage)
+
+    Local $iW, $iH, $f, $fRatio
+
+    If $iWidth > $iHeight Then
+        $f = $iWidth / $iNewWidth
+    Else
+        $f = $iHeight / $iNewHeight
+    EndIf
+    $iW = Int($iWidth / $f)
+    $iH = Int($iHeight / $f)
+
+    If $iW > $iNewWidth Then
+        $fRatio = $iNewWidth / $iW
+        $iW = Int($iW * $fRatio)
+        $iH = Int($iH * $fRatio)
+    ElseIf $iH > $iNewHeight Then
+        $fRatio = $iNewHeight / $iH
+        $iW = Int($iW * $fRatio)
+        $iH = Int($iH * $fRatio)
+    EndIf
+
+    Local $hBitmap = DllCall($ghGDIPDll, "uint", "GdipCreateBitmapFromScan0", "int", $iW, "int", $iH, "int", 0, "int", 0x0026200A, "ptr", 0, "int*", 0)
+    If @error Then Return SetError(3, 0, 0)
+    $hBitmap = $hBitmap[6]
+    Local $hBmpCtxt = _GDIPlus_ImageGetGraphicsContext($hBitmap)
+    If $bBGClear Then _GDIPlus_GraphicsClear($hBmpCtxt, $iBGColor)
+    DllCall($ghGDIPDll, "uint", "GdipSetInterpolationMode", "handle", $hBmpCtxt, "int", $iInterpolationMode)
+    _GDIPlus_GraphicsDrawImageRect($hBmpCtxt, $hImage, 0, 0, $iW, $iH)
+    _GDIPlus_ImageDispose($hImage)
+    _GDIPlus_GraphicsDispose($hBmpCtxt)
+    Return $hBitmap
 EndFunc
 
 Func _execjavascript($web,$js)
@@ -2163,5 +2239,4 @@ Func _URIDecode($sData)
     Next
     Return BinaryToString(StringToBinary($aData[1],1),4)
 EndFunc
-
 #EndRegion
