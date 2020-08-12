@@ -37,7 +37,7 @@ _SetTheme("DarkTeal")
 _SQLite_Startup()
 $store_db = _SQLite_Open(@ScriptDir &"\store.db")
 $node_db = _SQLite_Open(@ScriptDir &"\nodes\node_data\node_reg.db")
-_GDIPlus_Startup()
+$ghGDIPDll = _GDIPlus_Startup(Default,True)
 
 ;enable activeX
 Local $regValue = "0x2AF8"
@@ -102,6 +102,7 @@ While 1
 	Switch $nMsg
 		Case $GUI_EVENT_CLOSE, $GUI_CLOSE_BUTTON
 			_Metro_GUIDelete($welcomegui) ;Delete GUI/release resources, make sure you use this when working with multiple GUIs!
+			_Closeall()
 			Exit
 
 		Case $GUI_MINIMIZE_BUTTON
@@ -430,10 +431,10 @@ GUICtrlSetColor(-1, 0xffffff)
 ;LABELS AND BUTTON IN 3RD DIVISION GRAPHS
 
 $GRAPH_type = GUICtrlCreateCombo("",$ui_w*.725+90, $ui_h*.16, 100, 18, BitOR($CBS_DROPDOWN,$CBS_AUTOHSCROLL))
-GUICtrlSetData(-1, "|A|B|C","A")
+GUICtrlSetData(-1, "CrimeData","CrimeData")
 
 $GRAPH_STYLE = GUICtrlCreateCombo("",$ui_w*.86+90, $ui_h*.16, 100, 18, BitOR($CBS_DROPDOWN,$CBS_AUTOHSCROLL))
-GUICtrlSetData(-1, "|A|B|C","A")
+GUICtrlSetData(-1, "Bar Chart|Pie Chart","Bar Chart")
 
 $GRAPH_DATE = GUICtrlCreateInput("", $ui_w*.725+130, $ui_h*.19, 145, 18)
 
@@ -1005,7 +1006,6 @@ GUICtrlSetColor(-1, 0xffffff)
 GUICtrlCreateLabel("REMARKS:", $ui_w*.835, $ui_h*.7, 180, 28, 0x0200)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xffffff)
-
 #EndRegion
 
 
@@ -1105,6 +1105,7 @@ GUICtrlSetColor(-1, 0xffffff)
 GUICtrlCreateTabItem("tab5")
 
 GUICtrlCreateTabItem("")
+#EndRegion
 
 
 ;Stuff that should be always there irrespective of tabs
@@ -1404,6 +1405,21 @@ While 1
 
 
 		;Gui response for map
+		Case $generate_MAP
+			If IsArray($currentlatln) Then
+				$loader_gui = _loadscreen()
+				RunWait(@ComSpec &" /c python '" &@ScriptDir &"\crime-predict\CrimeTypePrediction.py'",@ScriptDir &"\crime-predict\",@SW_HIDE)
+				$return = StringReplace(_readcmd("python " &@ScriptDir &"\crime-predict\CrimeTypePredict.py -lat " &$currentlatln[0] &" -long " &$currentlatln[1],@ScriptDir &"\crime-predict\"),@CRLF,"")
+				$str_jv = "infowindowshow(" &Round($currentlatln[0],3) &"," &Round($currentlatln[1],3) &',"' &$return &'");'
+				$mainmap.document.parentwindow.eval($str_jv)
+				_closeloader($loader_gui)
+			Else
+				RunWait(@ComSpec &" /c python '" &@ScriptDir &"\crime-predict\CrimeTypePrediction.py'",@ScriptDir &"\crime-predict\",@SW_HIDE)
+				MsgBox($MB_ICONQUESTION,"Error : No Location Specified" ,"Click a Place on the map to get suggestion there")
+			EndIf
+			_loadpic($SHOW_GRAPH,@ScriptDir &"\crime-predict\barchart.png")
+
+
 		Case $START_DRAW
 			If IsArray($currentlatln) Then
 			_createpredictiongui($currentlatln[0],$currentlatln[1])
@@ -1452,7 +1468,7 @@ While 1
 
 		Case $REDRAW_MAP
 			_redrawmap()
-			_zoomtoaddress($currentlatln[0],$currentlatln[1])
+			If IsArray($currentlatln) Then _zoomtoaddress($currentlatln[0],$currentlatln[1])
 
 		Case $goto_selection
 			$seleccrim = _GUICtrlListView_GetItemTextArray($crimlst)
@@ -1470,6 +1486,8 @@ While 1
 $curlatln = _getcurlatln()
 If $curlatln <> '' Then
 	$currentlatln = StringSplit(StringTrimRight(StringTrimLeft($curlatln,1),1),",", $STR_NOCOUNT )
+	$currentlatln[0] = StringStripWS($currentlatln[0],8)
+	$currentlatln[1] = StringStripWS($currentlatln[1],8)
 	GUICtrlSetData($latvar,$currentlatln[0])
 	GUICtrlSetData($longvar,$currentlatln[1])
 	Local $hQuery,$aRow
@@ -1691,6 +1709,7 @@ $lst_pred = GUICtrlCreateListView("Predicted CrimeID|Convict|Confidence",20,90,3
 GUICtrlCreateListViewItem($crimid&"|"&$name_pr&"|"&$pred_conf,$lst_pred)
 $clsbutn = GUICtrlCreateButton("Close", 100, 224, 209, 25)
 GUISetState(@SW_SHOW,$creatped)
+
 While 1
 	$nMsg = GUIGetMsg()
 	Switch $nMsg
@@ -1702,11 +1721,10 @@ WEnd
 EndFunc
 
 Func _createpredictiongui($lat,$long)
-
-
-$predgui = GUICreate("PREDICTOR", 450, 470, 292, 124)
-
-
+$predgui = _Metro_CreateGUI("PREDICTOR", 450, 470, 292, 124)
+$Control_Buttons1 = _Metro_AddControlButtons(True, False, True, False, False)
+$GUI_CLOSE_BUTTON1 = $Control_Buttons1[0]
+$GUI_MINIMIZE_BUTTON1 = $Control_Buttons1[3]
 
 GUICtrlCreateGroup("",10, 10, 430, 450)
 GUICtrlCreateLabel(" PREDICTOR ", 180, 8, 98, 17)
@@ -1714,22 +1732,21 @@ GUICtrlSetFont(-1, 12, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xd5d5d5)
 
 $predict_place = _Metro_CreateButtonEx("PREDICT", 320, 145, 100, 50)
-GUISetBkColor($COLOR_BLACK,$predgui)
-
 $DRAW_OnMAP = _Metro_CreateButtonEx2("DRAW ON MAP",140, 410, 180, 30)
-GUISetBkColor($COLOR_BLACK,$predgui)
-
-
-$predAt = GUICtrlCreateInput("Input1", 200, 50, 145, 21)
+$predAt = GUICtrlCreateInput("", 200, 50, 145, 21)
 
 GUICtrlCreateLabel("Predict At :", 100, 50, 90, 17)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
 GUICtrlSetColor(-1, 0xd5d5d5)
 
-$predLat = GUICtrlCreateInput("Input2", 100, 100, 120, 21)
-$predLong = GUICtrlCreateInput("Input3", 310, 100, 120, 21)
-$predRadi = GUICtrlCreateInput("Input4", 200, 140, 100, 21)
-$predHot = GUICtrlCreateInput("Input5", 200, 180, 100, 21)
+$predLat = GUICtrlCreateInput("", 100, 100, 120, 21)
+GUICtrlSetData(-1,$lat)
+$predLong = GUICtrlCreateInput("", 310, 100, 120, 21)
+GUICtrlSetData(-1,$long)
+$predRadi = GUICtrlCreateInput("10", 200, 140, 100, 21)
+GUICtrlCreateUpdown(-1)
+$predHot = GUICtrlCreateInput("3", 200, 180, 100, 21)
+GUICtrlCreateUpdown(-1)
 
 GUICtrlCreateLabel("LATITUDE:", 20, 100, 80, 17)
 GUICtrlSetFont(-1, 10, Default, Default, "Consolas", 5); 5 = Clear Type
@@ -1755,17 +1772,16 @@ GUISetState(@SW_SHOW)
 While 1
 	$nMsg = GUIGetMsg()
 	Switch $nMsg
-		Case $GUI_EVENT_CLOSE
-			GUIDelete($predgui)
+		Case $GUI_EVENT_CLOSE,$GUI_CLOSE_BUTTON1
+			_Metro_GUIDelete($predgui)
 			Return
 
 		Case $predict_place
-			$cmd_exe = "python hotspot_predict.py -lat 11.05 -long 76.1 -rad 0.2 -hpts 5"
-			MsgBox(Default,Default,"Will Add feature in the next version ,Sorry ;-)")
+			$cmd_exe = "python "&@ScriptDir &"\Hotspot_Prediction(MAP)\hotspot_predict.py -lat " &GUICtrlRead($predLong)  &" -long " &GUICtrlRead($predLat) &" -rad " &GUICtrlRead($predRadi)/10 &" -hpts " &GUICtrlRead($predHot)
+			$rd_cmd = _readcmd($cmd_exe,@ScriptDir&"\Hotspot_Prediction(MAP)\")
 
 	EndSwitch
 WEnd
-
 
 EndFunc
 
@@ -1918,8 +1934,8 @@ _SQLite_GetTable2d($node_db,"Select * FROM nodes;",$arysql,$aryrowsql,$aryclmnsq
 Return $arysql
 EndFunc
 
-Func _readcmd($cmd)
-Local $iPID = Run(@ComSpec & " /c "&$cmd, @ScriptDir, @SW_HIDE, BitOR($STDERR_CHILD, $STDOUT_CHILD))
+Func _readcmd($cmd,$workloc = @ScriptDir)
+Local $iPID = Run(@ComSpec & " /c "&$cmd, $workloc, @SW_HIDE, BitOR($STDERR_CHILD, $STDOUT_CHILD))
 $sOutput = ''
     While 1
         $sOutput &= StdoutRead($iPID)
@@ -2026,6 +2042,9 @@ Func _Closeall()
 		ProcessClose($plugincontrol_array[$i][2])
 		RunWait (@comspec & " /c TaskKill /PID " & $plugincontrol_array[$i][2] & " /F",@ScriptDir,@SW_HIDE)
 	Next
+	_SQLite_Close()
+	_SQLite_Shutdown()
+	_GDIPlus_Shutdown()
 EndFunc
 
 Func _nodeaddnode()
@@ -2103,7 +2122,7 @@ $nMsg = GUIGetMsg()
 				EndIf
 			EndIf
 
-	EndSwitch
+EndSwitch
 _GUIDisable($gui)
 WEnd
 
@@ -2192,8 +2211,45 @@ EndFunc   ;==>WM_COMMAND
 
 Func _loadpic($iPic,$picture)
 Global $hImage = _GDIPlus_ImageLoadFromFile($picture)
-Global $hHBitmap = _GDIPlus_BitmapCreateHBITMAPFromBitmap($hImage)
+$hmap = _GDIPlus_ScaleImage2($hImage,410, 300)
+Global $hHBitmap = _GDIPlus_BitmapCreateHBITMAPFromBitmap($hmap)
 _WinAPI_DeleteObject(GUICtrlSendMsg($iPic, $STM_SETIMAGE, $IMAGE_BITMAP, $hHBitmap))
+EndFunc
+
+Func _GDIPlus_ScaleImage2($hImage, $iNewWidth, $iNewHeight, $iBGColor = 0xFFF0F0F0, $bBGClear = True, $iInterpolationMode = 7) ;coded by UEZ 2012
+    Local $iWidth = _GDIPlus_ImageGetWidth($hImage)
+    Local $iHeight = _GDIPlus_ImageGetHeight($hImage)
+
+    Local $iW, $iH, $f, $fRatio
+
+    If $iWidth > $iHeight Then
+        $f = $iWidth / $iNewWidth
+    Else
+        $f = $iHeight / $iNewHeight
+    EndIf
+    $iW = Int($iWidth / $f)
+    $iH = Int($iHeight / $f)
+
+    If $iW > $iNewWidth Then
+        $fRatio = $iNewWidth / $iW
+        $iW = Int($iW * $fRatio)
+        $iH = Int($iH * $fRatio)
+    ElseIf $iH > $iNewHeight Then
+        $fRatio = $iNewHeight / $iH
+        $iW = Int($iW * $fRatio)
+        $iH = Int($iH * $fRatio)
+    EndIf
+
+    Local $hBitmap = DllCall($ghGDIPDll, "uint", "GdipCreateBitmapFromScan0", "int", $iW, "int", $iH, "int", 0, "int", 0x0026200A, "ptr", 0, "int*", 0)
+    If @error Then Return SetError(3, 0, 0)
+    $hBitmap = $hBitmap[6]
+    Local $hBmpCtxt = _GDIPlus_ImageGetGraphicsContext($hBitmap)
+    If $bBGClear Then _GDIPlus_GraphicsClear($hBmpCtxt, $iBGColor)
+    DllCall($ghGDIPDll, "uint", "GdipSetInterpolationMode", "handle", $hBmpCtxt, "int", $iInterpolationMode)
+    _GDIPlus_GraphicsDrawImageRect($hBmpCtxt, $hImage, 0, 0, $iW, $iH)
+    _GDIPlus_ImageDispose($hImage)
+    _GDIPlus_GraphicsDispose($hBmpCtxt)
+    Return $hBitmap
 EndFunc
 
 Func _execjavascript($web,$js)
@@ -2273,7 +2329,7 @@ EndFunc
 Func _loadscreen()
 $hGUI = GUICreate("Loading", $iW, $iH, -1, -1, $WS_POPUPWINDOW, $WS_EX_TOPMOST)
 GUISetBkColor(0)
-Global Const $iPic = GUICtrlCreatePic("", 0, 0, $iW, $iH)
+Global $iPic = GUICtrlCreatePic("", 0, 0, $iW, $iH)
 GUICtrlSetState(-1, $GUI_DISABLE)
 GUISetState()
 DllCall("user32.dll", "int", "SetTimer", "hwnd", $hGUI, "int", 0, "int", $iSleep, "int", 0)
@@ -2281,7 +2337,7 @@ Return $hGUI
 EndFunc
 
 Func _closeloader($guihndl)
-GUIRegisterMsg($WM_TIMER, "")
+;GUIRegisterMsg($WM_TIMER, "")
 GUIDelete($guihndl)
 _WinAPI_DeleteObject($hHBmp_BG)
 EndFunc
@@ -2428,5 +2484,4 @@ Func _URIDecode($sData)
     Next
     Return BinaryToString(StringToBinary($aData[1],1),4)
 EndFunc
-
 #EndRegion
