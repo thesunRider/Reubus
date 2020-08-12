@@ -37,7 +37,7 @@ _SetTheme("DarkTeal")
 _SQLite_Startup()
 $store_db = _SQLite_Open(@ScriptDir &"\store.db")
 $node_db = _SQLite_Open(@ScriptDir &"\nodes\node_data\node_reg.db")
-_GDIPlus_Startup()
+$ghGDIPDll = _GDIPlus_Startup(Default,True)
 
 ;enable activeX
 Local $regValue = "0x2AF8"
@@ -430,10 +430,10 @@ GUICtrlSetColor(-1, 0xffffff)
 ;LABELS AND BUTTON IN 3RD DIVISION GRAPHS
 
 $GRAPH_type = GUICtrlCreateCombo("",$ui_w*.725+90, $ui_h*.16, 100, 18, BitOR($CBS_DROPDOWN,$CBS_AUTOHSCROLL))
-GUICtrlSetData(-1, "|A|B|C","A")
+GUICtrlSetData(-1, "CrimeData","CrimeData")
 
 $GRAPH_STYLE = GUICtrlCreateCombo("",$ui_w*.86+90, $ui_h*.16, 100, 18, BitOR($CBS_DROPDOWN,$CBS_AUTOHSCROLL))
-GUICtrlSetData(-1, "|A|B|C","A")
+GUICtrlSetData(-1, "Bar Chart|Pie Chart","Bar Chart")
 
 $GRAPH_DATE = GUICtrlCreateInput("", $ui_w*.725+130, $ui_h*.19, 145, 18)
 
@@ -1177,9 +1177,18 @@ While 1
 
 
 		;Gui response for map
-		Case $START_DRAW
-			_createpredictiongui($currentlatln[0],$currentlatln[1])
+		Case $generate_MAP
+			RunWait(@ComSpec &" /c python '" &@ScriptDir &"\crime-predict\CrimeTypePrediction.py'",@ScriptDir &"\crime-predict",@SW_HIDE)
+			$return = _readcmd(@ScriptDir &"\crime-predict\python CrimeTypePredict.py",@ScriptDir &"\crime-predict")
+			_loadpic($SHOW_GRAPH,@ScriptDir &"\crime-predict\barchart.png")
 
+
+		Case $START_DRAW
+			If IsArray($currentlatln) Then
+			_createpredictiongui($currentlatln[0],$currentlatln[1])
+			Else
+			_createpredictiongui(Null,Null)
+			EndIf
 
 		Case $GOTO_BUTTON
 			$latn = guictrlread($LAT_IN)
@@ -1222,7 +1231,7 @@ While 1
 
 		Case $REDRAW_MAP
 			_redrawmap()
-			_zoomtoaddress($currentlatln[0],$currentlatln[1])
+			If IsArray($currentlatln) Then _zoomtoaddress($currentlatln[0],$currentlatln[1])
 
 		Case $goto_selection
 			$seleccrim = _GUICtrlListView_GetItemTextArray($crimlst)
@@ -1653,8 +1662,8 @@ _SQLite_GetTable2d($node_db,"Select * FROM nodes;",$arysql,$aryrowsql,$aryclmnsq
 Return $arysql
 EndFunc
 
-Func _readcmd($cmd)
-Local $iPID = Run(@ComSpec & " /c "&$cmd, @ScriptDir, @SW_HIDE, BitOR($STDERR_CHILD, $STDOUT_CHILD))
+Func _readcmd($cmd,$workloc = @ScriptDir)
+Local $iPID = Run(@ComSpec & " /c "&$cmd, $workloc, @SW_HIDE, BitOR($STDERR_CHILD, $STDOUT_CHILD))
 $sOutput = ''
     While 1
         $sOutput &= StdoutRead($iPID)
@@ -1927,8 +1936,45 @@ EndFunc   ;==>WM_COMMAND
 
 Func _loadpic($iPic,$picture)
 Global $hImage = _GDIPlus_ImageLoadFromFile($picture)
-Global $hHBitmap = _GDIPlus_BitmapCreateHBITMAPFromBitmap($hImage)
+$hmap = _GDIPlus_ScaleImage2($hImage,410, 300)
+Global $hHBitmap = _GDIPlus_BitmapCreateHBITMAPFromBitmap($hmap)
 _WinAPI_DeleteObject(GUICtrlSendMsg($iPic, $STM_SETIMAGE, $IMAGE_BITMAP, $hHBitmap))
+EndFunc
+
+Func _GDIPlus_ScaleImage2($hImage, $iNewWidth, $iNewHeight, $iBGColor = 0xFFF0F0F0, $bBGClear = True, $iInterpolationMode = 7) ;coded by UEZ 2012
+    Local $iWidth = _GDIPlus_ImageGetWidth($hImage)
+    Local $iHeight = _GDIPlus_ImageGetHeight($hImage)
+
+    Local $iW, $iH, $f, $fRatio
+
+    If $iWidth > $iHeight Then
+        $f = $iWidth / $iNewWidth
+    Else
+        $f = $iHeight / $iNewHeight
+    EndIf
+    $iW = Int($iWidth / $f)
+    $iH = Int($iHeight / $f)
+
+    If $iW > $iNewWidth Then
+        $fRatio = $iNewWidth / $iW
+        $iW = Int($iW * $fRatio)
+        $iH = Int($iH * $fRatio)
+    ElseIf $iH > $iNewHeight Then
+        $fRatio = $iNewHeight / $iH
+        $iW = Int($iW * $fRatio)
+        $iH = Int($iH * $fRatio)
+    EndIf
+
+    Local $hBitmap = DllCall($ghGDIPDll, "uint", "GdipCreateBitmapFromScan0", "int", $iW, "int", $iH, "int", 0, "int", 0x0026200A, "ptr", 0, "int*", 0)
+    If @error Then Return SetError(3, 0, 0)
+    $hBitmap = $hBitmap[6]
+    Local $hBmpCtxt = _GDIPlus_ImageGetGraphicsContext($hBitmap)
+    If $bBGClear Then _GDIPlus_GraphicsClear($hBmpCtxt, $iBGColor)
+    DllCall($ghGDIPDll, "uint", "GdipSetInterpolationMode", "handle", $hBmpCtxt, "int", $iInterpolationMode)
+    _GDIPlus_GraphicsDrawImageRect($hBmpCtxt, $hImage, 0, 0, $iW, $iH)
+    _GDIPlus_ImageDispose($hImage)
+    _GDIPlus_GraphicsDispose($hBmpCtxt)
+    Return $hBitmap
 EndFunc
 
 Func _execjavascript($web,$js)
