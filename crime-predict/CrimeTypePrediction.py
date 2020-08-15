@@ -4,11 +4,15 @@ import matplotlib.pyplot as plt
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.model_selection import cross_val_score
+import sqlite3
 
-data = pd.read_csv("crime.csv")
-demo = data.iloc[0:10000]
+con = sqlite3.connect("../store.db")
+df = pd.read_sql_query("SELECT * from map", con)
 
-visual = demo['TYPE'].value_counts()
+data = df
+demo = data
+
+visual = demo['type'].value_counts()
 fig, ax = plt.subplots()
 width = 0.4
 ax.barh(visual.index, visual.values, width, color='Orange')
@@ -18,7 +22,7 @@ ax.set_title('CRIME NUMBER GRAPH', color='red')
 plt.savefig('barchart.png')
 
 # Pie chart, where the slices will be ordered and plotted counter-clockwise:
-explode = (0, 0, 0, 0, 0, 0, 0, 0, 0)
+explode = [0] * len(visual.values)
 fig1, ax1 = plt.subplots()
 ax1.pie(visual.values, explode=explode, labels=visual.index, autopct='%1.1f%%',
         shadow=True, startangle=30)
@@ -26,13 +30,13 @@ ax1.axis('equal')
 plt.savefig('piechart.png')
 
 # Removing Outliers
-value_c = demo['Latitude'].value_counts()
-rem = value_c[value_c < 10].index
-demo = demo[~demo['Latitude'].isin(rem)]
+#value_c = demo['Latitude'].value_counts()
+#rem = value_c[value_c < 10].index
+#demo = demo[~demo['Latitude'].isin(rem)]
 
 # Separating inputs and outputs
-x = demo.iloc[:, [10, 11]].values.reshape(-1, 2)
-y = demo['TYPE'].values
+x = demo.iloc[:, [1, 2]].values.reshape(-1, 2)
+y = demo['type'].values
 
 from sklearn import preprocessing
 le = preprocessing.LabelEncoder()
@@ -80,7 +84,7 @@ knn = KNeighborsClassifier(n_neighbors=3)
 knn.fit(x_train_pca, y_train)
 pred = knn.predict(x_test_pca)
 # print(confusion_matrix(y_test, pred))
-score = cross_val_score(knn, x_train_pca, y_train, cv=5)
+#score = cross_val_score(knn, x_train_pca, y_train)
 
 
 import pickle
